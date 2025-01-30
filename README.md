@@ -3,10 +3,9 @@
 <br />
 
 <p align="center">
-    <img src="https://www.uniteller.ru//local/templates/index/img/base/logo.svg" width="220">
+    <img src="https://lk.uniteller.ru/images/ulogo.png" width="128" alt="Uniteller" />
 </p>
 
-<br />
 <br />
 
 <p align="center">
