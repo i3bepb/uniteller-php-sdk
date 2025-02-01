@@ -1,0 +1,101 @@
+name: Run tests
+
+on: [push, workflow_dispatch, pull_request]
+
+jobs:
+  php7234:
+    name: Run tests PHP 7.2.34
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-7.2.34-cli-alpine3.12 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-7.2.34-cli-alpine3.12 vendor/bin/phpunit
+  php7333:
+    name: Run tests PHP 7.3.33
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-7.3.33-cli-alpine3.15 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-7.3.33-cli-alpine3.15 vendor/bin/phpunit
+  php7433:
+    name: Run tests PHP 7.4.33
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-7.4.33-cli-alpine3.16 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-7.4.33-cli-alpine3.16 vendor/bin/phpunit
+  php8030:
+    name: Run tests PHP 8.0.30
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.0.30-cli-alpine3.16 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.0.30-cli-alpine3.16 vendor/bin/phpunit
+  php8131:
+    name: Run tests PHP 8.1.31
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.1.31-cli-alpine3.21 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.1.31-cli-alpine3.21 vendor/bin/phpunit
+  php8227:
+    name: Run tests PHP 8.2.27
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.2.27-cli-alpine3.21 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.2.27-cli-alpine3.21 vendor/bin/phpunit
+  php8316:
+    name: Run tests PHP 8.3.16
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.3.16-cli-alpine3.21 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.3.16-cli-alpine3.21 vendor/bin/phpunit
+  php8403:
+    name: Run tests PHP 8.4.3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.4.3-cli-alpine3.21 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.4.3-cli-alpine3.21 vendor/bin/phpunit
