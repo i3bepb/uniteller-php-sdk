@@ -2,3 +2,4 @@
 vendor/
 /index.php
 example/credentials.php
+.phpunit.result.cache
