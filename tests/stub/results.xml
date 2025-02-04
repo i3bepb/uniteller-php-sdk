@@ -2,6 +2,58 @@
 <unitellerresult firstcode="" secondcode="" count="1">
     <orders>
         <order>
+            <ordernumber>receipt_order_3</ordernumber>
+            <response_code>AS000</response_code>
+            <recommendation>АВТОРИЗАЦИЯ УСПЕШНО ЗАВЕРШЕНА</recommendation>
+            <message></message>
+            <comment></comment>
+            <date>28.02.2025 14:36:10</date>
+            <total>20.00</total>
+            <currency>RUB</currency>
+            <cardtype>mastercard</cardtype>
+            <cardnumber>500000******2443</cardnumber>
+            <lastname></lastname>
+            <firstname></firstname>
+            <middlename></middlename>
+            <address>*НЕ ЗАДАВАЛСЯ*</address>
+            <email>test@gmail.com</email>
+            <country></country>
+            <rate></rate>
+            <approvalcode>50459F</approvalcode>
+            <cardsubtype></cardsubtype>
+            <cvc2>1</cvc2>
+            <cardholder>ALEXANDER</cardholder>
+            <ipaddress>134.255.154.134</ipaddress>
+            <protocoltypename></protocoltypename>
+            <billnumber>505914534904</billnumber>
+            <bankname></bankname>
+            <status>Canceled</status>
+            <error_code></error_code>
+            <error_comment></error_comment>
+            <processingname></processingname>
+            <packetdate>28.02.2025 14:36:10</packetdate>
+            <paymenttype>1</paymenttype>
+            <phone></phone>
+            <idata></idata>
+            <pt_code></pt_code>
+            <emoneytype></emoneytype>
+            <eorderdata></eorderdata>
+            <card_idp></card_idp>
+            <acquirerid>35</acquirerid>
+            <isothercard></isothercard>
+            <parent_order_number></parent_order_number>
+            <need_confirm>0</need_confirm>
+            <gds_payment_purpose_id></gds_payment_purpose_id>
+            <bookingcom_id></bookingcom_id>
+            <bookingcom_pincode></bookingcom_pincode>
+            <loanid></loanid>
+            <receipt>W3siY3VzdG9tZXIiOnsiZW1haWwiOiJnM2JlcGJAZ21haWwuY29tIn0sInRheG1vZGUiOjEsImxpbmVzIjpbeyJuYW1lIjoiXHUwNDEwXHUwNDMyXHUwNDM4XHUwNDMwXHUwNDMxXHUwNDM4XHUwNDNiXHUwNDM1XHUwNDQyIFx1MjExNjMiLCJwcmljZSI6MjAsInF0eSI6MSwic3VtIjoyMCwidmF0Ijo1LCJwYXlhdHRyIjo0LCJsaW5lYXR0ciI6NCwidW5pdCI6MCwiYWdlbnQiOnsiYWdlbnRhdHRyIjoiNjQiLCJhZ2VudHBob25lIjoiKzc4MDAyMDAwNjAwIiwic3VwcGxpZXJuYW1lIjoiXHUwNDFlMFx1MDQxZSBcdTAwYWJcdTA0MjBcdTA0M2VcdTA0MzNcdTA0MzAgXHUwNDM4IFx1MDQxYVx1MDQzZVx1MDQzZlx1MDQ0Ylx1MDQ0Mlx1MDQzMFx1MDBiYiIsInN1cHBsaWVyaW5uIjoiMTIzNDU2Nzg5MCIsInN1cHBsaWVycGhvbmUiOiIrNzgwMDIwMDA2MDIifX1dLCJwYXltZW50cyI6W3sia2luZCI6MSwidHlwZSI6MCwiYW1vdW50IjoyMH1dLCJmaXNjYWwiOnsiaWQiOiIxLTEwMjQ0NTIzNzMiLCJkYXRlIjoiMjAyNS0wMi0yOCAxNDozNjoxMCIsInR5cGUiOjAsInJlZ2lzdGVyIjp7ImZpc2NhbF9udW1iZXIiOjE3NDA3NDI2MDgsInNoaWZ0X251bWJlciI6Miwic2hpZnRfaW5kZXgiOiIzNiIsImZpc2NhbF9kYXRlIjoiMjAyNS0wMi0yOCAxNDozNjo0NyIsImZpc2NhbF9hdHRyIjoiMTI5ODQ5ODA4MSIsImZkb19kYXRlIjoiMjAyNS0wMi0yOCAxNDozNjo0NyIsImZkb19hdHRyIjo1NjIxOTM3NDEsImZpc2NhbF9saW5rIjoid3d3Lm5hbG9nLnJ1IiwicXIiOiJ0PTIwMTcwNjA4VDE4NDZcXHUwMDI2cz0yNDAwLjAwXFx1MDAyNmZuPTk5OTk5OTEyMzQ1Njc4OTBcXHUwMDI2aT0yN1xcdTAwMjZmcD0xMjk4NDk4MDgxXFx1MDAyNm49MSIsIm1hcmtpbmdpbmZvIjpudWxsfSwiZWNyIjp7InNuIjoiMTAwMDAwMDAwMDAwMDAwMDAxNTIiLCJybiI6IjI1MDU0ODAwODkwMTY3ODIiLCJmcyI6Ijk5OTk5OTEyMzQ1Njc4OTAifSwiY29tcGFueSI6eyJuYW1lIjoiXHUwNDE4XHUwNDFmIFx1MDQxOFx1MDQzMlx1MDQzMFx1MDQzZFx1MDQzZVx1MDQzMiBcdTA0MTguXHUwNDE4LiIsImlubiI6IjEyMzQ1Njc4OTAifSwiZmRvIjp7Im5hbWUiOiIiLCJpbm4iOiIiLCJ3d3ciOiIifX0sInRvdGFsIjoyMCwidXNlcnJlcXVpc2l0ZSI6eyJ0aXRsZSI6IlVuaXRlbGxlck9yZGVyTnVtYmVyIiwidmFsdWUiOiJyZWNlaXB0X29yZGVyXzMifX0seyJjdXN0b21lciI6eyJlbWFpbCI6ImczYmVwYkBnbWFpbC5jb20ifSwidGF4bW9kZSI6MSwibGluZXMiOlt7Im5hbWUiOiJcdTA0MTBcdTA0MzJcdTA0MzhcdTA0MzBcdTA0MzFcdTA0MzhcdTA0M2JcdTA0MzVcdTA0NDIgXHUyMTE2MyIsInByaWNlIjoyMCwicXR5IjoxLCJzdW0iOjIwLCJ2YXQiOjUsInBheWF0dHIiOjQsImxpbmVhdHRyIjo0LCJ1bml0IjowLCJhZ2VudCI6eyJhZ2VudGF0dHIiOiI2NCIsImFnZW50cGhvbmUiOiIrNzgwMDIwMDA2MDAiLCJzdXBwbGllcm5hbWUiOiJcdTA0MWUwXHUwNDFlIFx1MDBhYlx1MDQyMFx1MDQzZVx1MDQzM1x1MDQzMCBcdTA0MzggXHUwNDFhXHUwNDNlXHUwNDNmXHUwNDRiXHUwNDQyXHUwNDMwXHUwMGJiIiwic3VwcGxpZXJpbm4iOiIxMjM0NTY3ODkwIiwic3VwcGxpZXJwaG9uZSI6Iis3ODAwMjAwMDYwMiJ9fV0sInBheW1lbnRzIjpbeyJraW5kIjoxLCJ0eXBlIjowLCJhbW91bnQiOjIwfV0sImZpc2NhbCI6eyJpZCI6IjEtMTAyNDc4NTc1MyIsImRhdGUiOiIyMDI1LTAzLTAzIDIxOjAzOjI4IiwidHlwZSI6MSwicmVnaXN0ZXIiOnsiZmlzY2FsX251bWJlciI6MTc0MTAyNTAwOSwic2hpZnRfbnVtYmVyIjozLCJzaGlmdF9pbmRleCI6IjEyIiwiZmlzY2FsX2RhdGUiOiIyMDI1LTAzLTAzIDIxOjAzOjI4IiwiZmlzY2FsX2F0dHIiOiIxMjk4NDk4MDgxIiwiZmRvX2RhdGUiOiIyMDI1LTAzLTAzIDIxOjAzOjI4IiwiZmRvX2F0dHIiOjU2MjE5Mzc0MSwiZmlzY2FsX2xpbmsiOiJ3d3cubmFsb2cucnUiLCJxciI6InQ9MjAxNzA2MDhUMTg0NlxcdTAwMjZzPTI0MDAuMDBcXHUwMDI2Zm49OTk5OTk5MTIzNDU2Nzg5MFxcdTAwMjZpPTI3XFx1MDAyNmZwPTEyOTg0OTgwODFcXHUwMDI2bj0xIiwibWFya2luZ2luZm8iOltudWxsXX0sImVjciI6eyJzbiI6IjEwMDAwMDAwMDAwMDAwMDAwMTUyIiwicm4iOiIyNTA1NDgwMDg5MDE2NzgyIiwiZnMiOiI5OTk5OTkxMjM0NTY3ODkwIn0sImNvbXBhbnkiOnsibmFtZSI6Ilx1MDQxOFx1MDQxZiBcdTA0MThcdTA0MzJcdTA0MzBcdTA0M2RcdTA0M2VcdTA0MzIgXHUwNDE4Llx1MDQxOC4iLCJpbm4iOiIxMjM0NTY3ODkwIn0sImZkbyI6eyJuYW1lIjoiIiwiaW5uIjoiIiwid3d3IjoiIn19LCJ0b3RhbCI6MjAsInVzZXJyZXF1aXNpdGUiOnsidGl0bGUiOiJVbml0ZWxsZXJPcmRlck51bWJlciIsInZhbHVlIjoicmVjZWlwdF9vcmRlcl8zIn19XQ==</receipt>
+            <giftcert></giftcert>
+            <qrcid></qrcid>
+            <opkcid></opkcid>
+            <sberorderid></sberorderid>
+        </order>
+        <order>
             <ordernumber>Value of ordernumber</ordernumber>
             <response_code>Value of response_code</response_code>
             <recommendation>Value of recommendation</recommendation>
@@ -35,7 +87,6 @@
             <ipaddress>Value of ipaddress</ipaddress>
             <billnumber>Value of billnumber</billnumber>
             <bankname>Value of bankname</bankname>
-            <status>Value of status</status>
             <error_code>Value of error_code</error_code>
             <error_comment>Value of error_comment</error_comment>
             <packetdate>10.03.2017 15:42:42</packetdate>

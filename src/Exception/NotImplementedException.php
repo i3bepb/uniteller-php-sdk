@@ -12,7 +12,7 @@ namespace Tmconsulting\Uniteller\Exception;
  *
  * @package Tmconsulting\Uniteller\Exception
  */
-class NotImplementedException extends \Exception
+class NotImplementedException extends \LogicException
 {
 
 }

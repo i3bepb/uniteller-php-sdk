@@ -5,14 +5,33 @@
  * GitHub: Roquie
  */
 
-//для дебага
+// Для дебага
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$uniteller = new \Tmconsulting\Uniteller\Client();
-$uniteller->setShopId('your_shop_id');
-$uniteller->setLogin(1234);
-$uniteller->setPassword('your_password');
-$uniteller->setBaseUri('https://wpay.uniteller.ru');
+$shopId = 'your_shop_id';
+$login = '12345';
+$password = 'your_password';
+$email = 'test@gmail.com';
+$phone = '+78004005001';
+
+/**
+ * Класс для вывода лога прямо в браузер
+ */
+class ShowInBrowserLogger extends \Psr\Log\AbstractLogger implements \Psr\Log\LoggerInterface
+{
+    /**
+     * @param mixed $level
+     * @param string $message
+     * @param array $context
+     */
+    public function log($level, $message, array $context = [])
+    {
+        echo '<pre>';
+        echo "{$level}: {$message}" . PHP_EOL;
+        echo print_r($context, true) . PHP_EOL;
+        echo '</pre>';
+    }
+}

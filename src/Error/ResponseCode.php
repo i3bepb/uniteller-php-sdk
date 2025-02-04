@@ -10,15 +10,12 @@ namespace Tmconsulting\Uniteller\Error;
 /**
  * Class ResponseCode
  *
- * Параметр  Response_code  служит  для  приведения к единому виду схожих по смыслу,
+ * Параметр Response_code служит для приведения к единому виду схожих по смыслу,
  * но разных по формату ответов эквайеров на запросы оплат картами.
- * Response_code  имеет смысл только по оплатам картами.
- * По операциям с электронными валютами этот параметр не имеет смысла,
- * так как оплата является отложенной.
- *
- * @package Tmconsulting\Client\Error
+ * Response_code имеет смысл только по оплатам картами.
+ * По операциям с электронными валютами этот параметр не имеет смысла, так как оплата является отложенной.
  */
-final class ResponseCode
+class ResponseCode
 {
     /**
      * @var array
@@ -41,6 +38,7 @@ final class ResponseCode
      * Преобразование кода ошибки в сообщение.
      *
      * @param $code
+     *
      * @return string|null
      */
     public static function message($code)

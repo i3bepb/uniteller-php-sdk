@@ -1,39 +1,45 @@
 {
-  "name": "tmconsulting/uniteller-php-sdk",
-  "description": "PHP Library for integration with Uniteller payment processing.",
-  "type": "library",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "roquie",
-      "email": "roquie0@gmail.com"
-    }
-  ],
-  "require": {
-    "php": "^7.2 || ^8.0",
-    "ext-simplexml": "*",
-    "php-http/httplug": "^2",
-    "php-http/guzzle7-adapter": "^1",
-    "guzzlehttp/guzzle": "^7.4"
-  },
-  "require-dev": {
-    "symfony/var-dumper": "^3.2",
-    "phpunit/phpunit": "^8"
-  },
-  "autoload": {
-    "psr-4": {
-      "Tmconsulting\\Uniteller\\": "src"
+    "name": "i3bepb/uniteller-php-sdk",
+    "description": "PHP Library for integration with Uniteller payment processing.",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "roquie",
+            "email": "roquie0@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.2 || ^8.0",
+        "ext-json": "*",
+        "ext-simplexml": "*",
+        "parsecsv/php-parsecsv": "^1.3",
+        "psr/container": "^1.0 || ^2.0",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/log": "^1.1 || ^2.0 || ^3.0",
+        "psr/http-client-implementation": "*",
+        "psr/http-factory-implementation": "*",
+        "mtownsend/xml-to-array": "^2.0"
     },
-    "files": [
-      "src/helpers.php"
-    ]
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Tmconsulting\\Uniteller\\Tests\\": "tests"
+    "require-dev": {
+        "i3bepb/reflection-for-test": "^1.0",
+        "phpunit/phpunit": "^8",
+        "symfony/var-dumper": "^3.2",
+        "guzzlehttp/guzzle": "^7.9",
+        "monolog/monolog": "^2.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tmconsulting\\Uniteller\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tmconsulting\\Uniteller\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --coverage-text"
     }
-  },
-  "scripts": {
-    "test": "phpunit --coverage-text"
-  }
 }

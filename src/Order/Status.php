@@ -8,37 +8,25 @@
 namespace Tmconsulting\Uniteller\Order;
 
 /**
- * Class Status
- *
  * Статус заказа
- *
- * @package Tmconsulting\Client\Order
  */
-final class Status
+class Status
 {
-    /**
-     *  Мерчант не знает об этом заказе или считает, что заказ все еще не оплачен;
-     */
-    const NEWEST         = 'new';
-
     /**
      * Средства успешно заблокированы (выполнена авторизационная транзакция).
      */
-    const AUTHORIZED     = 'authorized';
+    const AUTHORIZED = 'authorized';
 
     /**
-     * Cредства не заблокированы (авторизационная транзакция не выполнена)
-     * по ряду причин.
-     * !! Статус not authorized  может фигурировать только в результатах
-     * !! запроса результата авторизации.
+     * Средства не заблокированы (авторизационная транзакция не выполнена) по ряду причин.
+     * !! Статус not authorized  может фигурировать только в результатах запроса результата авторизации.
      */
     const NOT_AUTHORIZED = 'not authorized';
 
     /**
-     * Оплачен (выполнена финансовая транзакция или
-     * заказ оплачен в электронной платёжной системе).
+     * Оплачен (выполнена финансовая транзакция или заказ оплачен в электронной платёжной системе).
      */
-    const PAID           = 'paid';
+    const PAID = 'paid';
 
     /**
      * Отменён (выполнена транзакция разблокировки средств или
@@ -47,7 +35,12 @@ final class Status
      * статус не присваивается),
      *
      */
-    const CANCELLED      = 'cancelled';
+    const CANCELLED = 'cancelled';
+
+    /**
+     * Частичная отмена / частичный возврат.
+     */
+    const PARTLY_CANCELLED = 'partly canceled';
 
     /**
      * Ожидается оплата выставленного счёта. Статус используется только
@@ -56,19 +49,18 @@ final class Status
      * счёта на оплату и этап фактической оплаты этого счёта
      * Покупателем, которые существенно разнесённы во времени.
      */
-    const WAITING        = 'waiting';
+    const WAITING = 'waiting';
 
     /**
      * Преобразуем в одинаковый формат статуса.
      *
      * @param $value
+     *
      * @return string|null
      */
     public static function resolve($value)
     {
         switch (strtolower($value)) {
-            case self::NEWEST:
-                return self::NEWEST;
             case self::AUTHORIZED:
                 return self::AUTHORIZED;
             case self::NOT_AUTHORIZED:
@@ -78,6 +70,8 @@ final class Status
             case 'canceled':
             case self::CANCELLED:
                 return self::CANCELLED;
+            case self::PARTLY_CANCELLED:
+                return self::PARTLY_CANCELLED;
             case self::WAITING:
                 return self::WAITING;
         }

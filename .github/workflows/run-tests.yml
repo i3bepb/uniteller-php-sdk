@@ -63,6 +63,18 @@ jobs:
 
       - name: Run tests
         run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.1.31-cli-alpine3.21 vendor/bin/phpunit --do-not-cache-result
+  php8132:
+    name: Run tests PHP 8.1.32
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.1.32-cli-alpine3.21 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.1.32-cli-alpine3.21 vendor/bin/phpunit --do-not-cache-result
   php8227:
     name: Run tests PHP 8.2.27
     runs-on: ubuntu-latest
@@ -75,6 +87,18 @@ jobs:
 
       - name: Run tests
         run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.2.27-cli-alpine3.21 vendor/bin/phpunit --do-not-cache-result
+  php8228:
+    name: Run tests PHP 8.2.28
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.2.28-cli-alpine3.21 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.2.28-cli-alpine3.21 vendor/bin/phpunit --do-not-cache-result
   php8316:
     name: Run tests PHP 8.3.16
     runs-on: ubuntu-latest
@@ -87,6 +111,18 @@ jobs:
 
       - name: Run tests
         run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.3.16-cli-alpine3.21 vendor/bin/phpunit --do-not-cache-result
+  php8320:
+    name: Run tests PHP 8.3.20
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.3.20-cli-alpine3.21 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.3.20-cli-alpine3.21 vendor/bin/phpunit --do-not-cache-result
   php8403:
     name: Run tests PHP 8.4.3
     runs-on: ubuntu-latest
@@ -99,3 +135,15 @@ jobs:
 
       - name: Run tests
         run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.4.3-cli-alpine3.21 vendor/bin/phpunit --do-not-cache-result
+  php8406:
+    name: Run tests PHP 8.4.6
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Composer install
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.4.6-cli-alpine3.21 composer install
+
+      - name: Run tests
+        run: docker run --rm -v $(pwd):/home/www-data/application i3bepb/php-for-test:1.2.6-php-8.4.6-cli-alpine3.21 vendor/bin/phpunit --do-not-cache-result

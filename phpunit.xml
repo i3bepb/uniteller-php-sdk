@@ -21,7 +21,36 @@
 
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./src/</directory>
+            <directory suffix=".php">src</directory>
+            <exclude>
+                <file>src/Builder/Enum/BaseUri.php</file>
+                <file>src/Builder/Enum/CallbackFields.php</file>
+                <file>src/Builder/Enum/Currency.php</file>
+                <file>src/Builder/Enum/EMoneyType.php</file>
+                <file>src/Builder/Enum/Fields.php</file>
+                <file>src/Builder/Enum/Language.php</file>
+                <file>src/Builder/Enum/MeanType.php</file>
+                <file>src/Builder/Enum/PaymentsResults.php</file>
+                <file>src/Builder/Enum/PaymentType.php</file>
+                <file>src/Builder/Enum/RVRReason.php</file>
+                <file>src/Builder/Enum/Success.php</file>
+                <file>src/Builder/Enum/Type.php</file>
+                <file>src/Builder/Enum/UnitellerRequestFieldNames.php</file>
+                <file>src/Builder/Enum/ZipFlag.php</file>
+                <file>src/Error/Error.php</file>
+                <file>src/Receipt/Enum/AgentAttribute.php</file>
+                <file>src/Receipt/Enum/CorrectionType.php</file>
+                <file>src/Receipt/Enum/DocCode.php</file>
+                <file>src/Receipt/Enum/DocumentType.php</file>
+                <file>src/Receipt/Enum/Kind.php</file>
+                <file>src/Receipt/Enum/Lineattr.php</file>
+                <file>src/Receipt/Enum/Payattr.php</file>
+                <file>src/Receipt/Enum/Taxmode.php</file>
+                <file>src/Receipt/Enum/TypePaymentMethod.php</file>
+                <file>src/Receipt/Enum/Unit.php</file>
+                <file>src/Receipt/Enum/Vat.php</file>
+                <file>src/Request/ApiEndpoints.php</file>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>
