@@ -26,4 +26,9 @@ class ErrorException extends UnitellerException
     {
         return $this->errorCode;
     }
+
+    public function setErrorCode(int $errorCode)
+    {
+        $this->errorCode = $errorCode;
+    }
 }

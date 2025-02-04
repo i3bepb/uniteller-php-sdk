@@ -7,28 +7,178 @@
 
 namespace Tmconsulting\Uniteller\Tests\Recurrent;
 
+use Tmconsulting\Uniteller\Dependency\Container;
+use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
+use Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException;
 use Tmconsulting\Uniteller\Recurrent\RecurrentBuilder;
+use Tmconsulting\Uniteller\Request\ApiEndpoints;
+use Tmconsulting\Uniteller\Request\RequestManager;
+use Tmconsulting\Uniteller\Signature\Signature;
 use Tmconsulting\Uniteller\Tests\TestCase;
 
+/**
+ * @coversDefaultClass \Tmconsulting\Uniteller\Recurrent\RecurrentBuilder
+ */
 class RecurrentBuilderTest extends TestCase
 {
-    public function testBuildObject()
+    private $builder;
+
+    protected function setUp(): void
     {
-        $builder = new RecurrentBuilder();
-        $builder->setShopIdp('FOO');
-        $builder->setParentShopIdp('BAR');
-        $builder->setOrderIdp('BAZ');
-        $builder->setParentOrderIdp('old');
-        $builder->setSubtotalP(10);
+        $signatureCreator = $this->createMock(Signature::class);
+        $signatureCreator->method('setParameters')->willReturnSelf();
+        $signatureCreator->method('createMd5')->willReturn('mocked_signature');
+        $this->builder = new RecurrentBuilder($signatureCreator);
+    }
 
-        $expected = [
-            'Shop_IDP'         => 'FOO',
-            'Parent_Shop_IDP'  => 'BAR',
-            'Order_IDP'        => 'BAZ',
-            'Parent_Order_IDP' => 'old',
-            'Subtotal_P'       => 10,
+    public static function dataProviderGetOrderIdp(): array
+    {
+        return [
+            ['my101', 'my101'],
+            [101, '101'],
+            ['53c0714c-b036-408c-aeb6-58eb50f71098', '53c0714c-b036-408c-aeb6-58eb50f71098'],
         ];
+    }
 
-        $this->assertEquals($expected, $builder->toArray());
+    /**
+     * @dataProvider dataProviderGetOrderIdp
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
+     */
+    public function testGetOrderIdp($set, string $get)
+    {
+        $this->builder->setOrderId($set);
+        $this->assertEquals($get, $this->builder->getOrderId());
+    }
+
+    /**
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
+     */
+    public function testSetOrderIdThrowsExceptionForTooLongOrderId()
+    {
+        $this->expectException(NotValidParameterException::class);
+        $this->builder->setOrderId(str_repeat('a', 128));
+    }
+
+    public static function dataProviderGetSubtotalP(): array
+    {
+        return [
+            [10000, 10000],
+            ['10000.05', 10000.05],
+            [10000.05, 10000.05],
+        ];
+    }
+
+    /**
+     * @dataProvider dataProviderGetSubtotalP
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
+     */
+    public function testGetSubtotalP($set, float $get)
+    {
+        $this->builder->setSubtotalP($set);
+        $this->assertIsFloat($this->builder->getSubtotalP());
+        $this->assertEquals($get, $this->builder->getSubtotalP());
+    }
+
+    /**
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
+     */
+    public function testSetSubtotalPThrowsExceptionForInvalidSubtotalP()
+    {
+        $this->expectException(RequiredParameterException::class);
+        $this->builder->getSubtotalP();
+    }
+
+    public function testSetParentOrderIdp()
+    {
+        $parentOrderIdp = 'parent123';
+        $this->builder->setParentOrderIdp($parentOrderIdp);
+        $this->assertEquals($parentOrderIdp, $this->builder->getParentOrderIdp());
+    }
+
+    public function testSetParentShopIdp()
+    {
+        $parentShopIdp = 'shop123';
+        $this->builder->setParentShopIdp($parentShopIdp);
+        $this->assertEquals($parentShopIdp, $this->builder->getParentShopIdp());
+    }
+
+    public function testSetCustomerIdp()
+    {
+        $customerIdp = 'customer123';
+        $this->builder->setCustomerIdp($customerIdp);
+        $this->assertEquals($customerIdp, $this->builder->getCustomerIdp());
+    }
+
+    public function testSetCustomerIdpThrowsExceptionForTooLong()
+    {
+        $this->expectException(NotValidParameterException::class);
+        $this->builder->setCustomerIdp(str_repeat('a', 65));
+    }
+
+    public function testSetCallbackFormat()
+    {
+        $callbackFormat = 'json';
+        $this->builder->setCallbackFormat($callbackFormat);
+        $this->assertEquals($callbackFormat, $this->builder->getCallbackFormat());
+    }
+
+    public function testGetSignature()
+    {
+        $this->builder->setShopId('shop')
+            ->setPassword('secret')
+            ->setOrderId('12345')
+            ->setSubtotalP(100.50)
+            ->setParentOrderIdp('parent123')
+            ->setParentShopIdp('shop123')
+            ->setCustomerIdp('customer123')
+            ->setCallbackFormat('json');
+
+        $signature = $this->builder->getSignature();
+
+        $this->assertNotEmpty($signature);
+        $this->assertEquals('mocked_signature', $signature);
+    }
+
+    public function testToArray()
+    {
+        $this->builder->setShopId('shop')
+            ->setPassword('secret')
+            ->setOrderId('12345')
+            ->setSubtotalP(100.50)
+            ->setParentOrderIdp('parent123')
+            ->setParentShopIdp('shop123')
+            ->setCustomerIdp('customer123')
+            ->setCallbackFormat('json');
+
+        $result = $this->builder->toArray();
+
+        $this->assertArrayHasKey('Shop_IDP', $result);
+        $this->assertArrayHasKey('Order_IDP', $result);
+        $this->assertArrayHasKey('Subtotal_P', $result);
+        $this->assertArrayHasKey('Parent_Order_IDP', $result);
+        $this->assertArrayHasKey('Signature', $result);
+    }
+
+    public function testProcess()
+    {
+        $decoded = new \Tmconsulting\Uniteller\Request\DecodedResponse(
+            [['OrderNumber' => '123']],
+            new \GuzzleHttp\Psr7\Request('POST', $this->builder->getEndpoint()),
+            new \GuzzleHttp\Psr7\Response(200)
+        );
+        $requestManager = $this->createMock(RequestManager::class);
+        $requestManager->expects($this->once())->method('executeRequest')->with($this->builder)->willReturn($decoded);
+        $this->builder->setContainer(new Container([RequestManager::class => $requestManager]));
+        $result = $this->builder->process();
+        $this->assertInstanceOf(\Tmconsulting\Uniteller\Order\Order::class, $result[0]);
+        $this->assertSame('123', $result[0]->getOrderNumber());
+    }
+
+    public function testGetRequestName()
+    {
+        $this->assertEquals(ApiEndpoints::RECURRENT, $this->builder->getEndpoint());
     }
 }

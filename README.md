@@ -73,13 +73,13 @@ use Tmconsulting\Uniteller\Payment\PaymentBuilder;
 
 $builder = new PaymentBuilder();
 $builder
-    ->setOrderIdp(mt_rand(10000, 99999))
+    ->setOrderId(mt_rand(10000, 99999))
     ->setSubtotalP(10)
     ->setCustomerIdp(mt_rand(10000, 99999))
     ->setUrlReturnOk('http://google.ru/?q=success')
     ->setUrlReturnNo('http://google.ru/?q=failure');
 
-$uniteller->payment($builder)->go();
+$container->payment($builder)->go();
 // if you don't need redirect
 // $uniteller->payment($builder)->getUri();
 
@@ -89,14 +89,14 @@ or use plain array
 
 ```php
 <?php
-$uniteller->payment([
+$container->payment([
     'Order_IDP' => mt_rand(10000, 99999),
     // ... other parameters
 ])->go();
 ```
 
 ### Recurrent payment
- 
+
 ```php
 <?php
 use Tmconsulting\Uniteller\Recurrent\RecurrentBuilder;
@@ -105,29 +105,29 @@ $builder = (new RecurrentBuilder())
     ->setOrderIdp(mt_rand(10000, 99999))
     ->setSubtotalP(15)
     ->setParentOrderIdp(00000) // order id of any past payment
-    ->setParentShopIdp($uniteller->getShopId()); // optional
+    ->setParentShopIdp($container->getShopId()); // optional
 
-$results = $uniteller->recurrent($builder);
+$results = $container->recurrent($builder);
 ```
 
 or use plain array
 
 ```php
 <?php
-$results = $uniteller->recurrent([
+$results = $container->recurrent([
     'Order_IDP' => mt_rand(10000, 99999),
     // ... other parameters
 ]);
 ```
 
 ### Cancel payment
- 
+
 ```php
 <?php
 use Tmconsulting\Uniteller\Cancel\CancelBuilder;
 
 $builder = (new CancelBuilder())->setBillNumber('RRN Number, (12 digits)');
-$results = $uniteller->cancel($builder);
+$results = $container->cancel($builder);
 ```
 
 or
@@ -136,7 +136,7 @@ or
 <?php
 use Tmconsulting\Uniteller\Order\Status;
 
-$results = $uniteller->cancel([
+$results = $container->cancel([
     'Billnumber' => 'RRN Number, (12 digits)',
     // ...
 ]);
@@ -154,7 +154,7 @@ foreach ($results as $payment) {
 ```php
 <?php
 
-$results = $uniteller->results([
+$results = $container->results([
     'ShopOrderNumber' => 'Order_IDP number'
 ]);
 
@@ -165,11 +165,11 @@ var_dump($results);
 
 ### Callback (gateway notification)
 
-Receive incoming parameters from gateway and verifying signature. 
+Receive incoming parameters from gateway and verifying signature.
 
 ```php
 <?php
-if (! $uniteller->verifyCallbackRequest(['all_parameters_from_post_with_signature'])) {
+if (! $container->verifyCallbackRequest(['all_parameters_from_post_with_signature'])) {
     return 'invalid_signature';
 }
 ```
@@ -181,3 +181,35 @@ if (! $uniteller->verifyCallbackRequest(['all_parameters_from_post_with_signatur
 ## License
 
 MIT.
+
+| № | task | status |
+| :--- | :--- | :--- |
+| 1 | Запрос на оплату\(https://wpay.uniteller.ru/pay/\). Параметры запроса, сигнатура. | Да |
+| 2 | Преавторизация платежа. Запрос выше, доработки. | Да |
+| 3 | Подтверждение платежа, проведённого с преавторизацией \(https://wpay.uniteller.ru/confirm/\). Параметры запроса, сигнатура. | Да |
+| 4 | Отмена платежа и возврат средств \(https://wpay.uniteller.ru/unblock/\). Параметры запроса. | Да |
+| 5 | Запрос результата авторизации \(https://wpay.uniteller.ru/results/\) проще говоря список заказов. Параметры запроса. | Да |
+| 6 | Уведомление об изменении статуса заказа. Тут и с фиксализацией | Да |
+| 7 | Парсинг ответов в csv формате. Обработка ошибок в ответах | При появлении нового запроса, возможно доработка |
+| 8 | Парсинг ответов в xml формате. Обработка ошибок в ответах. | Нет |
+| 9 | Форма оплаты в iframe. Разобраться, попробовать, что необходимо для этого. | Нет |
+| 10 | Платёж в фоновом режиме. Нам не нужен | Нет |
+| 11 | Оплата с помощью платёжной ссылки. Нам не нужен | Нет |
+| 12 | Рекуррентные платежи \(https://wpay.uniteller.ru/recurrent/\). Связан с Запросом на оплату. Нам не нужен | Да |
+| 13 | Регистрация банковских карт и все запросы по просмотру, удалению, блокировке. Нам не нужен | Нет |
+| 14 | Запрос оплаты с фискализацией \(https://fpay.uniteller.ru/v2/pay\). Параметры запроса, сигнатура. | Да |
+| 15 | Описание чека. | Да |
+| 16 | Преавторизация с фискализацией \(https://fpay.uniteller.ru/v2/api/iacheck\). Параметры запроса, сигнатура. | Нет |
+| 17 | Отмена платежа с фискализацией \(https://fpay.uniteller.ru/v2/cancel\). Параметры запроса, сигнатура. | Нет |
+| 18 | Запрос статуса заказа с фискализацией \(https://fpay.uniteller.ru/v2/results\), короче список заказов. Параметры запроса, сигнатура. | Нет |
+| 19 | Оплата Apple Pay через API. Нам не нужен. | Нет |
+| 20 | Оплата Google Pay через API. Нам не нужен. | Нет |
+| 21 | Платёж в фоновом режиме с фискализацией \(https://fpay.uniteller.ru/v2/api/pay\). Нам не нужен. | Нет |
+| 22 | Рекуррентный платёж с фискализацией \(https://fpay.uniteller.ru/v2/recurrent\). Нам не нужен. | Нет |
+| 23 | Преавторизация с печатью чека аванса с использованием платёжной формы. Нам не нужен. | Нет |
+| 24 | Преавторизация с печатью чека аванса через API. Нам не нужен. | Нет |
+| 25 | Преавторизация с печатью чека аванса через упрощённый API. Нам не нужен. | Нет |
+| 26 | Подтверждение платежа с преавторизацией с печатью чека аванса. Нам не нужен. | Нет |
+| 27 | Запрос регистрации заказа с фискализацией для оплаты с помощью платёжной ссылки \(https://fpay.uniteller.ru/v2/api/register\). Нам не нужен. | Нет |
+| 28 | Формирование чека коррекции через упрощённый API \(https://fpay.uniteller.ru/v2/api/correct\). | Нет |
+| 29 | Оплата СБП. Доработка первого запроса на оплату | Нет |

@@ -1,307 +1,393 @@
 <?php
-/**
- * Created by Roquie.
- * E-mail: roquie0@gmail.com
- * GitHub: Roquie
- */
 
 namespace Tmconsulting\Uniteller\Order;
 
 use DateTime;
-use Tmconsulting\Uniteller\ArraybleInterface;
 use Tmconsulting\Uniteller\Error\ResponseCode;
+use Tmconsulting\Uniteller\Parameter\Enum\SFields;
 
 /**
- * Class Order
- *
- * @package Tmconsulting\Client\Order
+ * Заказ Uniteller.
  */
-class Order implements ArraybleInterface
+class Order implements \JsonSerializable
 {
     /**
-     * Адрес Держателя карты
+     * Адрес Держателя карты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $address;
+    protected $address = null;
 
     /**
-     * Код подтверждения транзакции от процессингового центра
+     * Код подтверждения транзакции от процессингового центра.
      *
-     * @var string
+     * @var string|null
      */
-    protected $approvalCode;
+    protected $approvalCode = null;
 
     /**
-     * Имя банка-эмитента
+     * Имя банка-эмитента.
      *
-     * @var string
+     * @var string|null
      */
-    protected $bankName;
+    protected $bankName = null;
 
     /**
-     * Номер платежа в системе Client
+     * Номер платежа в системе Uniteller (RRN).
      *
-     * @var int
+     * @var string|null
      */
-    protected $billNumber;
+    protected $billNumber = null;
 
     /**
-     * Идентификатор (логин) Мерчанта в сервисе Booking.com
+     * Идентификатор (логин) Мерчанта в сервисе Booking.com.
      *
-     * @var string
+     * @var string|null
      */
-    protected $bookingcomId;
+    protected $bookingcomId = null;
 
     /**
-     * Пароль Мерчанта в сервисе Booking.com
+     * Пароль Мерчанта в сервисе Booking.com.
      *
-     * @var string
+     * @var string|null
      */
-    protected $bookingcomPincode;
+    protected $bookingcomPincode = null;
 
     /**
-     * Идентификатор зарегистрированной карты
+     * Идентификатор зарегистрированной карты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $cardIdp;
+    protected $cardIdp = null;
 
     /**
      * Информация, введённая Покупателем на странице оплаты в поле имени владельца карты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $cardHolder;
+    protected $cardHolder = null;
 
     /**
-     * Первые 6 цифр и последние 4 цифры номера карты (PAN), соединённые звёздочками
+     * Первые 6 цифр и последние 4 цифры номера карты (PAN), соединённые звёздочками.
      *
-     * @var string
+     * @var string|null
      */
-    protected $cardNumber;
+    protected $cardNumber = null;
 
     /**
-     * Тип платёжной системы карты (возможные значения: visa, mastercard,  dinnersclub, jcb)
+     * Тип платёжной системы карты (возможные значения: visa, mastercard,  dinnersclub, jcb).
      *
-     * @var string
+     * @var string|null
      */
-    protected $cardType;
+    protected $cardType = null;
 
     /**
-     * Комментарий к оплате (передаётся в запросе на оплату)
+     * Комментарий к оплате (передаётся в запросе на оплату).
      *
-     * @var string
+     * @var string|null
      */
-    protected $comment;
+    protected $comment = null;
 
     /**
-     * Код валюты
+     * Код валюты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $currency;
+    protected $currency = null;
 
     /**
-     * Наличие CVC2/CVV2/4DBC
+     * Наличие CVC2/CVV2/4DBC.
      * (0 — авторизация без CVC2, 1 — авторизация с СVC2)
      *
-     * @var bool
+     * @var int|null
      */
-    protected $cvc2;
+    protected $cvc2 = null;
 
     /**
-     * Дата и время создания заказа в системе
-     * Client в формате dd.mm.yyyy hh:mm:ss
+     * Дата и время создания заказа в системе.
+     * Формат dd.mm.yyyy hh:mm:ss
      *
      * @var DateTime|null
      */
-    protected $date;
+    protected $date = null;
 
     /**
-     * Адрес электронной почты Держателя карты
+     * Адрес электронной почты Держателя карты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $email;
+    protected $email = null;
 
     /**
-     * Тип электронной валюты
+     * Тип электронной валюты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $eMoneyType;
-
+    protected $eMoneyType = null;
 
     /**
      * Данные заказа, выставленного в электронной платёжной системе.
      *
-     * @var array
+     * @var array|null
      */
-    protected $eOrderData;
+    protected $eOrderData = null;
 
     /**
-     * Код ответа процессингового центра
+     * Код ответа процессингового центра.
      *
-     * @var int
+     * @var int|null
      */
-    protected $errorCode;
+    protected $errorCode = null;
 
     /**
-     * Расшифровка кода ответа процессингового центра
+     * Расшифровка кода ответа процессингового центра.
      *
-     * @var string
+     * @var string|null
      */
-    protected $errorComment;
+    protected $errorComment = null;
 
     /**
-     * Имя Держателя карты
+     * Имя Держателя карты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $firstName;
+    protected $firstName = null;
 
     /**
-     * @var int
+     * @var int|null
      */
-    protected $gdsPaymentPurposeId;
+    protected $gdsPaymentPurposeId = null;
 
     /**
-     * «Длинная запись» (параметр, включающий дополнительную информацию, необходимую при бронировании и оплате авиабилетов)
+     * «Длинная запись» (параметр, включающий дополнительную информацию, необходимую при бронировании и оплате авиабилетов).
      *
-     * @var string
+     * @var string|null
      */
-    protected $iData;
+    protected $iData = null;
 
     /**
-     * IP-адрес Покупателя
+     * IP-адрес Покупателя.
      *
-     * @var string
+     * @var string|null
      */
-    protected $ip;
+    protected $ip = null;
 
     /**
-     * Фамилия Держателя карты
+     * Фамилия Держателя карты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $lastName;
+    protected $lastName = null;
 
     /**
-     * Идентификатор кредитной организации
+     * Идентификатор кредитной организации.
      *
-     * @var string
+     * @var string|null
      */
-    protected $loanId;
+    protected $loanId = null;
 
     /**
-     * Сообщение об ошибке (текст ошибки, если она произошла)
+     * Сообщение об ошибке (текст ошибки, если она произошла).
      *
-     * @var string
+     * @var string|null
      */
-    protected $message;
+    protected $message = null;
 
     /**
-     * Отчество Держателя карты
+     * Отчество Держателя карты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $middleName;
+    protected $middleName = null;
 
     /**
-     * Признак необходимости подтверждения преавторизации
+     * Признак необходимости подтверждения преавторизации.
      *
      * «0» — платёж без преавторизации или уже подтверждён;
      * «1» — необходимо подтверждение.
      *
-     * @var bool
+     * @var int|null
      */
-    protected $needConfirm;
+    protected $needConfirm = null;
 
     /**
-     * Номер заказа в интернет-магазине Мерчанта
+     * Номер заказа в интернет-магазине Мерчанта.
      *
-     * @var string
+     * @var string|null
      */
-    protected $orderNumber;
+    protected $orderNumber = null;
 
     /**
      * Идентификатор «родительского» платежа (значение параметра OrderNumber) для рекуррентного платежа.
      * Пустое значение, если платёж нерекуррентный.
      *
-     * @var string
+     * @var string|null
      */
-    protected $parentOrderNumber;
+    protected $parentOrderNumber = null;
 
     /**
      * «1» — оплата кредитной картой;
      * «3» — оплата с помощью электронной валюты.
-     * Payment\Type::CREDIT_CARD
      *
-     * @var int
+     * @see \Tmconsulting\Uniteller\Parameter\Enum\PaymentType
+     *
+     * @var int|null
      */
-    protected $paymentType;
+    protected $paymentType = null;
 
     /**
-     * Телефон Держателя карты
+     * Телефон Держателя карты.
      *
-     * @var string
+     * @var string|null
      */
-    protected $phone;
+    protected $phone = null;
 
     /**
-     * Тип платежа
+     * Тип платежа.
      *
-     * @var string
+     * @var string|null
      */
-    protected $ptCode;
+    protected $ptCode = null;
 
     /**
-     * Расшифровка кода возврата
+     * Идентификатор QR-кода, выданный НСПК.
      *
-     * @var string
+     * @var string|null
      */
-    protected $recommendation;
+    protected $qrcId = null;
+    /**
+     * Идентификатор сохранённого токена СБП (идентификатор привязанного в СБП счёта, будет пустым, если Плательщик
+     * не привязывал счёт).
+     *
+     * @var string|null
+     */
+    protected $tokenIdp = null;
 
     /**
-     * Код возврата
+     * Описание чека фискализации.
      *
-     * @var string
+     * @var \Tmconsulting\Uniteller\Receipt\FiscalReceipt[]|null
      */
-    protected $responseCode;
+    protected $receipts = null;
 
     /**
-     * Состояние заказа
-     * Order\Status::PAID
+     * Расшифровка кода возврата.
      *
-     * @var string
+     * @var string|null
      */
-    protected $status;
+    protected $recommendation = null;
+
+    /**
+     * Код возврата.
+     *
+     * @var string|null
+     */
+    protected $responseCode = null;
+
+    /**
+     * Состояние заказа.
+     *
+     * @see \Tmconsulting\Uniteller\Order\Status
+     *
+     * @var string|null
+     */
+    protected $status = null;
 
     /**
      * Сумма всех средств, уплаченных по одному заказу.
-     * Десятичный разделитель — точка
+     * Десятичный разделитель — точка.
      *
-     * @var string
+     * @var string|null
      */
-    protected $total;
+    protected $total = null;
 
     /**
      * @var DateTime|null
      */
-    protected $packetDate;
+    protected $packetDate = null;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $signature;
-
+    protected $country = null;
 
     /**
-     * @param string $address
+     * @var string|null
+     */
+    protected $rate = null;
+
+    /**
+     * @var string|null
+     */
+    protected $cardSubType = null;
+
+    /**
+     * @var string|null
+     */
+    protected $protocolTypeName = null;
+
+    /**
+     * @var string|null
+     */
+    protected $processingName = null;
+
+    /**
+     * @var string|null
+     */
+    protected $acquirerID = null;
+
+    /**
+     * @var bool|null
+     */
+    protected $isOtherCard = null;
+
+    /**
+     * Сумма заказа.
+     *
+     * @var string|null
+     */
+    protected $sum = null;
+
+    /**
+     * Уникальный номер заказа в Платёжном шлюзе.
+     *
+     * @var string|null
+     */
+    protected $sberOrderId = null;
+
+    /**
+     * @var string|null
+     */
+    protected $giftCert = null;
+
+    /**
+     * @var string|null
+     */
+    protected $opkcID = null;
+
+    /**
+     * @var string|null
+     */
+    protected $tpayRequestId = null;
+
+    /**
+     * @var string|null
+     */
+    protected $bnplRequestId = null;
+
+    /**
+     * Ссылка на подробную информацию о заказе.
+     *
+     * @var string|null
+     */
+    protected $lkOrderUrl = null;
+
+    /**
+     * @param string|null $address
+     *
      * @return $this
      */
-    public function setAddress($address)
+    public function setAddress(?string $address): self
     {
         $this->address = $address;
 
@@ -309,10 +395,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $approvalCode
+     * @param string|null $approvalCode
+     *
      * @return $this
      */
-    public function setApprovalCode($approvalCode)
+    public function setApprovalCode(?string $approvalCode): self
     {
         $this->approvalCode = $approvalCode;
 
@@ -320,10 +407,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $bankName
+     * @param string|null $bankName
+     *
      * @return $this
      */
-    public function setBankName($bankName)
+    public function setBankName(?string $bankName): self
     {
         $this->bankName = $bankName;
 
@@ -331,10 +419,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param int $billNumber
+     * @param string|null $billNumber
+     *
      * @return $this
      */
-    public function setBillNumber($billNumber)
+    public function setBillNumber(?string $billNumber): self
     {
         $this->billNumber = $billNumber;
 
@@ -342,10 +431,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $bookingcomId
+     * @param string|null $bookingcomId
+     *
      * @return $this
      */
-    public function setBookingcomId($bookingcomId)
+    public function setBookingcomId(?string $bookingcomId): self
     {
         $this->bookingcomId = $bookingcomId;
 
@@ -353,10 +443,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $bookingcomPincode
+     * @param string|null $bookingcomPincode
+     *
      * @return $this
      */
-    public function setBookingcomPincode($bookingcomPincode)
+    public function setBookingcomPincode(?string $bookingcomPincode): self
     {
         $this->bookingcomPincode = $bookingcomPincode;
 
@@ -364,10 +455,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $cardIdp
+     * @param string|null $cardIdp
+     *
      * @return $this
      */
-    public function setCardIdp($cardIdp)
+    public function setCardIdp(?string $cardIdp): self
     {
         $this->cardIdp = $cardIdp;
 
@@ -375,10 +467,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $cardHolder
+     * @param string|null $cardHolder
+     *
      * @return $this
      */
-    public function setCardHolder($cardHolder)
+    public function setCardHolder(?string $cardHolder): self
     {
         $this->cardHolder = $cardHolder;
 
@@ -386,10 +479,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $cardNumber
+     * @param string|null $cardNumber
+     *
      * @return $this
      */
-    public function setCardNumber($cardNumber)
+    public function setCardNumber(?string $cardNumber): self
     {
         $this->cardNumber = $cardNumber;
 
@@ -397,10 +491,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $cardType
+     * @param string|null $cardType
+     *
      * @return $this
      */
-    public function setCardType($cardType)
+    public function setCardType(?string $cardType): self
     {
         $this->cardType = $cardType;
 
@@ -408,10 +503,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $comment
+     * @param string|null $comment
+     *
      * @return $this
      */
-    public function setComment($comment)
+    public function setComment(?string $comment): self
     {
         $this->comment = $comment;
 
@@ -419,10 +515,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $currency
+     * @param string|null $currency
+     *
      * @return $this
      */
-    public function setCurrency($currency)
+    public function setCurrency(?string $currency): self
     {
         $this->currency = $currency;
 
@@ -430,12 +527,13 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param $value
+     * @param int|null $value
+     *
      * @return $this
      */
-    public function setCvc2($value)
+    public function setCvc2(?int $value): self
     {
-        $this->cvc2 = (bool) $value;
+        $this->cvc2 = $value;
 
         return $this;
     }
@@ -443,9 +541,9 @@ class Order implements ArraybleInterface
     /**
      * @return $this
      */
-    public function withCvc2()
+    public function withCvc2(): self
     {
-        $this->cvc2 = true;
+        $this->cvc2 = 1;
 
         return $this;
     }
@@ -453,25 +551,31 @@ class Order implements ArraybleInterface
     /**
      * @return $this
      */
-    public function withoutCvc2()
+    public function withoutCvc2(): self
     {
-        $this->cvc2 = false;
+        $this->cvc2 = 0;
 
         return $this;
     }
 
     /**
-     * @param DateTime $date
+     * @param string|null $date
+     *
      * @return $this
      */
-    public function setDate($date)
+    public function setDate(?string $date): self
     {
         if (empty($date)) {
             return $this;
         }
 
-        // Ёбаный насрать, а даты зачем разного формата отдавать?
-        // Полностью разделяю и поддерживаю данное негодование, значит ебашим костыли))
+        /**
+         * Ёбаный насрать, а даты зачем разного формата отдавать?
+         * Полностью разделяю и поддерживаю данное негодование, значит ебашим костыли))
+         *
+         * Например, если ответ запрашивается в формате CSV, то дата в формате d.m.Y H:i:s,
+         * а если в формате XML, то дата в формате Y-m-d H:i:s
+         */
         $date = str_replace('.', '-', $date);
         $this->date = DateTime::createFromFormat('U', strtotime($date));
 
@@ -479,10 +583,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $email
+     * @param string|null $email
+     *
      * @return $this
      */
-    public function setEmail($email)
+    public function setEmail(?string $email): self
     {
         $this->email = $email;
 
@@ -490,10 +595,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $eMoneyType
+     * @param string|null $eMoneyType
+     *
      * @return $this
      */
-    public function setEMoneyType($eMoneyType)
+    public function setEMoneyType(?string $eMoneyType): self
     {
         $this->eMoneyType = $eMoneyType;
 
@@ -501,28 +607,32 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param array $eOrderData
+     * @param string|null $eOrderData
+     *
      * @return $this
      */
-    public function setEOrderData($eOrderData)
+    public function setEOrderData(?string $eOrderData): self
     {
         if (empty($eOrderData)) {
             return $this;
         }
 
+        $arr = [];
         foreach (explode(', ', $eOrderData) as $item) {
-            list($key, $value) = explode('=', $item);
-            $this->eOrderData[$key] = $value;
+            list($key, $value) = explode('=', $item, 2);
+            $arr[$key] = $value;
         }
+        $this->eOrderData = $arr;
 
         return $this;
     }
 
     /**
-     * @param int $errorCode
+     * @param int|null $errorCode
+     *
      * @return $this
      */
-    public function setErrorCode($errorCode)
+    public function setErrorCode(?int $errorCode): self
     {
         $this->errorCode = $errorCode;
 
@@ -530,10 +640,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $errorComment
+     * @param string|null $errorComment
+     *
      * @return $this
      */
-    public function setErrorComment($errorComment)
+    public function setErrorComment(?string $errorComment): self
     {
         $this->errorComment = $errorComment;
 
@@ -541,10 +652,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $firstName
+     * @param string|null $firstName
+     *
      * @return $this
      */
-    public function setFirstName($firstName)
+    public function setFirstName(?string $firstName): self
     {
         $this->firstName = $firstName;
 
@@ -552,10 +664,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param int $gdsPaymentPurposeId
+     * @param int|null $gdsPaymentPurposeId
+     *
      * @return $this
      */
-    public function setGdsPaymentPurposeId($gdsPaymentPurposeId)
+    public function setGdsPaymentPurposeId(?int $gdsPaymentPurposeId): self
     {
         $this->gdsPaymentPurposeId = $gdsPaymentPurposeId;
 
@@ -563,10 +676,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $iData
+     * @param string|null $iData
+     *
      * @return $this
      */
-    public function setIData($iData)
+    public function setIData(?string $iData): self
     {
         $this->iData = $iData;
 
@@ -574,10 +688,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $ip
+     * @param string|null $ip
+     *
      * @return $this
      */
-    public function setIp($ip)
+    public function setIp(?string $ip): self
     {
         $this->ip = $ip;
 
@@ -585,10 +700,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $lastName
+     * @param string|null $lastName
+     *
      * @return $this
      */
-    public function setLastName($lastName)
+    public function setLastName(?string $lastName): self
     {
         $this->lastName = $lastName;
 
@@ -596,10 +712,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $loanId
+     * @param string|null $loanId
+     *
      * @return $this
      */
-    public function setLoanId($loanId)
+    public function setLoanId(?string $loanId): self
     {
         $this->loanId = $loanId;
 
@@ -607,10 +724,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $message
+     * @param string|null $message
+     *
      * @return $this
      */
-    public function setMessage($message)
+    public function setMessage(?string $message): self
     {
         $this->message = $message;
 
@@ -618,10 +736,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $middleName
+     * @param string|null $middleName
+     *
      * @return $this
      */
-    public function setMiddleName($middleName)
+    public function setMiddleName(?string $middleName): self
     {
         $this->middleName = $middleName;
 
@@ -629,21 +748,23 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param bool $needConfirm
+     * @param int|null $needConfirm
+     *
      * @return $this
      */
-    public function setNeedConfirm($needConfirm)
+    public function setNeedConfirm(?int $needConfirm): self
     {
-        $this->needConfirm = (bool) $needConfirm;
-        
+        $this->needConfirm = $needConfirm;
+
         return $this;
     }
 
     /**
-     * @param string $orderNumber
+     * @param string|null $orderNumber
+     *
      * @return $this
      */
-    public function setOrderNumber($orderNumber)
+    public function setOrderNumber(?string $orderNumber): self
     {
         $this->orderNumber = $orderNumber;
 
@@ -651,10 +772,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $parentOrderNumber
+     * @param string|null $parentOrderNumber
+     *
      * @return $this
      */
-    public function setParentOrderNumber($parentOrderNumber)
+    public function setParentOrderNumber(?string $parentOrderNumber): self
     {
         $this->parentOrderNumber = $parentOrderNumber;
 
@@ -662,10 +784,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param int $paymentType
+     * @param int|null $paymentType
+     *
      * @return $this
      */
-    public function setPaymentType($paymentType)
+    public function setPaymentType(?int $paymentType): self
     {
         $this->paymentType = $paymentType;
 
@@ -673,10 +796,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $phone
+     * @param string|null $phone
+     *
      * @return $this
      */
-    public function setPhone($phone)
+    public function setPhone(?string $phone): self
     {
         $this->phone = $phone;
 
@@ -684,10 +808,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $ptCode
+     * @param string|null $ptCode
+     *
      * @return $this
      */
-    public function setPtCode($ptCode)
+    public function setPtCode(?string $ptCode): self
     {
         $this->ptCode = $ptCode;
 
@@ -695,10 +820,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $recommendation
+     * @param string|null $recommendation
+     *
      * @return $this
      */
-    public function setRecommendation($recommendation)
+    public function setRecommendation(?string $recommendation): self
     {
         $this->recommendation = $recommendation;
 
@@ -706,10 +832,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $responseCode
+     * @param string|null $responseCode
+     *
      * @return $this
      */
-    public function setResponseCode($responseCode)
+    public function setResponseCode(?string $responseCode): self
     {
         $this->responseCode = $responseCode;
 
@@ -717,10 +844,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $status
+     * @param string|null $status
+     *
      * @return $this
      */
-    public function setStatus($status)
+    public function setStatus(?string $status): self
     {
         $this->status = Status::resolve($status);
 
@@ -728,10 +856,11 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @param string $total
+     * @param string|null $total
+     *
      * @return $this
      */
-    public function setTotal($total)
+    public function setTotal(?string $total): self
     {
         $this->total = $total;
 
@@ -739,281 +868,325 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @return string
+     * @return string|null Адрес Держателя карты.
      */
-    public function getAddress()
+    public function getAddress(): ?string
     {
         return $this->address;
     }
 
     /**
-     * @return string
+     * @return string|null Код подтверждения транзакции от процессингового центра.
      */
-    public function getApprovalCode()
+    public function getApprovalCode(): ?string
     {
         return $this->approvalCode;
     }
 
     /**
-     * @return string
+     * @return string|null Имя банка-эмитента.
      */
-    public function getBankName()
+    public function getBankName(): ?string
     {
         return $this->bankName;
     }
 
     /**
-     * @return int
+     * @return string|null Номер платежа в системе Uniteller.
      */
-    public function getBillNumber()
+    public function getBillNumber(): ?string
     {
         return $this->billNumber;
     }
 
     /**
-     * @return string
+     * @return string|null Идентификатор (логин) Мерчанта в сервисе Booking.com.
      */
-    public function getBookingcomId()
+    public function getBookingcomId(): ?string
     {
         return $this->bookingcomId;
     }
 
     /**
-     * @return string
+     * @return string|null Пароль Мерчанта в сервисе Booking.com.
      */
-    public function getBookingcomPincode()
+    public function getBookingcomPincode(): ?string
     {
         return $this->bookingcomPincode;
     }
 
     /**
-     * @return string
+     * @return string|null Идентификатор зарегистрированной карты.
      */
-    public function getCardIdp()
+    public function getCardIdp(): ?string
     {
         return $this->cardIdp;
     }
 
     /**
-     * @return string
+     * @return string|null Информация, введённая Покупателем на странице оплаты в поле имени владельца карты.
      */
-    public function getCardHolder()
+    public function getCardHolder(): ?string
     {
         return $this->cardHolder;
     }
 
     /**
-     * @return string
+     * @return string|null Первые 6 цифр и последние 4 цифры номера карты (PAN), соединённые звёздочками.
      */
-    public function getCardNumber()
+    public function getCardNumber(): ?string
     {
         return $this->cardNumber;
     }
 
     /**
-     * @return string
+     * @return string|null Тип платёжной системы карты (возможные значения: visa, mastercard, dinnersclub, jcb, mir).
      */
-    public function getCardType()
+    public function getCardType(): ?string
     {
         return $this->cardType;
     }
 
     /**
-     * @return string
+     * @return string|null Комментарий к оплате.
      */
-    public function getComment()
+    public function getComment(): ?string
     {
         return $this->comment;
     }
 
     /**
-     * @return string
+     * @return string|null Код валюты.
      */
-    public function getCurrency()
+    public function getCurrency(): ?string
     {
         return $this->currency;
     }
 
     /**
-     * @return int
+     * @return bool|null Наличие CVC2/CVV2/4DBC (false — авторизация без CVC2, true — авторизация с СVC2).
      */
-    public function isCvc2()
+    public function isCvc2(): ?bool
+    {
+        if ($this->cvc2 === 1) {
+            return true;
+        }
+        if ($this->cvc2 === 0) {
+            return false;
+        }
+        return null;
+    }
+
+    /**
+     * @return int|null Наличие CVC2/CVV2/4DBC (0 — авторизация без CVC2, 1 — авторизация с СVC2).
+     */
+    public function getCvc2(): ?int
     {
         return $this->cvc2;
     }
 
     /**
-     * @return DateTime
+     * @return DateTime|null Дата и время создания заказа в системе Uniteller.
      */
-    public function getDate()
+    public function getDate(): ?DateTime
     {
         return $this->date;
     }
 
     /**
-     * @return string
+     * @return string|null Адрес электронной почты Держателя карты.
      */
-    public function getEmail()
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
     /**
-     * @return string
+     * @return string|null Тип электронной валюты.
      */
-    public function getEMoneyType()
+    public function getEMoneyType(): ?string
     {
         return $this->eMoneyType;
     }
 
     /**
-     * @return array
+     * @return array|null Данные заказа, выставленного в электронной платёжной системе. В формате «title1=value1, title2=value2, …».
      */
-    public function getEOrderData()
+    public function getEOrderData(): ?array
     {
         return $this->eOrderData;
     }
 
     /**
-     * @return int
+     * @return int|null Код ответа процессингового центра.
      */
-    public function getErrorCode()
+    public function getErrorCode(): ?int
     {
         return $this->errorCode;
     }
 
     /**
-     * @return string
+     * @return string|null Расшифровка кода ответа процессингового центра.
      */
-    public function getErrorComment()
+    public function getErrorComment(): ?string
     {
         return $this->errorComment;
     }
 
     /**
-     * @return string
+     * @return string|null Имя Держателя карты.
      */
-    public function getFirstName()
+    public function getFirstName(): ?string
     {
         return $this->firstName;
     }
 
     /**
-     * @return int
+     * @return int|null Назначение платежа через ГДС
+     *             «10» — оплата комиссионного вознаграждения Агентства;
+     *             «20» — оплата билетов;
+     *             для платежей без участия ГДС этот параметр пустой. В ответе в формате SOAP на запрос результата
+     *             авторизации в текущей версии сервиса этот параметр не возвращается.
      */
-    public function getGdsPaymentPurposeId()
+    public function getGdsPaymentPurposeId(): ?int
     {
         return $this->gdsPaymentPurposeId;
     }
 
     /**
-     * @return string
+     * @return string|null «Длинная запись» (параметр, включающий дополнительную информацию, необходимую
+     *                     при бронировании и оплате авиабилетов).
      */
-    public function getIData()
+    public function getIData(): ?string
     {
         return $this->iData;
     }
 
     /**
-     * @return string
+     * @return string|null IP-адрес Покупателя.
      */
-    public function getIp()
+    public function getIp(): ?string
     {
         return $this->ip;
     }
 
     /**
-     * @return string
+     * @return string|null Фамилия Держателя карты.
      */
-    public function getLastName()
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
 
     /**
-     * @return string
+     * @return string|null Идентификатор кредитной организации.
      */
-    public function getLoanId()
+    public function getLoanId(): ?string
     {
         return $this->loanId;
     }
 
     /**
-     * @return string
+     * @return string|null Сообщение об ошибке (текст ошибки, если она произошла).
      */
-    public function getMessage()
+    public function getMessage(): ?string
     {
         return $this->message;
     }
 
     /**
-     * @return string
+     * @return string|null Отчество Держателя карты.
      */
-    public function getMiddleName()
+    public function getMiddleName(): ?string
     {
         return $this->middleName;
     }
 
     /**
-     * @return bool
+     * @return bool|null Признак необходимости подтверждения преавторизации.
+     *              «0» — платёж без преавторизации или уже подтверждён;
+     *              «1» — необходимо подтверждение.
      */
-    public function isNeedConfirm()
+    public function isNeedConfirm(): ?bool
+    {
+        if ($this->needConfirm === 1) {
+            return true;
+        }
+        if ($this->needConfirm === 0) {
+            return false;
+        }
+        return null;
+    }
+
+    /**
+     * @return int|null Признак необходимости подтверждения преавторизации.
+     *                  0 — платёж без преавторизации или уже подтверждён;
+     *                  1 — необходимо подтверждение.
+     */
+    public function getNeedConfirm(): ?int
     {
         return $this->needConfirm;
     }
 
     /**
-     * @return string
+     * @return string|null Номер заказа в интернет-магазине Мерчанта.
      */
-    public function getOrderNumber()
+    public function getOrderNumber(): ?string
     {
         return $this->orderNumber;
     }
 
     /**
-     * @return string
+     * @return string|null Идентификатор «родительского» платежа для рекуррентного платежа.
+     *                Пустое значение, если платёж не рекуррентный.
      */
-    public function getParentOrderNumber()
+    public function getParentOrderNumber(): ?string
     {
         return $this->parentOrderNumber;
     }
 
     /**
-     * @return int
+     * @return int|null
+     *  «1» — оплата кредитной картой;
+     *  «3» — оплата с помощью электронной валюты;
+     *  «13» — оплата через СБП;
+     *  «14» – оплата через SberPay.
+     *
+     * @see \Tmconsulting\Uniteller\Parameter\Enum\PaymentType
      */
-    public function getPaymentType()
+    public function getPaymentType(): ?int
     {
         return $this->paymentType;
     }
 
     /**
-     * @return string
+     * @return string|null Телефон Держателя карты.
      */
-    public function getPhone()
+    public function getPhone(): ?string
     {
         return $this->phone;
     }
 
     /**
-     * @return string
+     * @return string|null Тип платежа.
      */
-    public function getPtCode()
+    public function getPtCode(): ?string
     {
         return $this->ptCode;
     }
 
     /**
-     * @return string
+     * @return string|null Расшифровка кода возврата.
      */
-    public function getRecommendation()
+    public function getRecommendation(): ?string
     {
         return $this->recommendation;
     }
 
     /**
-     * @return string
+     * @return string|null Код возврата.
      */
-    public function getResponseCode()
+    public function getResponseCode(): ?string
     {
         return $this->responseCode;
     }
@@ -1027,26 +1200,27 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @return string
+     * @return string|null Состояние заказа.
      */
-    public function getStatus()
+    public function getStatus(): ?string
     {
         return $this->status;
     }
 
     /**
-     * @return string
+     * @return string|null Сумма всех средств, уплаченных по одному заказу.
      */
-    public function getTotal()
+    public function getTotal(): ?string
     {
         return $this->total;
     }
 
     /**
-     * @param DateTime $packetDate
+     * @param string|null $packetDate
+     *
      * @return $this
      */
-    public function setPacketDate($packetDate)
+    public function setPacketDate(?string $packetDate): self
     {
         if (empty($packetDate)) {
             return $this;
@@ -1061,28 +1235,339 @@ class Order implements ArraybleInterface
     }
 
     /**
-     * @return DateTime
+     * @return DateTime|null Дата операции.
      */
-    public function getPacketDate()
+    public function getPacketDate(): ?DateTime
     {
         return $this->packetDate;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getSignature()
+    public function getCountry(): ?string
     {
-        return $this->signature;
+        return $this->country;
     }
 
     /**
-     * @param string $signature
-     * @return Order
+     * @param string|null $country
+     *
+     * @return $this
      */
-    public function setSignature($signature)
+    public function setCountry(?string $country): self
     {
-        $this->signature = $signature;
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRate(): ?string
+    {
+        return $this->rate;
+    }
+
+    /**
+     * @param string|null $rate
+     *
+     * @return $this
+     */
+    public function setRate(?string $rate): self
+    {
+        $this->rate = $rate;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCardSubType(): ?string
+    {
+        return $this->cardSubType;
+    }
+
+    /**
+     * @param string|null $cardSubType
+     *
+     * @return $this
+     */
+    public function setCardSubType(?string $cardSubType): self
+    {
+        $this->cardSubType = $cardSubType;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getProtocolTypeName(): ?string
+    {
+        return $this->protocolTypeName;
+    }
+
+    /**
+     * @param string|null $protocolTypeName
+     *
+     * @return $this
+     */
+    public function setProtocolTypeName(?string $protocolTypeName): self
+    {
+        $this->protocolTypeName = $protocolTypeName;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getProcessingName(): ?string
+    {
+        return $this->processingName;
+    }
+
+    /**
+     * @param string|null $processingName
+     *
+     * @return $this
+     */
+    public function setProcessingName(?string $processingName): self
+    {
+        $this->processingName = $processingName;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAcquirerID(): ?string
+    {
+        return $this->acquirerID;
+    }
+
+    /**
+     * @param string|null $acquirerID
+     *
+     * @return $this
+     */
+    public function setAcquirerID(?string $acquirerID): self
+    {
+        $this->acquirerID = $acquirerID;
+
+        return $this;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function isOtherCard(): ?bool
+    {
+        return $this->isOtherCard;
+    }
+
+    /**
+     * @param bool|null $isOtherCard
+     *
+     * @return $this
+     */
+    public function setIsOtherCard(?bool $isOtherCard): self
+    {
+        $this->isOtherCard = $isOtherCard;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null Идентификатор QR-кода, выданный НСПК.
+     */
+    public function getQrcId(): ?string
+    {
+        return $this->qrcId;
+    }
+
+    /**
+     * @param string|null $qrcId
+     *
+     * @return $this
+     */
+    public function setQrcId(?string $qrcId): self
+    {
+        $this->qrcId = $qrcId;
+
+        return $this;
+    }
+
+    /**
+     * @return \Tmconsulting\Uniteller\Receipt\FiscalReceipt[]|null Все чеки связанные с заказом.
+     */
+    public function getReceipts(): ?array
+    {
+        return $this->receipts;
+    }
+
+    /**
+     * @param \Tmconsulting\Uniteller\Receipt\FiscalReceipt[]|null $receipts
+     *
+     * @return $this
+     */
+    public function setReceipts(?array $receipts): self
+    {
+        $this->receipts = $receipts;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null Уникальный номер заказа в Платёжном шлюзе.
+     */
+    public function getSberOrderId(): ?string
+    {
+        return $this->sberOrderId;
+    }
+
+    /**
+     * @param string|null $sberOrderId Уникальный номер заказа в Платёжном шлюзе.
+     *
+     * @return $this
+     */
+    public function setSberOrderId(?string $sberOrderId): self
+    {
+        $this->sberOrderId = $sberOrderId;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSum(): ?string
+    {
+        return $this->sum;
+    }
+
+    /**
+     * @param string|null $sum Сумма заказа.
+     *
+     * @return $this
+     */
+    public function setSum(?string $sum): self
+    {
+        $this->sum = $sum;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null Идентификатор сохранённого токена СБП.
+     */
+    public function getTokenIdp(): ?string
+    {
+        return $this->tokenIdp;
+    }
+
+    /**
+     * @param string|null $tokenIdp Идентификатор сохранённого токена СБП.
+     *
+     * @return $this
+     */
+    public function setTokenIdp(?string $tokenIdp): self
+    {
+        $this->tokenIdp = $tokenIdp;
+
+        return $this;
+    }
+
+    public function getGiftCert(): ?string
+    {
+        return $this->giftCert;
+    }
+
+    /**
+     * @param string|null $giftCert
+     *
+     * @return $this
+     */
+    public function setGiftCert(?string $giftCert): self
+    {
+        $this->giftCert = $giftCert;
+
+        return $this;
+    }
+
+    public function getOpkcID(): ?string
+    {
+        return $this->opkcID;
+    }
+
+    /**
+     * @param string|null $opkcID
+     *
+     * @return $this
+     */
+    public function setOpkcID(?string $opkcID): self
+    {
+        $this->opkcID = $opkcID;
+
+        return $this;
+    }
+
+    public function getTpayRequestId(): ?string
+    {
+        return $this->tpayRequestId;
+    }
+
+    /**
+     * @param string|null $tpayRequestId
+     *
+     * @return $this
+     */
+    public function setTpayRequestId(?string $tpayRequestId): self
+    {
+        $this->tpayRequestId = $tpayRequestId;
+
+        return $this;
+    }
+
+    public function getBnplRequestId(): ?string
+    {
+        return $this->bnplRequestId;
+    }
+
+    /**
+     * @param string|null $bnplRequestId
+     *
+     * @return $this
+     */
+    public function setBnplRequestId(?string $bnplRequestId): self
+    {
+        $this->bnplRequestId = $bnplRequestId;
+
+        return $this;
+    }
+
+    /**
+     * Ссылка на подробную информацию о заказе.
+     *
+     * @return string|null
+     */
+    public function getLkOrderUrl(): ?string
+    {
+        return $this->lkOrderUrl;
+    }
+
+    /**
+     * @param string|null $lkOrderUrl Ссылка на подробную информацию о заказе.
+     *
+     * @return $this
+     */
+    public function setLkOrderUrl(?string $lkOrderUrl): self
+    {
+        $this->lkOrderUrl = $lkOrderUrl;
 
         return $this;
     }
@@ -1090,49 +1575,83 @@ class Order implements ArraybleInterface
     /**
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
-        return [
-            'Address'                => $this->getAddress(),
-            'ApprovalCode'           => $this->getApprovalCode(),
-            'BankName'               => $this->getBankName(),
-            'BillNumber'             => $this->getBillNumber(),
-            'bookingcom_id'          => $this->getBookingcomId(),
-            'bookingcom_pincode'     => $this->getBookingcomPincode(),
-            'Card_IDP'               => $this->getCardIdp(),
-            'CardHolder'             => $this->getCardHolder(),
-            'CardNumber'             => $this->getCardNumber(),
-            'CardType'               => $this->getCardType(),
-            'Comment'                => $this->getComment(),
-            'Currency'               => $this->getCurrency(),
-            'CVC2'                   => $this->isCvc2(),
-            'Date'                   => $this->getDate(),
-            'PacketDate'             => $this->getPacketDate(),
-            'Email'                  => $this->getEmail(),
-            'EMoneyType'             => $this->getEMoneyType(),
-            'EOrderData'             => $this->getEOrderData(),
-            'Error_Code'             => $this->getErrorCode(),
-            'Error_Comment'          => $this->getErrorComment(),
-            'FirstName'              => $this->getFirstName(),
-            'gds_payment_purpose_id' => $this->getGdsPaymentPurposeId(),
-            'IData'                  => $this->getIData(),
-            'IPAddress'              => $this->getIp(),
-            'LastName'               => $this->getLastName(),
-            'LoanID'                 => $this->getLoanId(),
-            'Message'                => $this->getMessage(),
-            'MiddleName'             => $this->getMiddleName(),
-            'need_confirm'           => $this->isNeedConfirm(),
-            'OrderNumber'            => $this->getOrderNumber(),
-            'parent_order_number'    => $this->getParentOrderNumber(),
-            'PaymentType'            => $this->getPaymentType(),
-            'Phone'                  => $this->getPhone(),
-            'PT_Code'                => $this->getPtCode(),
-            'Recommendation'         => $this->getRecommendation(),
-            'Response_Code'          => $this->getResponseCode(),
-            'Response_Message'       => $this->getResponseMessage(),
-            'Status'                 => $this->getStatus(),
-            'Total'                  => $this->getTotal(),
-            'Signature'              => $this->getSignature(),
-        ];
+        return array_filter([
+            SFields::ADDRESS                => $this->getAddress(),
+            SFields::APPROVAL_CODE          => $this->getApprovalCode(),
+            SFields::BANK_NAME              => $this->getBankName(),
+            SFields::BILL_NUMBER            => $this->getBillNumber(),
+            SFields::BOOKINGCOM_ID          => $this->getBookingcomId(),
+            SFields::BOOKINGCOM_PINCODE     => $this->getBookingcomPincode(),
+            SFields::CARD_IDP               => $this->getCardIdp(),
+            SFields::CARD_HOLDER            => $this->getCardHolder(),
+            SFields::CARD_NUMBER            => $this->getCardNumber(),
+            SFields::CARD_TYPE              => $this->getCardType(),
+            SFields::COMMENT                => $this->getComment(),
+            SFields::CURRENCY               => $this->getCurrency(),
+            SFields::CVC2                   => $this->getCvc2(),
+            SFields::DATE                   => $this->getDate(),
+            SFields::PACKET_DATE            => $this->getPacketDate(),
+            SFields::EMAIL                  => $this->getEmail(),
+            SFields::E_MONEY_TYPE           => $this->getEMoneyType(),
+            SFields::E_ORDER_DATA           => $this->getEOrderData(),
+            SFields::ERROR_CODE             => $this->getErrorCode(),
+            SFields::ERROR_COMMENT          => $this->getErrorComment(),
+            SFields::FIRST_NAME             => $this->getFirstName(),
+            SFields::GDS_PAYMENT_PURPOSE_ID => $this->getGdsPaymentPurposeId(),
+            SFields::I_DATA                 => $this->getIData(),
+            SFields::IP_ADDRESS             => $this->getIp(),
+            SFields::LAST_NAME              => $this->getLastName(),
+            SFields::LOAN_ID                => $this->getLoanId(),
+            SFields::MESSAGE                => $this->getMessage(),
+            SFields::MIDDLE_NAME            => $this->getMiddleName(),
+            SFields::NEED_CONFIRM           => $this->getNeedConfirm(),
+            SFields::ORDER_NUMBER           => $this->getOrderNumber(),
+            SFields::PARENT_ORDER_NUMBER    => $this->getParentOrderNumber(),
+            SFields::PAYMENT_TYPE           => $this->getPaymentType(),
+            SFields::PHONE                  => $this->getPhone(),
+            SFields::PT_CODE                => $this->getPtCode(),
+            SFields::RECOMMENDATION         => $this->getRecommendation(),
+            SFields::RESPONSE_CODE          => $this->getResponseCode(),
+            'Response_Message'              => $this->getResponseMessage(),
+            SFields::STATUS                 => $this->getStatus(),
+            SFields::TOTAL                  => $this->getTotal(),
+            SFields::SUM                    => $this->getSum(),
+            SFields::SBER_ORDER_ID          => $this->getSberOrderId(),
+            SFields::RECEIPT                => $this->getReceipts(),
+            SFields::QRC_ID                 => $this->getQrcId(),
+            SFields::IS_OTHER_CARD          => $this->isOtherCard(),
+            SFields::ACQUIRER_ID            => $this->getAcquirerID(),
+            SFields::PROCESSING_NAME        => $this->getProcessingName(),
+            SFields::PROTOCOL_TYPE_NAME     => $this->getProtocolTypeName(),
+            SFields::CARD_SUB_TYPE          => $this->getCardSubType(),
+            SFields::RATE                   => $this->getRate(),
+            SFields::COUNTRY                => $this->getCountry(),
+            SFields::TOKEN_IDP              => $this->getTokenIdp(),
+            SFields::GIFT_CERT              => $this->getGiftCert(),
+            SFields::OPKC_ID                => $this->getOpkcID(),
+            SFields::TPAY_REQUEST_ID        => $this->getTpayRequestId(),
+            SFields::BNPL_REQUEST_ID        => $this->getBnplRequestId(),
+            SFields::LK_ORDER_URL           => $this->getLkOrderUrl(),
+        ], static function ($value) {
+            return $value !== null;
+        });
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return json_encode(
+            $this->toArray(),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        );
     }
 }

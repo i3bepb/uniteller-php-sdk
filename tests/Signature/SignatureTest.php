@@ -1,120 +1,121 @@
 <?php
-/**
- * Created by Roquie.
- * E-mail: roquie0@gmail.com
- * GitHub: Roquie
- */
 
 namespace Tmconsulting\Uniteller\Tests\Signature;
 
-use Tmconsulting\Uniteller\Signature\SignatureCallback;
-use Tmconsulting\Uniteller\Signature\SignaturePayment;
-use Tmconsulting\Uniteller\Signature\SignatureRecurrent;
+use I3bepb\ReflectionForTest\AccessToProperty;
+use Psr\Log\LoggerInterface;
+use Tmconsulting\Uniteller\Signature\Signature;
 use Tmconsulting\Uniteller\Tests\TestCase;
 
+/**
+ * @coversDefaultClass \Tmconsulting\Uniteller\Signature\Signature
+ */
 class SignatureTest extends TestCase
 {
-    public function testPaymentSignatureCreation()
-    {
-        $sig = (new SignaturePayment)
-            ->setShopIdp('ACME')
-            ->setOrderIdp('FOO')
-            ->setSubtotalP(100)
-            ->setLifeTime(300)
-            ->setCustomerIdp('short_shop_string')
-            ->setPassword('LONG-PWD')
-            ->create();
+    use AccessToProperty;
 
-        $this->assertSame('3D1D6F830384886A81AD672F66392B03', $sig);
+    /**
+     * @var \Tmconsulting\Uniteller\Signature\Signature
+     */
+    private $signature;
+
+    protected function setUp(): void
+    {
+        $this->signature = new Signature();
     }
 
-    public function testRecurrentSignatureCreation()
+    public function testSetFields()
     {
-        $sig = (new SignatureRecurrent())
-            ->setShopIdp('ACME')
-            ->setOrderIdp('FOO')
-            ->setSubtotalP(100)
-            ->setParentOrderIdp('BAR')
-            ->setPassword('LONG-PWD')
-            ->create();
-
-        $this->assertSame('A5FE1C95A2819EBACFC2145EE83742F6', $sig);
+        $fields = ['field1' => 'value1', 'field2' => 'value2'];
+        $result = $this->signature->setParameters($fields);
+        $this->assertSame($this->signature, $result);
+        $this->assertEquals($fields, $this->getProtectedOrPrivatePropertyValue($this->signature, 'fields'));
     }
 
-    public function testCallbackSignatureCreation()
+    public function testVerifyWithValidSignature()
     {
-        $sig = (new SignatureCallback())
-            ->setOrderId('FOO')
-            ->setStatus('paid')
-            ->setPassword('LONG-PWD')
-            ->create();
+        $fields = ['test' => 'value'];
+        $this->signature->setParameters($fields);
 
-        $this->assertSame('3F728AA479E50F5B10EE6C20258BFF88', $sig);
+        // Правильная подпись для массива ['test' => 'value']
+        $validSignature = strtoupper(md5(implode('', $fields)));
+
+        $this->assertTrue($this->signature->verify($validSignature));
+        $this->assertFalse($this->signature->verify('fake'));
     }
 
-    public function testCallbackSignatureCreationWithFields()
+    public function testVerifyWithInvalidSignature()
     {
-        $sig = (new SignatureCallback())
-            ->setOrderId('FOO')
-            ->setStatus('paid')
-            ->setFields([
-                'AcquirerID'   => 'fOO',
-                'ApprovalCode' => 'BaR',
-                'BillNumber'   => 'baz',
-            ])
-            ->setPassword('LONG-PWD')
-            ->create();
-
-        $this->assertSame('1F4E3B63AE408D0BE1E33965E6697236', $sig);
+        $this->signature->setParameters(['test' => 'value']);
+        $this->assertFalse($this->signature->verify('INVALID_SIGNATURE'));
     }
 
-    public function testPaymentSignatureVerifying()
+    public function testCreateMd5()
     {
-        $sig = (new SignaturePayment())
-            ->setShopIdp('ACME')
-            ->setOrderIdp('FOO')
-            ->setSubtotalP(100)
-            ->setLifeTime(300)
-            ->setCustomerIdp('short_shop_string')
-            ->setPassword('LONG-PWD');
-
-        $this->assertTrue($sig->verify('3D1D6F830384886A81AD672F66392B03'));
+        $fields = ['param1' => 'value1', 'param2' => 'value2'];
+        $this->signature->setParameters($fields);
+        $this->assertEquals('E23DB4CAED578D98F118EF2CD703EBA0', $this->signature->createMd5());
     }
 
-    public function testRecurrentSignatureVerifying()
+    public function testCreateMd5WithEmptyFields()
     {
-        $sig = (new SignatureRecurrent())
-            ->setShopIdp('ACME')
-            ->setOrderIdp('FOO')
-            ->setSubtotalP(100)
-            ->setParentOrderIdp('BAR')
-            ->setPassword('LONG-PWD');
-
-        $this->assertTrue($sig->verify('A5FE1C95A2819EBACFC2145EE83742F6'));
+        $this->signature->setParameters([]);
+        $expected = strtoupper(md5(''));
+        $this->assertEquals($expected, $this->signature->createMd5());
     }
 
-    public function testCallbackSignatureVerifying()
+    public function testCreateMd5WithoutDelimiter()
     {
-        $sig = (new SignatureCallback())
-            ->setOrderId('FOO')
-            ->setStatus('paid')
-            ->setPassword('LONG-PWD');
-
-        $this->assertTrue($sig->verify('3F728AA479E50F5B10EE6C20258BFF88'));
+        $fields = ['p1' => 'v1', 'p2' => 'v2'];
+        $this->signature->setParameters($fields);
+        $this->assertEquals('B29A93FDC743158B246AB456BB82EF07', $this->signature->createMd5WithoutDelimiter());
     }
 
-    public function testCallbackSignatureVerifyingWithFields()
+    public function testCreateSha256()
     {
-        $sig = (new SignatureCallback())
-            ->setOrderId('FOO')
-            ->setStatus('paid')
-            ->setFields([
-                'AcquirerID'   => 'fOO',
-                'ApprovalCode' => 'BaR',
-                'BillNumber'   => 'baz',
-            ])
-            ->setPassword('LONG-PWD');
+        $fields = ['key' => 'secret'];
+        $this->signature->setParameters($fields);
+        $this->assertEquals('3D91B58504A6CC3A159005EE7B16C7AE503CA6AC2A6A3C893837083C236B864A', $this->signature->createSha256());
+    }
 
-        $this->assertTrue($sig->verify('1F4E3B63AE408D0BE1E33965E6697236'));
+    public function testDebugSignatureCalculationWithMd5()
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())
+            ->method('debug')
+            ->with($this->stringContains('Signature md5'));
+        $this->signature->setLogger($logger);
+        $this->signature->setDebug(true);
+        $this->signature->createMd5();
+    }
+
+    public function testDebugSignatureCalculationWithSha256()
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())
+            ->method('debug')
+            ->with($this->stringContains('Signature sha256'));
+        $this->signature->setLogger($logger);
+        $this->signature->setDebug(true);
+        $this->signature->createSha256();
+    }
+
+    public function testNoDebugOutputWhenDisabled()
+    {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->never())->method('debug');
+        $this->signature->setLogger($logger);
+        $this->signature->setDebug(false);
+        $this->signature->createMd5();
+    }
+
+    public function testNullValuesHandling()
+    {
+        $fields = ['param1' => null, 'param2' => ''];
+        $this->signature->setParameters($fields);
+
+        $expectedMd5 = strtoupper(md5(implode('&', [md5(''),md5('')])));
+
+        $this->assertEquals($expectedMd5, $this->signature->createMd5());
     }
 }

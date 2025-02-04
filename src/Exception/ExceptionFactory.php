@@ -88,6 +88,8 @@ class ExceptionFactory
                 );
         }
 
-        return new ErrorException($message, $request, $response);
+        $exception = new ErrorException($message, $request, $response);
+        $exception->setErrorCode($code);
+        return $exception;
     }
 }

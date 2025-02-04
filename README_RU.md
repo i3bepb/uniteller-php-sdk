@@ -74,13 +74,13 @@ use Tmconsulting\Uniteller\Payment\PaymentBuilder;
 
 $builder = new PaymentBuilder();
 $builder
-    ->setOrderIdp(mt_rand(10000, 99999))
+    ->setOrderId(mt_rand(10000, 99999))
     ->setSubtotalP(10)
     ->setCustomerIdp(mt_rand(10000, 99999))
     ->setUrlReturnOk('http://google.ru/?q=success')
     ->setUrlReturnNo('http://google.ru/?q=failure');
 
-$uniteller->payment($builder)->go();
+$container->payment($builder)->go();
 // Если переходить к оплате сразу нет необходимости,
 // можно получить готовую ссылку для оплаты
 // $uniteller->payment($builder)->getUri();
@@ -91,14 +91,14 @@ $uniteller->payment($builder)->go();
 
 ```php
 <?php
-$uniteller->payment([
+$container->payment([
     'Order_IDP' => mt_rand(10000, 99999),
     // ... прочие параметры
 ])->go();
 ```
 
 ### Рекуррентный платеж
- 
+
 ```php
 <?php
 use Tmconsulting\Uniteller\Recurrent\RecurrentBuilder;
@@ -107,29 +107,29 @@ $builder = (new RecurrentBuilder())
     ->setOrderIdp(mt_rand(10000, 99999))
     ->setSubtotalP(15)
     ->setParentOrderIdp(00000) // id заказа магазина из ранее оплаченных в uniteller
-    ->setParentShopIdp($uniteller->getShopId()); // не обязательно задавать, если родительский платеж из того же магазина
+    ->setParentShopIdp($container->getShopId()); // не обязательно задавать, если родительский платеж из того же магазина
 
-$results = $uniteller->recurrent($builder);
+$results = $container->recurrent($builder);
 ```
 
 или
 
 ```php
 <?php
-$results = $uniteller->recurrent([
+$results = $container->recurrent([
     'Order_IDP' => mt_rand(10000, 99999),
     // ...
 ]);
 ```
 
 ### Отмена платежа
- 
+
 ```php
 <?php
 use Tmconsulting\Uniteller\Cancel\CancelBuilder;
 
 $builder = (new CancelBuilder())->setBillNumber('RRN Number, (12 digits)');
-$results = $uniteller->cancel($builder);
+$results = $container->cancel($builder);
 ```
 
 или
@@ -138,7 +138,7 @@ $results = $uniteller->cancel($builder);
 <?php
 use Tmconsulting\Uniteller\Order\Status;
 
-$results = $uniteller->cancel([
+$results = $container->cancel([
     'Billnumber' => 'RRN Number, (12 digits)',
     // ...
 ]);
@@ -158,7 +158,7 @@ foreach ($results as $payment) {
 ```php
 <?php
 
-$results = $uniteller->results([
+$results = $container->results([
     'ShopOrderNumber' => 'Order_IDP number'
 ]);
 
@@ -173,7 +173,7 @@ var_dump($results);
 
 ```php
 <?php
-if (! $uniteller->verifyCallbackRequest(['all_parameters_from_post_with_signature'])) {
+if (! $container->verifyCallbackRequest(['all_parameters_from_post_with_signature'])) {
     return 'invalid_signature';
 }
 ```
