@@ -7,6 +7,8 @@
 
 namespace Tmconsulting\Uniteller\Payment;
 
+use Tmconsulting\Uniteller\Common\EnumToArray;
+
 /**
  * Class EMoneyType
  *
@@ -14,10 +16,12 @@ namespace Tmconsulting\Uniteller\Payment;
  */
 final class EMoneyType
 {
+    use EnumToArray;
+
     /**
      * Любая система электронных платежей
      */
-    const ANY          = 0;
+    const ANY = 0;
 
     /**
      * Яндекс.Деньги
@@ -27,12 +31,17 @@ final class EMoneyType
     /**
      * Оплата наличными (Евросеть, Яндекс.Деньги и пр.)
      */
-    const CASH         = 13;
+    const CASH = 13;
 
     /**
      * QIWI Кошелек REST (по протоколу REST)
      */
-    const QIWI_REST    = 18;
+    const QIWI_REST = 18;
+
+    /**
+     * MOBI.Деньги
+     */
+    const MOBI = 19;
 
     /**
      * WebMoney WMR

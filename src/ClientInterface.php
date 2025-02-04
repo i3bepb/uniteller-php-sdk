@@ -18,10 +18,11 @@ use Tmconsulting\Uniteller\Payment\UriInterface;
 interface ClientInterface
 {
     /**
-     * @param \Tmconsulting\Uniteller\Payment\PaymentBuilder|array $parameters
+     * @param \Tmconsulting\Uniteller\Payment\PaymentBuilder|array $paymentBuilder
+     *
      * @return UriInterface
      */
-    public function payment($parameters);
+    public function payment($paymentBuilder);
 
     /**
      * @param \Tmconsulting\Uniteller\Cancel\CancelBuilder|array $parameters

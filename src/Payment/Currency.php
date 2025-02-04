@@ -7,6 +7,8 @@
 
 namespace Tmconsulting\Uniteller\Payment;
 
+use Tmconsulting\Uniteller\Common\EnumToArray;
+
 /**
  * Class Currency
  *
@@ -14,6 +16,8 @@ namespace Tmconsulting\Uniteller\Payment;
  */
 final class Currency
 {
+    use EnumToArray;
+
     /**
      * российский рубль
      */
@@ -33,4 +37,19 @@ final class Currency
      * казахский тенге
      */
     const KZT = 'KZT';
+
+    /**
+     * евро
+     */
+    const EUR = 'EUR';
+
+    /**
+     * киргизский сом
+     */
+    const KGS = 'KGS';
+
+    /**
+     * доллар США
+     */
+    const USD = 'USD';
 }

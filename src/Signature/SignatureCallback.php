@@ -114,7 +114,7 @@ final class SignatureCallback extends AbstractSignature
     /**
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         $array = [];
         $array['Order_ID'] = $this->getOrderId();
@@ -128,9 +128,11 @@ final class SignatureCallback extends AbstractSignature
     /**
      * Create signature
      *
+     * @param array|\Tmconsulting\Uniteller\ArraybleInterface $parameters
+     *
      * @return string
      */
-    public function create()
+    public function create($parameters): string
     {
         return strtoupper(md5(join('', $this->toArray())));
     }

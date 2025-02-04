@@ -151,7 +151,7 @@ final class CancelBuilder implements ArraybleInterface
         return $this->selectFields;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'Billnumber' => $this->getBillNumber(),

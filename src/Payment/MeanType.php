@@ -7,6 +7,8 @@
 
 namespace Tmconsulting\Uniteller\Payment;
 
+use Tmconsulting\Uniteller\Common\EnumToArray;
+
 /**
  * Class MeanType
  *
@@ -14,6 +16,8 @@ namespace Tmconsulting\Uniteller\Payment;
  */
 final class MeanType
 {
+    use EnumToArray;
+
     const ANY              = 0;
     const VISA             = 1;
     const MASTERCARD       = 2;

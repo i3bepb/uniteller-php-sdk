@@ -163,7 +163,7 @@ final class SignatureRecurrent extends AbstractSignature
     /**
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         $array = [];
         $array['Shop_IDP'] = $this->getShopIdp();

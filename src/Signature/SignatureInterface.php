@@ -17,16 +17,11 @@ interface SignatureInterface
     /**
      * Create signature
      *
+     * @param array|\Tmconsulting\Uniteller\ArraybleInterface $parameters
+     *
      * @return string
      */
-    public function create();
-
-    /**
-     * Array params signature
-     *
-     * @return array
-     */
-    public function toArray();
+    public function create($parameters): string;
 
     /**
      * Verify signature

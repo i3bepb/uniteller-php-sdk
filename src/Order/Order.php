@@ -1090,7 +1090,7 @@ class Order implements ArraybleInterface
     /**
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'Address'                => $this->getAddress(),

@@ -1,23 +1,36 @@
 <?php
 
+use Tmconsulting\Uniteller\Client;
+use Tmconsulting\Uniteller\Payment\CallbackFields;
+use Tmconsulting\Uniteller\Payment\EMoneyType;
+use Tmconsulting\Uniteller\Payment\MeanType;
 use Tmconsulting\Uniteller\Payment\PaymentBuilder;
+use Tmconsulting\Uniteller\Payment\PaymentType;
 
 require __DIR__ . '/credentials.php';
 
+global $shopId, $login, $password;
 
-/** @var \Tmconsulting\Uniteller\Client $uniteller */
-
-$builder = new PaymentBuilder();
-$builder
-    ->useRecurrentPayment()
-    ->setOrderIdp(mt_rand(10000, 99999))
-    ->setSubtotalP(10)
-    ->setCustomerIdp(mt_rand(10000, 99999))
+$builder = (new PaymentBuilder())
+    ->setShopIdp($shopId)
+    ->setPassword($password)
+    ->setOrderIdp(999)
+    ->setSubtotalP(50)
+    ->setMeanType(MeanType::VISA)
+    ->setEMoneyType(EMoneyType::ANY)
+    ->setLifetime(100)
+    ->setMerchantOrderId('59c93853-4ba5-4552-b225-cc3ee0fe40ad')
+    ->setCallbackFields([CallbackFields::CARD_IDP, CallbackFields::CARD_NUMBER, CallbackFields::BILL_NUMBER])
+    ->setOrderLifetime(120)
+    ->setPhone('+79630400529')
+    ->setPaymentTypeLimits([
+        PaymentType::BANK_CARD => [50, 50],
+    ])
+    ->setPhoneVerified('+79630400529')
     ->setUrlReturnOk('http://google.ru/?q=success')
     ->setUrlReturnNo('http://google.ru/?q=failure');
 
-
-$uri = $uniteller->payment($builder)->getUri();
+$uri = (new Client())->payment($builder)->getUri();
 
 echo <<< HTML
     <h2>Client Payment Sample</h2>

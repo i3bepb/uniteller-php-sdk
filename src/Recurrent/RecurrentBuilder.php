@@ -161,7 +161,7 @@ class RecurrentBuilder implements ArraybleInterface
     /**
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return [
             'Shop_IDP'         => $this->getShopIdp(),

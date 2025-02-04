@@ -8,6 +8,8 @@
 namespace Tmconsulting\Uniteller;
 
 use Tmconsulting\Uniteller\Cancel\CancelRequest;
+use Tmconsulting\Uniteller\Common\GetParametersFromBuilder;
+use Tmconsulting\Uniteller\Common\NameFieldsUniteller;
 use Tmconsulting\Uniteller\Exception\NotImplementedException;
 use Tmconsulting\Uniteller\Http\HttpManager;
 use Tmconsulting\Uniteller\Http\HttpManagerInterface;
@@ -31,6 +33,13 @@ use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
  */
 class Client implements ClientInterface
 {
+    use GetParametersFromBuilder;
+
+    /**
+     * @var string
+     */
+    protected $baseUri = 'https://wpay.uniteller.ru';
+
     /**
      * @var array
      */
@@ -42,7 +51,7 @@ class Client implements ClientInterface
     protected $payment;
 
     /**
-     * @var SignatureInterface
+     * @var \Tmconsulting\Uniteller\Signature\SignaturePayment
      */
     protected $signaturePayment;
 
@@ -91,54 +100,23 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param $uri
-     * @return $this
+     * @param string $uri
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function setBaseUri($uri)
+    public function setBaseUri(string $uri): Client
     {
-        $this->options['base_uri'] = $uri;
-
-        return $this;
-    }
-
-    /**
-     * @param $value
-     * @return $this
-     */
-    public function setLogin($value)
-    {
-        $this->options['login'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param $value
-     * @return $this
-     */
-    public function setPassword($value)
-    {
-        $this->options['password'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * @param $value
-     * @return $this
-     */
-    public function setShopId($value)
-    {
-        $this->options['shop_id'] = $value;
+        $this->baseUri = $uri;
 
         return $this;
     }
 
     /**
      * @param array $options
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): Client
     {
         $this->options = array_merge($this->options, $options);
 
@@ -146,10 +124,11 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param HttpManagerInterface $httpManager
-     * @return $this
+     * @param \Tmconsulting\Uniteller\Http\HttpManagerInterface $httpManager
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function setHttpManager(HttpManagerInterface $httpManager)
+    public function setHttpManager(HttpManagerInterface $httpManager): Client
     {
         $this->httpManager = $httpManager;
 
@@ -157,10 +136,11 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param PaymentInterface $payment
-     * @return $this
+     * @param \Tmconsulting\Uniteller\Payment\PaymentInterface $payment
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function registerPayment(PaymentInterface $payment)
+    public function registerPayment(PaymentInterface $payment): Client
     {
         $this->payment = $payment;
 
@@ -168,10 +148,11 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param RequestInterface $cancel
-     * @return $this
+     * @param \Tmconsulting\Uniteller\Request\RequestInterface $cancel
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function registerCancelRequest(RequestInterface $cancel)
+    public function registerCancelRequest(RequestInterface $cancel): Client
     {
         $this->cancelRequest = $cancel;
 
@@ -179,10 +160,11 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param RequestInterface $request
-     * @return $this
+     * @param \Tmconsulting\Uniteller\Request\RequestInterface $request
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function registerResultsRequest(RequestInterface $request)
+    public function registerResultsRequest(RequestInterface $request): Client
     {
         $this->resultsRequest = $request;
 
@@ -190,10 +172,11 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param RequestInterface $request
-     * @return $this
+     * @param \Tmconsulting\Uniteller\Request\RequestInterface $request
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function registerRecurrentRequest(RequestInterface $request)
+    public function registerRecurrentRequest(RequestInterface $request): Client
     {
         $this->recurrentRequest = $request;
 
@@ -202,9 +185,10 @@ class Client implements ClientInterface
 
     /**
      * @param \Tmconsulting\Uniteller\Signature\SignatureInterface $signature
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function registerSignaturePayment(SignatureInterface $signature)
+    public function registerSignaturePayment(SignatureInterface $signature): Client
     {
         $this->signaturePayment = $signature;
 
@@ -213,9 +197,10 @@ class Client implements ClientInterface
 
     /**
      * @param \Tmconsulting\Uniteller\Signature\SignatureInterface $signature
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function registerSignatureRecurrent(SignatureInterface $signature)
+    public function registerSignatureRecurrent(SignatureInterface $signature): Client
     {
         $this->signatureRecurrent = $signature;
 
@@ -224,9 +209,10 @@ class Client implements ClientInterface
 
     /**
      * @param \Tmconsulting\Uniteller\Signature\SignatureInterface $signature
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Client
      */
-    public function registerSignatureCallback(SignatureInterface $signature)
+    public function registerSignatureCallback(SignatureInterface $signature): Client
     {
         $this->signatureCallback = $signature;
 
@@ -236,17 +222,18 @@ class Client implements ClientInterface
     /**
      * @return array
      */
-    public function getOptions()
+    public function getOptions(): array
     {
         return $this->options;
     }
 
     /**
-     * @param $key
-     * @param null $default
-     * @return string|mixed
+     * @param string $key
+     * @param mixed $default
+     *
+     * @return mixed
      */
-    public function getOption($key, $default = null)
+    public function getOption(string $key, $default = null)
     {
         if (array_key_exists($key, $this->options)) {
             return $this->options[$key];
@@ -258,33 +245,9 @@ class Client implements ClientInterface
     /**
      * @return string
      */
-    public function getBaseUri()
+    public function getBaseUri(): string
     {
-        return $this->getOption('base_uri');
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogin()
-    {
-        return $this->getOption('login');
-    }
-
-    /**
-     * @return string
-     */
-    public function getShopId()
-    {
-        return $this->getOption('shop_id');
-    }
-
-    /**
-     * @return string
-     */
-    public function getPassword()
-    {
-        return $this->getOption('password');
+        return $this->baseUri;
     }
 
     /**
@@ -354,28 +317,18 @@ class Client implements ClientInterface
     /**
      * Получение платежной ссылки или сразу переход к оплате.
      *
-     * @param array $parameters|\Tmconsulting\Client\Payment\PaymentBuilder $builder
+     * @param \Tmconsulting\Uniteller\Payment\PaymentBuilder $paymentBuilder
+     *
      * @return \Tmconsulting\Uniteller\Payment\UriInterface
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
      */
-    public function payment($parameters)
+    public function payment($paymentBuilder)
     {
-        $array = $this->getParameters($parameters);
-        $array['Shop_IDP'] = $this->getShopId();
-        $array['Signature'] = $this->signaturePayment
-            ->setShopIdp(array_get($array, 'Shop_IDP'))
-            ->setOrderIdp(array_get($array, 'Order_IDP'))
-            ->setSubtotalP(array_get($array, 'Subtotal_P'))
-            ->setMeanType(array_get($array, 'MeanType'))
-            ->setEMoneyType(array_get($array, 'EMoneyType'))
-            ->setLifeTime(array_get($array, 'Lifetime'))
-            ->setCustomerIdp(array_get($array, 'Customer_IDP'))
-            ->setCardIdp(array_get($array, 'Card_IDP'))
-            ->setIData(array_get($array, 'IData'))
-            ->setPtCode(array_get($array, 'PT_Code'))
-            ->setPassword($this->getPassword())
-            ->create();
+        $array = $paymentBuilder->toArray();
+        $array[NameFieldsUniteller::SIGNATURE] = $this->signaturePayment->create($paymentBuilder);
 
-        return $this->getPayment()->execute($array, $this->getOptions());
+        return $this->getPayment()->execute($array, ['base_uri' => $this->getBaseUri()]);
     }
 
     /**
@@ -470,19 +423,6 @@ class Client implements ClientInterface
             $this->getHttpManager(),
             $this->getParameters($parameters)
         );
-    }
-
-    /**
-     * @param $parameters
-     * @return mixed
-     */
-    private function getParameters($parameters)
-    {
-        if ($parameters instanceof ArraybleInterface) {
-            return $parameters->toArray();
-        }
-
-        return $parameters;
     }
 
     /**

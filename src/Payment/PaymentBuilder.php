@@ -8,20 +8,25 @@
 namespace Tmconsulting\Uniteller\Payment;
 
 use Tmconsulting\Uniteller\ArraybleInterface;
+use Tmconsulting\Uniteller\Common\Builder;
+use Tmconsulting\Uniteller\Common\NameFieldsUniteller;
+use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
+use Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException;
 
 /**
  * Class PaymentBuilder
  *
  * @package Tmconsulting\Client\Payment
  */
-final class PaymentBuilder implements ArraybleInterface
+final class PaymentBuilder implements ArraybleInterface, Builder
 {
     /**
      * Shop_IDP (Client Point ID)
+     * Текст, содержащий латинские буквы, цифры и "-"
      *
      * @var string
      */
-    protected $shopIdp;
+    private $shopIdp;
 
     /**
      * Номер заказа в системе расчётов интернет-магазина,
@@ -33,40 +38,34 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $orderIdp;
+    private $orderIdp = '';
 
     /**
      * Сумма покупки в валюте, оговоренной в договоре с банком-эквайером.
      * В качестве десятичного разделителя используется точка,
      * не более 2 знаков после разделителя. Например, 12.34
      *
-     * @var float|string
+     * @var float
      */
-    protected $subtotalP;
-
-    /**
-     * Подпись, гарантирующая неизменность критичных данных оплаты
-     * (суммы, Order_IDP)
-     *
-     * @var string
-     */
-    protected $signature;
+    private $subtotalP = 0;
 
     /**
      * URL страницы, на которую должен вернуться Покупатель
-     * после успешного осуществления платежа в системе Client
+     * после успешного осуществления платежа в системе Client.
+     * Длина до 255 символов.
      *
      * @var string
      */
-    protected $urlReturnOk;
+    private $urlReturnOk;
 
     /**
      * URL страницы, на которую должен вернуться Покупатель
      * после неуспешного осуществления платежа в системе
+     * Длина до 255 символов.
      *
      * @var string
      */
-    protected $urlReturnNo;
+    private $urlReturnNo;
 
     /**
      * Валюта платежа.
@@ -74,16 +73,19 @@ final class PaymentBuilder implements ArraybleInterface
      * UAH — украинская гривна;
      * AZN — азербайджанский манат;
      * KZT — казахский тенге.
-     * Use Payment\Currecy class.
+     *
+     * @see \Tmconsulting\Uniteller\Payment\Currency
      *
      * @var string
      */
-    protected $currency;
+    private $currency;
 
     /**
+     * Длина до 64 символа.
+     *
      * @var string
      */
-    protected $email;
+    private $email;
 
     /**
      * Время жизни формы оплаты в секундах, начиная с момента её показа.
@@ -91,7 +93,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var int
      */
-    protected $lifetime;
+    private $lifetime;
 
     /**
      * Время жизни (в секундах) заказа на оплату банковской картой,
@@ -99,7 +101,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var int
      */
-    protected $orderLifetime;
+    private $orderLifetime;
 
     /**
      * Идентификатор Покупателя, используемый некоторыми интернет-магазинами.
@@ -107,7 +109,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $customerIdp;
+    private $customerIdp;
 
     /**
      * Идентификатор зарегистрированной карты
@@ -115,14 +117,16 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $cardIdp;
+    private $cardIdp;
 
     /**
      * «длинная запись»
      *
+     * @deprecated со слов представителя Uniteller "на данный момент можно не передавать idata"
+     *
      * @var string
      */
-    protected $iData;
+    private $iData;
 
     /**
      * Тип платежа. Произвольная строка длиной до десяти символов включительно.
@@ -130,17 +134,18 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $ptCode;
+    private $ptCode;
 
     /**
      * Платёжная система кредитной карты.
      * Может принимать значения: 0 — любая, 1 — VISA, 2 — MasterCard,
      * 3 — Diners Club, 4 — JCB, 5 — American Express.
-     * Use Payment\MeanType class.
+     *
+     * @see \Tmconsulting\Uniteller\Payment\MeanType
      *
      * @var int
      */
-    protected $meanType;
+    private $meanType;
 
     /**
      * Тип электронной валюты.
@@ -150,9 +155,11 @@ final class PaymentBuilder implements ArraybleInterface
      * 18 - QIWI Кошелек REST (по протоколу REST)
      * 29 - WebMoney WMR
      *
+     * @see \Tmconsulting\Uniteller\Payment\EMoneyType
+     *
      * @var int
      */
-    protected $eMoneyType;
+    private $eMoneyType;
 
     /**
      * Срок жизни заказа оплаты в электронной платёжной системе в часах (от 1 до 1080 часов).
@@ -162,7 +169,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var int
      */
-    protected $billLifetime;
+    private $billLifetime;
 
     /**
      * Признак преавторизации платежа.
@@ -170,7 +177,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var bool
      */
-    protected $preAuth;
+    private $preAuth = false;
 
     /**
      * Признак того, что платёж является «родительским» для
@@ -178,32 +185,37 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var bool
      */
-    protected $IsRecurrentStart;
+    private $isRecurrentStart = false;
 
     /**
      * Список дополнительных полей, передаваемых в
      * уведомлении об изменении статуса заказа.
      * BillNumber, ApprovalCode, Total
-     * @var array
+     *
+     * @see \Tmconsulting\Uniteller\Payment\CallbackFields
+     *
+     * @var string
      */
-    protected $callbackFields;
+    private $callbackFields;
 
     /**
      * Запрашиваемый формат уведомления о статусе оплаты.
-     * Eсли параметр имеет значение "json", то уведомление направляется
+     * Если параметр имеет значение "json", то уведомление направляется
      * в json-формате. Во всех остальных случаях уведомление направляется в виде POST-запроса.
      *
      * @var string
      */
-    protected $callbackFormat;
+    private $callbackFormat;
 
     /**
      * Код языка интерфейса платёжной страницы. Может быть en или ru.
      * (2 символа)
      *
+     * @see \Tmconsulting\Uniteller\Payment\Language
+     *
      * @var string
      */
-    protected $language;
+    private $language;
 
     /**
      * Комментарий к платежу
@@ -211,7 +223,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $comment;
+    private $comment;
 
     /**
      * Имя Покупателя, переданное с сайта Мерчанта
@@ -219,7 +231,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $firstName;
+    private $firstName;
 
     /**
      * Фамилия Покупателя, переданная с сайта Мерчанта
@@ -227,7 +239,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @vars string
      */
-    protected $lastName;
+    private $lastName;
 
     /**
      * Отчество
@@ -235,7 +247,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $middleName;
+    private $middleName;
 
     /**
      * Телефон
@@ -243,7 +255,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $phone;
+    private $phone;
 
     /**
      * Адрес
@@ -251,7 +263,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $address;
+    private $address;
 
     /**
      * Название страны Покупателя
@@ -259,7 +271,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $country;
+    private $country;
 
     /**
      * Код штата/региона
@@ -267,7 +279,7 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $state;
+    private $state;
 
     /**
      * Город
@@ -275,21 +287,95 @@ final class PaymentBuilder implements ArraybleInterface
      *
      * @var string
      */
-    protected $city;
+    private $city;
 
     /**
      * Почтовый индекс
      *
      * (64 символа)
-     * @var
+     *
+     * @var string
      */
-    protected $zip;
+    private $zip;
+
+    /**
+     * Верифицированный мерчантом номер телефона. Если передаётся, то значение
+     * Phone устанавливается равным PhoneVerified.
+     *
+     * @var string
+     */
+    private $phoneVerified;
+    /**
+     * Номер телефона, для которого производится пополнение баланса. Если в свойствах точки продажи включён параметр
+     * «Телекоммуникационные услуги» и мерчаном этот параметр не передан, то на странице оплаты отображается
+     * обязательное поле для указания номера телефона.
+     *
+     * (формат телефонного номера с кодом страны: +7XXXXXXXXXX)
+     *
+     * @var string
+     */
+    private $destPhoneNum;
+
+    /**
+     * Внешний номер заказа мерчанта.
+     * (строка в кодировке UTF-8, не содержащая символов ";", "=").
+     *
+     * @var string
+     */
+    private $merchantOrderId;
+
+    /**
+     * Разрешенные типы платежей.
+     * JSON-объект формата:
+     * {тип_платежа1:[ сумма_заказа, сумма_заказа ]…}
+     *
+     * @see \Tmconsulting\Uniteller\Payment\PaymentType
+     *
+     * @var string
+     */
+    private $paymentTypeLimits;
+
+    /**
+     * Адрес для возврата Плательщика после оплаты через СБП или SberPay в банковском приложении.
+     * Строка до 255 символов.
+     * Если не задано, для возврата будет выполнен редирект на страницу чека Uniteller.
+     *
+     * @var string
+     */
+    private $backUrl;
+
+    /**
+     * Ссылка на мобильное приложение Клиента для возврата после оплаты через СБП или SberPay.
+     * Строка до 255 символов.
+     * Если не задано, возврат будет выполнен по ссылке из параметра BackUrl
+     *
+     * @var string
+     */
+    private $deepLink;
+
+    /**
+     * Номер кошелька получателя электронных денежных средств. Если в свойствах точки продажи включён
+     * параметр «Квази-кэш» и мерчаном этот параметр не передан, то на странице оплаты отображается обязательное
+     * поле для указания номер кошелька.
+     * (Латинские буквы и цифры)
+     *
+     * @var string
+     */
+    private $eWallet;
+
+    /**
+     * Пароль. Доступен Мерчанту в Личном кабинете, пункт меню «Параметры Авторизации».
+     *
+     * @var string
+     */
+    private $password;
 
     /**
      * @param string $shopIdp
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setShopIdp($shopIdp)
+    public function setShopIdp(string $shopIdp): PaymentBuilder
     {
         $this->shopIdp = $shopIdp;
 
@@ -297,43 +383,41 @@ final class PaymentBuilder implements ArraybleInterface
     }
 
     /**
-     * @param string $orderIdp
-     * @return $this
+     * @param string|int $orderIdp Номер заказа в системе интернет-магазина
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
      */
-    public function setOrderIdp($orderIdp)
+    public function setOrderIdp($orderIdp): PaymentBuilder
     {
+        $orderIdp = (string)$orderIdp;
+        if (mb_strlen($orderIdp) > 127) {
+            throw new NotValidParameterException('Not valid parameter ' . NameFieldsUniteller::ORDER_IDP . ', max 127');
+        }
         $this->orderIdp = $orderIdp;
 
         return $this;
     }
 
     /**
-     * @param float|string $subtotalP
-     * @return $this
+     * @param int|float|string $subtotalP
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setSubtotalP($subtotalP)
+    public function setSubtotalP($subtotalP): PaymentBuilder
     {
-        $this->subtotalP = $subtotalP;
-
-        return $this;
-    }
-
-    /**
-     * @param string $signature
-     * @return $this
-     */
-    public function setSignature($signature)
-    {
-        $this->signature = $signature;
+        $this->subtotalP = (float)$subtotalP;
 
         return $this;
     }
 
     /**
      * @param string $urlReturnOk
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setUrlReturnOk($urlReturnOk)
+    public function setUrlReturnOk(string $urlReturnOk): PaymentBuilder
     {
         $this->urlReturnOk = $urlReturnOk;
 
@@ -342,9 +426,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $urlReturnNo
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setUrlReturnNo($urlReturnNo)
+    public function setUrlReturnNo(string $urlReturnNo): PaymentBuilder
     {
         $this->urlReturnNo = $urlReturnNo;
 
@@ -353,10 +438,19 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $currency
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
      */
-    public function setCurrency($currency)
+    public function setCurrency(string $currency): PaymentBuilder
     {
+        $currencies = Currency::toArray();
+        if (!in_array($currency, $currencies, true)) {
+            throw new NotValidParameterException(
+                'Not valid parameter ' . NameFieldsUniteller::CURRENCY . ', must be one of the values: ' . implode(',', $currencies)
+            );
+        }
         $this->currency = $currency;
 
         return $this;
@@ -364,20 +458,27 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $email
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
      */
-    public function setEmail($email)
+    public function setEmail(string $email): PaymentBuilder
     {
+        if (mb_strlen($email) > 64) {
+            throw new NotValidParameterException('Not valid parameter ' . NameFieldsUniteller::EMAIL . ', max 64');
+        }
         $this->email = $email;
 
         return $this;
     }
 
     /**
-     * @param int $lifetime
-     * @return $this
+     * @param int $lifetime Время жизни формы оплаты в секундах, начиная с момента её показа
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setLifetime($lifetime)
+    public function setLifetime(int $lifetime): PaymentBuilder
     {
         $this->lifetime = $lifetime;
 
@@ -385,10 +486,11 @@ final class PaymentBuilder implements ArraybleInterface
     }
 
     /**
-     * @param int $orderLifetime
-     * @return $this
+     * @param int $orderLifetime Время жизни заказа в секундах
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setOrderLifetime($orderLifetime)
+    public function setOrderLifetime(int $orderLifetime): PaymentBuilder
     {
         $this->orderLifetime = $orderLifetime;
 
@@ -396,22 +498,33 @@ final class PaymentBuilder implements ArraybleInterface
     }
 
     /**
-     * @param string $customerIdp
-     * @return $this
+     * @param string|int $customerIdp Идентификатор Покупателя
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
      */
-    public function setCustomerIdp($customerIdp)
+    public function setCustomerIdp($customerIdp): PaymentBuilder
     {
+        $customerIdp = (string)$customerIdp;
+        if (mb_strlen($customerIdp) > 64) {
+            throw new NotValidParameterException('Not valid parameter ' . NameFieldsUniteller::CUSTOMER_IDP . ', max 64');
+        }
         $this->customerIdp = $customerIdp;
 
         return $this;
     }
 
     /**
-     * @param mixed $cardIdp
-     * @return $this
+     * @param string $cardIdp Идентификатор зарегистрированной карты
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setCardIdp($cardIdp)
+    public function setCardIdp(string $cardIdp): PaymentBuilder
     {
+        if (mb_strlen($cardIdp) > 128) {
+            throw new NotValidParameterException('Not valid parameter ' . NameFieldsUniteller::CARD_IDP . ', max 128');
+        }
         $this->cardIdp = $cardIdp;
 
         return $this;
@@ -419,9 +532,12 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $iData
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     * @deprecated
+     *
      */
-    public function setIData($iData)
+    public function setIData(string $iData): PaymentBuilder
     {
         $this->iData = $iData;
 
@@ -429,10 +545,11 @@ final class PaymentBuilder implements ArraybleInterface
     }
 
     /**
-     * @param string $ptCode
-     * @return $this
+     * @param string $ptCode Тип платежа
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setPtCode($ptCode)
+    public function setPtCode(string $ptCode): PaymentBuilder
     {
         $this->ptCode = $ptCode;
 
@@ -441,10 +558,19 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param int $meanType
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
      */
-    public function setMeanType($meanType)
+    public function setMeanType(int $meanType): PaymentBuilder
     {
+        $types = MeanType::toArray();
+        if (!in_array($meanType, $types, true)) {
+            throw new NotValidParameterException(
+                'Not valid parameter ' . NameFieldsUniteller::MEAN_TYPE . ', must be one of the values: ' . implode(',', $types)
+            );
+        }
         $this->meanType = $meanType;
 
         return $this;
@@ -452,20 +578,30 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param int $eMoneyType
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
      */
-    public function setEMoneyType($eMoneyType)
+    public function setEMoneyType(int $eMoneyType): PaymentBuilder
     {
+        $types = EMoneyType::toArray();
+        if (!in_array($eMoneyType, $types, true)) {
+            throw new NotValidParameterException(
+                'Not valid parameter ' . NameFieldsUniteller::E_MONEY_TYPE . ', must be one of the values: ' . implode(',', $types)
+            );
+        }
         $this->eMoneyType = $eMoneyType;
 
         return $this;
     }
 
     /**
-     * @param int $billLifetime
-     * @return $this
+     * @param int $billLifetime Срок жизни заказа оплаты в часах
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setBillLifetime($billLifetime)
+    public function setBillLifetime(int $billLifetime): PaymentBuilder
     {
         $this->billLifetime = $billLifetime;
 
@@ -473,9 +609,9 @@ final class PaymentBuilder implements ArraybleInterface
     }
 
     /**
-     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function usePreAuth()
+    public function usePreAuth(): PaymentBuilder
     {
         $this->preAuth = true;
 
@@ -483,20 +619,21 @@ final class PaymentBuilder implements ArraybleInterface
     }
 
     /**
-     * @return bool
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function useRecurrentPayment()
+    public function useRecurrentPayment(): PaymentBuilder
     {
-        $this->IsRecurrentStart = true;
+        $this->isRecurrentStart = true;
 
         return $this;
     }
 
     /**
      * @param array $callbackFields
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setCallbackFields(array $callbackFields)
+    public function setCallbackFields(array $callbackFields): PaymentBuilder
     {
         $this->callbackFields = join(' ', $callbackFields);
 
@@ -505,9 +642,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $callbackFormat
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setCallbackFormat($callbackFormat)
+    public function setCallbackFormat(string $callbackFormat): PaymentBuilder
     {
         $this->callbackFormat = $callbackFormat;
 
@@ -516,10 +654,19 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $language
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
      */
-    public function setLanguage($language)
+    public function setLanguage(string $language): PaymentBuilder
     {
+        $types = Language::toArray();
+        if (!in_array($language, $types, true)) {
+            throw new NotValidParameterException(
+                'Not valid parameter ' . NameFieldsUniteller::LANGUAGE . ', must be one of the values: ' . implode(',', $types)
+            );
+        }
         $this->language = $language;
 
         return $this;
@@ -527,9 +674,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $comment
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setComment($comment)
+    public function setComment(string $comment): PaymentBuilder
     {
         $this->comment = $comment;
 
@@ -538,9 +686,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $firstName
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setFirstName($firstName)
+    public function setFirstName(string $firstName): PaymentBuilder
     {
         $this->firstName = $firstName;
 
@@ -548,10 +697,11 @@ final class PaymentBuilder implements ArraybleInterface
     }
 
     /**
-     * @param mixed $lastName
-     * @return $this
+     * @param string $lastName
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setLastName($lastName)
+    public function setLastName(string $lastName): PaymentBuilder
     {
         $this->lastName = $lastName;
 
@@ -560,9 +710,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $middleName
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setMiddleName($middleName)
+    public function setMiddleName(string $middleName): PaymentBuilder
     {
         $this->middleName = $middleName;
 
@@ -571,9 +722,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $phone
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setPhone($phone)
+    public function setPhone(string $phone): PaymentBuilder
     {
         $this->phone = $phone;
 
@@ -582,9 +734,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $address
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setAddress($address)
+    public function setAddress(string $address): PaymentBuilder
     {
         $this->address = $address;
 
@@ -593,9 +746,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $country
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setCountry($country)
+    public function setCountry(string $country): PaymentBuilder
     {
         $this->country = $country;
 
@@ -604,9 +758,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $state
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setState($state)
+    public function setState(string $state): PaymentBuilder
     {
         $this->state = $state;
 
@@ -615,9 +770,10 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @param string $city
-     * @return $this
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setCity($city)
+    public function setCity(string $city): PaymentBuilder
     {
         $this->city = $city;
 
@@ -625,12 +781,113 @@ final class PaymentBuilder implements ArraybleInterface
     }
 
     /**
-     * @param mixed $zip
-     * @return $this
+     * @param string|int $zip Почтовый индекс
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
-    public function setZip($zip)
+    public function setZip($zip): PaymentBuilder
     {
-        $this->zip = $zip;
+        $this->zip = (string)$zip;
+
+        return $this;
+    }
+
+    /**
+     * @param string $phone Верифицированный номер телефона
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     */
+    public function setPhoneVerified(string $phone): PaymentBuilder
+    {
+        $this->phoneVerified = $phone;
+
+        return $this;
+    }
+
+    /**
+     * @param string $phone
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     */
+    public function setDestPhoneNum(string $phone): PaymentBuilder
+    {
+        $this->destPhoneNum = $phone;
+
+        return $this;
+    }
+
+    /**
+     * @param string|int $merchantOrderId
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     */
+    public function setMerchantOrderId($merchantOrderId): PaymentBuilder
+    {
+        $this->merchantOrderId = (string)$merchantOrderId;
+
+        return $this;
+    }
+
+    /**
+     * @param string|array $paymentTypeLimits
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     */
+    public function setPaymentTypeLimits($paymentTypeLimits): PaymentBuilder
+    {
+        if (is_array($paymentTypeLimits)) {
+            $this->paymentTypeLimits = json_encode($paymentTypeLimits);
+        } else {
+            $this->paymentTypeLimits = (string)$paymentTypeLimits;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $backUrl
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     */
+    public function setBackUrl(string $backUrl): PaymentBuilder
+    {
+        $this->backUrl = $backUrl;
+
+        return $this;
+    }
+
+    /**
+     * @param string $deepLink
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     */
+    public function setDeepLink(string $deepLink): PaymentBuilder
+    {
+        $this->deepLink = $deepLink;
+
+        return $this;
+    }
+
+    /**
+     * @param string $eWallet
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     */
+    public function setEWallet(string $eWallet): PaymentBuilder
+    {
+        $this->eWallet = $eWallet;
+
+        return $this;
+    }
+
+    /**
+     * @param string $password
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
+     */
+    public function setPassword(string $password): PaymentBuilder
+    {
+        $this->password = $password;
 
         return $this;
     }
@@ -639,305 +896,483 @@ final class PaymentBuilder implements ArraybleInterface
 
     /**
      * @return string
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
      */
-    public function getShopIdp()
+    public function getShopIdp(): string
     {
+        if (empty($this->shopIdp)) {
+            throw new RequiredParameterException(NameFieldsUniteller::SHOP_IDP);
+        }
+
         return $this->shopIdp;
-
-        return $this;
     }
 
     /**
      * @return string
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
      */
-    public function getOrderIdp()
+    public function getOrderIdp(): string
     {
+        if ($this->orderIdp === '') {
+            throw new RequiredParameterException(NameFieldsUniteller::ORDER_IDP);
+        }
         return $this->orderIdp;
-
-        return $this;
     }
 
     /**
-     * @return float|string
+     * @return float
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
      */
-    public function getSubtotalP()
+    public function getSubtotalP(): float
     {
+        if ($this->subtotalP <= 0) {
+            throw new RequiredParameterException(NameFieldsUniteller::SUBTOTAL_P);
+        }
         return $this->subtotalP;
-
-        return $this;
     }
 
     /**
      * @return string
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
      */
-    public function getSignature()
+    public function getUrlReturnOk(): string
     {
-        return $this->signature;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUrlReturnOk()
-    {
+        if (empty($this->urlReturnOk)) {
+            throw new RequiredParameterException(NameFieldsUniteller::URL_RETURN_OK);
+        }
         return $this->urlReturnOk;
     }
 
     /**
      * @return string
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
      */
-    public function getUrlReturnNo()
+    public function getUrlReturnNo(): string
     {
+        if (empty($this->urlReturnNo)) {
+            throw new RequiredParameterException(NameFieldsUniteller::URL_RETURN_NO);
+        }
         return $this->urlReturnNo;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCurrency()
+    public function getCurrency(): ?string
     {
         return $this->currency;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getEmail()
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getLifetime()
+    public function getLifetime(): ?int
     {
         return $this->lifetime;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getOrderLifetime()
+    public function getOrderLifetime(): ?int
     {
         return $this->orderLifetime;
     }
 
-
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCustomerIdp()
+    public function getCustomerIdp(): ?string
     {
         return $this->customerIdp;
     }
 
     /**
-     * @return mixed
+     * @return string|null
      */
-    public function getCardIdp()
+    public function getCardIdp(): ?string
     {
         return $this->cardIdp;
     }
 
     /**
-     * @return string
+     * @return string|null
+     * @deprecated
+     *
      */
-    public function getIData()
+    public function getIData(): ?string
     {
         return $this->iData;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getPtCode()
+    public function getPtCode(): ?string
     {
         return $this->ptCode;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getMeanType()
+    public function getMeanType(): ?int
     {
         return $this->meanType;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getEMoneyType()
+    public function getEMoneyType(): ?int
     {
         return $this->eMoneyType;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getBillLifetime()
+    public function getBillLifetime(): ?int
     {
         return $this->billLifetime;
     }
 
     /**
-     * @return bool
+     * @return string|null
      */
-    public function isPreAuth()
+    public function isPreAuth(): ?string
     {
-        return $this->preAuth;
+        if ($this->preAuth) {
+            return '1';
+        }
+        return null;
     }
 
     /**
-     * @return bool
+     * @return string|null
      */
-    public function isIsRecurrentStart()
+    public function isIsRecurrentStart(): ?string
     {
-        return $this->IsRecurrentStart;
+        if ($this->isRecurrentStart) {
+            return '1';
+        }
+        return null;
     }
 
     /**
-     * @return array
+     * @return string|null
      */
-    public function getCallbackFields()
+    public function getCallbackFields(): ?string
     {
         return $this->callbackFields;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCallbackFormat()
+    public function getCallbackFormat(): ?string
     {
         return $this->callbackFormat;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getLanguage()
+    public function getLanguage(): ?string
     {
         return $this->language;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getComment()
+    public function getComment(): ?string
     {
         return $this->comment;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getFirstName()
+    public function getFirstName(): ?string
     {
         return $this->firstName;
     }
 
     /**
-     * @return mixed
+     * @return string|null
      */
-    public function getLastName()
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getMiddleName()
+    public function getMiddleName(): ?string
     {
         return $this->middleName;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getPhone()
+    public function getPhone(): ?string
     {
         return $this->phone;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getAddress()
+    public function getAddress(): ?string
     {
         return $this->address;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCountry()
+    public function getCountry(): ?string
     {
         return $this->country;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getState()
+    public function getState(): ?string
     {
         return $this->state;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCity()
+    public function getCity(): ?string
     {
         return $this->city;
     }
 
     /**
-     * @return mixed
+     * @return string|null
      */
-    public function getZip()
+    public function getZip(): ?string
     {
         return $this->zip;
     }
 
     /**
-     * @return array
+     * @return string|null
      */
-    public function toArray()
+    public function getPhoneVerified(): ?string
     {
-        return [
-            'Shop_IDP'         => $this->getShopIdp(),
-            'Order_IDP'        => $this->getOrderIdp(),
-            'Subtotal_P'       => $this->getSubtotalP(),
-            'Signature'        => $this->getSignature(),
-            'URL_RETURN_OK'    => $this->getUrlReturnOk(),
-            'URL_RETURN_NO'    => $this->getUrlReturnNo(),
-            'Currency'         => $this->getCurrency(),
-            'Email'            => $this->getEmail(),
-            'Lifetime'         => $this->getLifetime(),
-            'OrderLifetime'    => $this->getOrderLifetime(),
-            'Customer_IDP'     => $this->getCustomerIdp(),
-            'Card_IDP'         => $this->getCardIdp(),
-            'IData'            => $this->getIData(),
-            'PT_Code'          => $this->getPtCode(),
-            'MeanType'         => $this->getMeanType(),
-            'EMoneyType'       => $this->getEMoneyType(),
-            'BillLifetime'     => $this->getBillLifetime(),
-            'Preauth'          => $this->isPreAuth(),
-            'IsRecurrentStart' => $this->isIsRecurrentStart(),
-            'CallbackFields'   => $this->getCallbackFields(),
-            'CallbackFormat'   => $this->getCallbackFormat(),
-            'Language'         => $this->getLanguage(),
-            'Comment'          => $this->getComment(),
-            'FirstName'        => $this->getFirstName(),
-            'LastName'         => $this->getLastName(),
-            'MiddleName'       => $this->getMiddleName(),
-            'Phone'            => $this->getPhone(),
-            'Address'          => $this->getAddress(),
-            'Country'          => $this->getCountry(),
-            'State'            => $this->getState(),
-            'City'             => $this->getCity(),
-            'Zip'              => $this->getZip(),
+        return $this->phoneVerified;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDestPhoneNum(): ?string
+    {
+        return $this->destPhoneNum;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getMerchantOrderId(): ?string
+    {
+        return $this->merchantOrderId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPaymentTypeLimits(): ?string
+    {
+        return $this->paymentTypeLimits;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBackUrl(): ?string
+    {
+        return $this->backUrl;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getDeepLink(): ?string
+    {
+        return $this->deepLink;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEWallet(): ?string
+    {
+        return $this->eWallet;
+    }
+
+    /**
+     * @return string
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
+     */
+    public function getPassword(): string
+    {
+        if (empty($this->password)) {
+            throw new RequiredParameterException(NameFieldsUniteller::PASSWORD);
+        }
+        return $this->password;
+    }
+
+    /**
+     * Возвращает массив со значениями параметров. Порядок следования полей должен соответствовать
+     * порядку полей в signature, поэтому поля выстроены в определенном порядке.
+     *
+     * @return array
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
+     */
+    public function toArray(): array
+    {
+        $arr = [
+            NameFieldsUniteller::SHOP_IDP   => $this->getShopIdp(),
+            NameFieldsUniteller::ORDER_IDP  => $this->getOrderIdp(),
+            NameFieldsUniteller::SUBTOTAL_P => $this->getSubtotalP(),
         ];
+        if ($this->getMeanType() !== null) {
+            $arr[NameFieldsUniteller::MEAN_TYPE] = $this->getMeanType();
+        }
+        if ($this->getEMoneyType() !== null) {
+            $arr[NameFieldsUniteller::E_MONEY_TYPE] = $this->getEMoneyType();
+        }
+        if ($this->getLifetime() !== null) {
+            $arr[NameFieldsUniteller::LIFETIME] = $this->getLifetime();
+        }
+        if ($this->getCustomerIdp() !== null) {
+            $arr[NameFieldsUniteller::CUSTOMER_IDP] = $this->getCustomerIdp();
+        }
+        if ($this->getCardIdp() !== null) {
+            $arr[NameFieldsUniteller::CARD_IDP] = $this->getCardIdp();
+        }
+        if ($this->getIData() !== null) {
+            $arr[NameFieldsUniteller::I_DATA] = $this->getIData();
+        }
+        if ($this->getPtCode() !== null) {
+            $arr[NameFieldsUniteller::PT_CODE] = $this->getPtCode();
+        }
+        if ($this->getOrderLifetime() !== null) {
+            $arr[NameFieldsUniteller::ORDER_LIFETIME] = $this->getOrderLifetime();
+        }
+        if ($this->getPhoneVerified() !== null) {
+            $arr[NameFieldsUniteller::PHONE_VERIFIED] = $this->getPhoneVerified();
+        }
+        if ($this->getMerchantOrderId() !== null) {
+            $arr[NameFieldsUniteller::MERCHANT_ORDER_ID] = $this->getMerchantOrderId();
+        }
+        if ($this->getPaymentTypeLimits() !== null) {
+            $arr[NameFieldsUniteller::PAYMENT_TYPE_LIMITS] = $this->getPaymentTypeLimits();
+        }
+        /**
+         * Поля выше участвуют в расчете signature, ниже нет
+         */
+        if ($this->getCallbackFields() !== null) {
+            $arr[NameFieldsUniteller::CALLBACK_FIELDS] = $this->getCallbackFields();
+        }
+        if ($this->getCurrency() !== null) {
+            $arr[NameFieldsUniteller::CURRENCY] = $this->getCurrency();
+        }
+        if ($this->getEmail() !== null) {
+            $arr[NameFieldsUniteller::EMAIL] = $this->getEmail();
+        }
+        if ($this->getBillLifetime() !== null) {
+            $arr[NameFieldsUniteller::BILL_LIFETIME] = $this->getBillLifetime();
+        }
+        if ($this->isPreAuth() !== null) {
+            $arr[NameFieldsUniteller::PREAUTH] = $this->isPreAuth();
+        }
+        if ($this->isIsRecurrentStart() !== null) {
+            $arr[NameFieldsUniteller::IS_RECURRENT_START] = $this->isIsRecurrentStart();
+        }
+        if ($this->getCallbackFormat() !== null) {
+            $arr[NameFieldsUniteller::CALLBACK_FORMAT] = $this->getCallbackFormat();
+        }
+        if ($this->getBackUrl() !== null) {
+            $arr[NameFieldsUniteller::BACK_URL] = $this->getBackUrl();
+        }
+        if ($this->getDeepLink() !== null) {
+            $arr[NameFieldsUniteller::DEEP_LINK] = $this->getDeepLink();
+        }
+        if ($this->getLanguage() !== null) {
+            $arr[NameFieldsUniteller::LANGUAGE] = $this->getLanguage();
+        }
+        if ($this->getEWallet() !== null) {
+            $arr[NameFieldsUniteller::E_WALLET] = $this->getEWallet();
+        }
+        if ($this->getDestPhoneNum() !== null) {
+            $arr[NameFieldsUniteller::DEST_PHONE_NUM] = $this->getDestPhoneNum();
+        }
+        if ($this->getComment() !== null) {
+            $arr[NameFieldsUniteller::COMMENT] = $this->getComment();
+        }
+        if ($this->getFirstName() !== null) {
+            $arr[NameFieldsUniteller::FIRST_NAME] = $this->getFirstName();
+        }
+        if ($this->getLastName() !== null) {
+            $arr[NameFieldsUniteller::LAST_NAME] = $this->getLastName();
+        }
+        if ($this->getMiddleName() !== null) {
+            $arr[NameFieldsUniteller::MIDDLE_NAME] = $this->getMiddleName();
+        }
+        if ($this->getPhone() !== null) {
+            $arr[NameFieldsUniteller::PHONE] = $this->getPhone();
+        }
+        // сли есть верифицированный телефон, то чтобы не было указано в Phone, оно заменяется на PhoneVerified
+        if ($this->getPhoneVerified() !== null) {
+            $arr[NameFieldsUniteller::PHONE] = $this->getPhoneVerified();
+        }
+        if ($this->getAddress() !== null) {
+            $arr[NameFieldsUniteller::ADDRESS] = $this->getAddress();
+        }
+        if ($this->getCountry() !== null) {
+            $arr[NameFieldsUniteller::COUNTRY] = $this->getCountry();
+        }
+        if ($this->getState() !== null) {
+            $arr[NameFieldsUniteller::STATE] = $this->getState();
+        }
+        if ($this->getCity() !== null) {
+            $arr[NameFieldsUniteller::CITY] = $this->getCity();
+        }
+        if ($this->getZip() !== null) {
+            $arr[NameFieldsUniteller::ZIP] = $this->getZip();
+        }
+        $arr[NameFieldsUniteller::URL_RETURN_OK] = $this->getUrlReturnOk();
+        $arr[NameFieldsUniteller::URL_RETURN_NO] = $this->getUrlReturnNo();
+
+        echo '<pre>';
+        print_r($arr);
+        echo '</pre>';
+
+        return $arr;
     }
 }
