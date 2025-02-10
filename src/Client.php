@@ -328,6 +328,10 @@ class Client implements ClientInterface
         $array = $paymentBuilder->toArray();
         $array[NameFieldsUniteller::SIGNATURE] = $this->signaturePayment->create($paymentBuilder);
 
+        echo '<pre>';
+        print_r($array);
+        echo '</pre>';
+
         return $this->getPayment()->execute($array, ['base_uri' => $this->getBaseUri()]);
     }
 

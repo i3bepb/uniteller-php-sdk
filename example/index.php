@@ -27,8 +27,8 @@ $builder = (new PaymentBuilder())
         PaymentType::BANK_CARD => [50, 50],
     ])
     ->setPhoneVerified('+79630400529')
-    ->setUrlReturnOk('http://google.ru/?q=success')
-    ->setUrlReturnNo('http://google.ru/?q=failure');
+    ->setUrlReturnOk('https://google.ru/?q=success')
+    ->setUrlReturnNo('https://google.ru/?q=failure');
 
 $uri = (new Client())->payment($builder)->getUri();
 

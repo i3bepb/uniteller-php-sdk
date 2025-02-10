@@ -1369,10 +1369,6 @@ final class PaymentBuilder implements ArraybleInterface, Builder
         $arr[NameFieldsUniteller::URL_RETURN_OK] = $this->getUrlReturnOk();
         $arr[NameFieldsUniteller::URL_RETURN_NO] = $this->getUrlReturnNo();
 
-        echo '<pre>';
-        print_r($arr);
-        echo '</pre>';
-
         return $arr;
     }
 }
