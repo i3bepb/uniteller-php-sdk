@@ -7,6 +7,8 @@
 
 namespace Tmconsulting\Uniteller\Signature;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * Interface SignatureInterface
  *
@@ -14,6 +16,11 @@ namespace Tmconsulting\Uniteller\Signature;
  */
 interface SignatureInterface
 {
+    /**
+     * @param \Psr\Log\LoggerInterface|null $logger
+     */
+    public function __construct(LoggerInterface $logger = null);
+
     /**
      * Create signature
      *
@@ -27,6 +34,7 @@ interface SignatureInterface
      * Verify signature
      *
      * @param string $signature
+     *
      * @return bool
      */
     public function verify($signature);

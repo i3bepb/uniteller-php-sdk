@@ -188,9 +188,8 @@ final class PaymentBuilder implements ArraybleInterface, Builder
     private $isRecurrentStart = false;
 
     /**
-     * Список дополнительных полей, передаваемых в
-     * уведомлении об изменении статуса заказа.
-     * BillNumber, ApprovalCode, Total
+     * Список дополнительных полей, передаваемых в уведомлении об изменении статуса заказа.
+     * Например - BillNumber, ApprovalCode, Total
      *
      * @see \Tmconsulting\Uniteller\Payment\CallbackFields
      *
@@ -200,8 +199,8 @@ final class PaymentBuilder implements ArraybleInterface, Builder
 
     /**
      * Запрашиваемый формат уведомления о статусе оплаты.
-     * Если параметр имеет значение "json", то уведомление направляется
-     * в json-формате. Во всех остальных случаях уведомление направляется в виде POST-запроса.
+     * Если параметр имеет значение "json", то уведомление направляется в json-формате.
+     * Во всех остальных случаях уведомление направляется в виде POST-запроса.
      *
      * @var string
      */
@@ -545,7 +544,7 @@ final class PaymentBuilder implements ArraybleInterface, Builder
     }
 
     /**
-     * @param string $ptCode Тип платежа
+     * @param string $ptCode Тип платежа. Произвольная строка длиной до десяти символов включительно.
      *
      * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
@@ -673,7 +672,7 @@ final class PaymentBuilder implements ArraybleInterface, Builder
     }
 
     /**
-     * @param string $comment
+     * @param string $comment Комментарий к платежу.
      *
      * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
@@ -805,7 +804,7 @@ final class PaymentBuilder implements ArraybleInterface, Builder
     }
 
     /**
-     * @param string $phone
+     * @param string $phone Номер телефона, для которого производится пополнение баланса.
      *
      * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
@@ -845,7 +844,7 @@ final class PaymentBuilder implements ArraybleInterface, Builder
     }
 
     /**
-     * @param string $backUrl
+     * @param string $backUrl Адрес для возврата Плательщика после оплаты через СБП или SberPay в банковском приложении.
      *
      * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
@@ -857,7 +856,7 @@ final class PaymentBuilder implements ArraybleInterface, Builder
     }
 
     /**
-     * @param string $deepLink
+     * @param string $deepLink Ссылка на мобильное приложение Клиента для возврата после оплаты через СБП или SberPay.
      *
      * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */
@@ -869,7 +868,7 @@ final class PaymentBuilder implements ArraybleInterface, Builder
     }
 
     /**
-     * @param string $eWallet
+     * @param string $eWallet Номер кошелька получателя электронных денежных средств.
      *
      * @return \Tmconsulting\Uniteller\Payment\PaymentBuilder
      */

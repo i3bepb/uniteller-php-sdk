@@ -7,6 +7,8 @@
 
 namespace Tmconsulting\Uniteller\Signature;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * Class Signature
  *
@@ -14,6 +16,19 @@ namespace Tmconsulting\Uniteller\Signature;
  */
 abstract class AbstractSignature implements SignatureInterface
 {
+    /**
+     * @var \Psr\Log\LoggerInterface|null
+     */
+    protected $logger;
+
+    /**
+     * @param \Psr\Log\LoggerInterface|null $logger
+     */
+    public function __construct(LoggerInterface $logger = null)
+    {
+        $this->logger = $logger;
+    }
+
     /**
      * Create signature
      *

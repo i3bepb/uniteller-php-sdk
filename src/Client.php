@@ -7,6 +7,7 @@
 
 namespace Tmconsulting\Uniteller;
 
+use Psr\Log\LoggerInterface;
 use Tmconsulting\Uniteller\Cancel\CancelRequest;
 use Tmconsulting\Uniteller\Common\GetParametersFromBuilder;
 use Tmconsulting\Uniteller\Common\NameFieldsUniteller;
@@ -84,19 +85,26 @@ class Client implements ClientInterface
      * @var HttpManagerInterface
      */
     protected $httpManager;
+    /**
+     * @var \Psr\Log\LoggerInterface|null
+     */
+    protected $logger;
 
     /**
      * Client constructor.
+     *
+     * @param \Psr\Log\LoggerInterface|null $logger
      */
-    public function __construct()
+    public function __construct(LoggerInterface $logger = null)
     {
+        $this->logger = $logger;
         $this->registerPayment(new Payment());
         $this->registerCancelRequest(new CancelRequest());
         $this->registerResultsRequest(new ResultsRequest());
         $this->registerRecurrentRequest(new RecurrentRequest());
-        $this->registerSignaturePayment(new SignaturePayment());
-        $this->registerSignatureRecurrent(new SignatureRecurrent());
-        $this->registerSignatureCallback(new SignatureCallback());
+        $this->registerSignaturePayment(new SignaturePayment($this->logger));
+        $this->registerSignatureRecurrent(new SignatureRecurrent($this->logger));
+        $this->registerSignatureCallback(new SignatureCallback($this->logger));
     }
 
     /**
@@ -328,9 +336,9 @@ class Client implements ClientInterface
         $array = $paymentBuilder->toArray();
         $array[NameFieldsUniteller::SIGNATURE] = $this->signaturePayment->create($paymentBuilder);
 
-        echo '<pre>';
-        print_r($array);
-        echo '</pre>';
+        if ($this->logger) {
+            $this->logger->debug('Fields in request: ' . PHP_EOL . print_r($array, true));
+        }
 
         return $this->getPayment()->execute($array, ['base_uri' => $this->getBaseUri()]);
     }

@@ -5,13 +5,18 @@
  * GitHub: Roquie
  */
 
+use Tmconsulting\Uniteller\Client;
+use Tmconsulting\Uniteller\Results\ResultsBuilder;
+
 require __DIR__ . '/credentials.php';
 
-/** @var \Tmconsulting\Uniteller\Client $uniteller */
+global $shopId, $login, $password;
 
-$results = $uniteller->results([
-    'ShopOrderNumber' => 'number'
-]);
+$builder = (new ResultsBuilder())
+    ->setShopIdp($shopId)
+    ->setPassword($password)
+    ->setOrderIdp(10);
 
+$results = (new Client(new \MyLogger()))->results($builder);
 
 var_dump($results);

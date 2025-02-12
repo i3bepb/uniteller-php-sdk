@@ -14,7 +14,7 @@ use Tmconsulting\Uniteller\Common\NameFieldsUniteller;
  *
  * @package Tmconsulting\Client
  */
-final class SignaturePayment extends AbstractSignature
+final class SignaturePayment extends AbstractSignature implements SignatureInterface
 {
     /**
      * Create signature
@@ -52,36 +52,33 @@ final class SignaturePayment extends AbstractSignature
             $arr[NameFieldsUniteller::PAYMENT_TYPE_LIMITS] = $parameters->getPaymentTypeLimits();
         }
         $arr[NameFieldsUniteller::PASSWORD] = $parameters->getPassword();
-        echo '<pre>';
-        print_r($arr);
-        echo '</pre>';
-        $this->showFormula($arr);
+
         $string = implode('&', array_map(static function ($item) {
             return md5($item ?? '');
         }, $arr));
+        $this->logFormula($arr, $string);
 
         return strtoupper(md5($string));
     }
 
-    private function showFormula(array $arr)
+    /**
+     * @param array $arr Fields involved in the signature
+     * @param string $hash
+     */
+    private function logFormula(array $arr, string $hash)
     {
-        $newArr = [];
-        $newArr2 = [];
-        foreach ($arr as $k => $v) {
-            $newArr[] = 'md5(' . $k . ')';
-            $newArr2[] = 'md5(' . ($v ?? '') . ')';
+        if ($this->logger) {
+            $str = 'Fields involved in the signature: ' . PHP_EOL . print_r($arr, true) . PHP_EOL . 'Formula: ' . PHP_EOL;
+            $newArr = [];
+            $newArr2 = [];
+            foreach ($arr as $k => $v) {
+                $newArr[] = 'md5(' . $k . ')';
+                $newArr2[] = 'md5(' . ($v ?? '') . ')';
+            }
+            $str .= 'strtoupper(md5(' . implode(' + & + ', $newArr) . '))' . PHP_EOL;
+            $str .= 'strtoupper(md5(' . implode(' + & + ', $newArr2) . '))' . PHP_EOL;
+            $str .= 'strtoupper(md5("' . $hash . '"))' . PHP_EOL;
+            $this->logger->debug($str);
         }
-        echo '<pre>';
-        echo 'strtoupper(md5(' . implode(' + & + ', $newArr) . '))';
-        echo '</pre>';
-        echo '<pre>';
-        echo 'strtoupper(md5(' . implode(' + & + ', $newArr2) . '))';
-        echo '</pre>';
-        $string = implode('&', array_map(static function ($item) {
-            return md5($item ?? '');
-        }, $arr));
-        echo '<pre>';
-        echo 'strtoupper(md5("' . $string . '"))';
-        echo '</pre>';
     }
 }

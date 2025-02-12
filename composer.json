@@ -15,7 +15,9 @@
     "ext-json": "*",
     "php-http/httplug": "^2",
     "php-http/guzzle7-adapter": "^1",
-    "guzzlehttp/guzzle": "^7.4"
+    "guzzlehttp/guzzle": "^7.4",
+    "psr/log": "^1.1 || ^2.0 || ^3.0",
+    "monolog/monolog": "^2.10"
   },
   "require-dev": {
     "symfony/var-dumper": "^3.2",

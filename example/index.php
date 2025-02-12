@@ -14,8 +14,8 @@ global $shopId, $login, $password;
 $builder = (new PaymentBuilder())
     ->setShopIdp($shopId)
     ->setPassword($password)
-    ->setOrderIdp(999)
-    ->setSubtotalP(50)
+    ->setOrderIdp(10)
+    ->setSubtotalP(10)
     ->setMeanType(MeanType::VISA)
     ->setEMoneyType(EMoneyType::ANY)
     ->setLifetime(100)
@@ -23,14 +23,28 @@ $builder = (new PaymentBuilder())
     ->setCallbackFields([CallbackFields::CARD_IDP, CallbackFields::CARD_NUMBER, CallbackFields::BILL_NUMBER])
     ->setOrderLifetime(120)
     ->setPhone('+79630400529')
-    ->setPaymentTypeLimits([
-        PaymentType::BANK_CARD => [50, 50],
-    ])
-    ->setPhoneVerified('+79630400529')
+//    ->setPaymentTypeLimits([
+//        PaymentType::BANK_CARD => [50, 50],
+//    ])
+//    ->setPhoneVerified('+79630400529')
     ->setUrlReturnOk('https://google.ru/?q=success')
-    ->setUrlReturnNo('https://google.ru/?q=failure');
+    ->setUrlReturnNo('https://google.ru/?q=failure')
+    ->setEmail('g3bepb@gmail.com')
+    ->usePreAuth();
 
-$uri = (new Client())->payment($builder)->getUri();
+
+//$log = new \Monolog\Logger('name');
+//$formatter = new \Monolog\Formatter\LineFormatter(
+//    null, // Format of message in log, default [%datetime%] %channel%.%level_name%: %message% %context% %extra%\n
+//    null, // Datetime format
+//    true, // allowInlineLineBreaks option, default false
+//    true  // ignoreEmptyContextAndExtra option, default false
+//);
+//$debugHandler = new \Monolog\Handler\StreamHandler('out.log', \Monolog\Logger::DEBUG);
+//$debugHandler->setFormatter($formatter);
+//$log->pushHandler($debugHandler);
+
+$uri = (new Client(new \MyLogger()))->payment($builder)->getUri();
 
 echo <<< HTML
     <h2>Client Payment Sample</h2>

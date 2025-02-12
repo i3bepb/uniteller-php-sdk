@@ -11,6 +11,8 @@ class NameFieldsUniteller
 {
     const SHOP_IDP = 'Shop_IDP';
 
+    const SHOP_ID = 'Shop_ID';
+
     const ORDER_IDP = 'Order_IDP';
 
     const SUBTOTAL_P = 'Subtotal_P';
@@ -88,4 +90,73 @@ class NameFieldsUniteller
     const ZIP = 'Zip';
 
     const PASSWORD = 'Password';
+
+    const LOGIN = 'Login';
+
+    const FORMAT = 'Format';
+
+    const SHOP_ORDER_NUMBER = 'ShopOrderNumber';
+
+    const SUCCESS = 'Success';
+
+    const START_DAY = 'StartDay';
+
+    const START_MONTH = 'StartMonth';
+
+    const START_YEAR = 'StartYear';
+
+    const START_HOUR = 'StartHour';
+
+    const START_MIN = 'StartMin';
+
+    const END_DAY = 'EndDay';
+
+    const END_MONTH = 'EndMonth';
+
+    const END_YEAR = 'EndYear';
+
+    const END_HOUR = 'EndHour';
+
+    const END_MIN = 'EndMin';
+
+    const START_DAY_OF_CHANGE = 'StartDayOfChange';
+
+    const START_MONTH_OF_CHANGE = 'StartMonthOfChange';
+
+    const START_YEAR_OF_CHANGE = 'StartYearOfChange';
+
+    const START_HOUR_OF_CHANGE = 'StartHourOfChange';
+
+    const START_MIN_OF_CHANGE = 'StartMinOfChange';
+
+    const END_DAY_OF_CHANGE = 'EndDayOfChange';
+
+    const END_MONTH_OF_CHANGE = 'EndMonthOfChange';
+
+    const END_YEAR_OF_CHANGE = 'EndYearOfChange';
+
+    const END_HOUR_OF_CHANGE = 'EndHourOfChange';
+
+    const END_MIN_OF_CHANGE = 'EndMinOfChange';
+
+    const PAYMENTS_RESULTS = 'PaymentsResults';
+
+    const SHOW_PARTLY_CANCELED = 'ShowPartlyCanceled';
+
+    const ZIP_FLAG = 'ZipFlag';
+
+    const HEADER = 'Header';
+
+    const HEADER1 = 'Header1';
+
+    const DELIMITER = 'Delimiter';
+
+    const OPEN_DELIMITER = 'OpenDelimiter';
+
+    const CLOSE_DELIMITER = 'CloseDelimiter';
+
+    const ROW_DELIMITER = 'RowDelimiter';
+
+    const S_FIELDS = 'S_FIELDS';
+
 }

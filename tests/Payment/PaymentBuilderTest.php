@@ -2,6 +2,7 @@
 
 namespace Tmconsulting\Uniteller\Tests\Payment;
 
+use Tmconsulting\Uniteller\Common\NameFieldsUniteller;
 use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
 use Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException;
 use Tmconsulting\Uniteller\Payment\CallbackFields;
@@ -663,5 +664,153 @@ class PaymentBuilderTest extends TestCase
         $builder = new PaymentBuilder();
         $builder->setPassword('password12345');
         $this->assertEquals('password12345', $builder->getPassword());
+    }
+
+    /**
+     * @covers \Tmconsulting\Uniteller\Payment\PaymentBuilder::toArray
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
+     */
+    public function testNotSetNotExistToArray()
+    {
+        $builder = (new PaymentBuilder())
+            ->setShopIdp('009999')
+            ->setOrderIdp(1)
+            ->setSubtotalP(10)
+            ->setUrlReturnOk('https://google.ru/?q=success')
+            ->setUrlReturnNo('https://google.ru/?q=failure');
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::MEAN_TYPE, $builder->toArray());
+        $builder->setMeanType(MeanType::VISA);
+        $this->assertArrayHasKey(NameFieldsUniteller::MEAN_TYPE, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::E_MONEY_TYPE, $builder->toArray());
+        $builder->setEMoneyType(EMoneyType::ANY);
+        $this->assertArrayHasKey(NameFieldsUniteller::E_MONEY_TYPE, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::LIFETIME, $builder->toArray());
+        $builder->setLifetime(100);
+        $this->assertArrayHasKey(NameFieldsUniteller::LIFETIME, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::CUSTOMER_IDP, $builder->toArray());
+        $builder->setCustomerIdp(1);
+        $this->assertArrayHasKey(NameFieldsUniteller::CUSTOMER_IDP, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::CARD_IDP, $builder->toArray());
+        $builder->setCardIdp('2200060300746821');
+        $this->assertArrayHasKey(NameFieldsUniteller::CARD_IDP, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::I_DATA, $builder->toArray());
+        $builder->setIData('220006');
+        $this->assertArrayHasKey(NameFieldsUniteller::I_DATA, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::PT_CODE, $builder->toArray());
+        $builder->setPtCode('dfs220');
+        $this->assertArrayHasKey(NameFieldsUniteller::PT_CODE, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::ORDER_LIFETIME, $builder->toArray());
+        $builder->setOrderLifetime(220);
+        $this->assertArrayHasKey(NameFieldsUniteller::ORDER_LIFETIME, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::MERCHANT_ORDER_ID, $builder->toArray());
+        $builder->setMerchantOrderId(4567890);
+        $this->assertArrayHasKey(NameFieldsUniteller::MERCHANT_ORDER_ID, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::PAYMENT_TYPE_LIMITS, $builder->toArray());
+        $builder->setPaymentTypeLimits('{"13":[5000.3,4000.7],"14":[12300.37]}');
+        $this->assertArrayHasKey(NameFieldsUniteller::PAYMENT_TYPE_LIMITS, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::CALLBACK_FIELDS, $builder->toArray());
+        $builder->setCallbackFields([CallbackFields::CARD_IDP]);
+        $this->assertArrayHasKey(NameFieldsUniteller::CALLBACK_FIELDS, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::CURRENCY, $builder->toArray());
+        $builder->setCurrency(Currency::RUB);
+        $this->assertArrayHasKey(NameFieldsUniteller::CURRENCY, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::EMAIL, $builder->toArray());
+        $builder->setEmail('example@gmail.com');
+        $this->assertArrayHasKey(NameFieldsUniteller::EMAIL, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::BILL_LIFETIME, $builder->toArray());
+        $builder->setBillLifetime(120);
+        $this->assertArrayHasKey(NameFieldsUniteller::BILL_LIFETIME, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::PREAUTH, $builder->toArray());
+        $builder->usePreAuth();
+        $this->assertArrayHasKey(NameFieldsUniteller::PREAUTH, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::IS_RECURRENT_START, $builder->toArray());
+        $builder->useRecurrentPayment();
+        $this->assertArrayHasKey(NameFieldsUniteller::IS_RECURRENT_START, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::CALLBACK_FORMAT, $builder->toArray());
+        $builder->setCallbackFormat('json');
+        $this->assertArrayHasKey(NameFieldsUniteller::CALLBACK_FORMAT, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::BACK_URL, $builder->toArray());
+        $builder->setBackUrl('https://google.ru/?q=success');
+        $this->assertArrayHasKey(NameFieldsUniteller::BACK_URL, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::DEEP_LINK, $builder->toArray());
+        $builder->setDeepLink('https://google.ru/?q=success');
+        $this->assertArrayHasKey(NameFieldsUniteller::DEEP_LINK, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::LANGUAGE, $builder->toArray());
+        $builder->setLanguage(Language::RU);
+        $this->assertArrayHasKey(NameFieldsUniteller::LANGUAGE, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::E_WALLET, $builder->toArray());
+        $builder->setEWallet('4325234');
+        $this->assertArrayHasKey(NameFieldsUniteller::E_WALLET, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::DEST_PHONE_NUM, $builder->toArray());
+        $builder->setDestPhoneNum('+79120900000');
+        $this->assertArrayHasKey(NameFieldsUniteller::DEST_PHONE_NUM, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::COMMENT, $builder->toArray());
+        $builder->setComment('My comment!');
+        $this->assertArrayHasKey(NameFieldsUniteller::COMMENT, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::FIRST_NAME, $builder->toArray());
+        $builder->setFirstName('Alexander');
+        $this->assertArrayHasKey(NameFieldsUniteller::FIRST_NAME, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::LAST_NAME, $builder->toArray());
+        $builder->setLastName('Ivanov');
+        $this->assertArrayHasKey(NameFieldsUniteller::LAST_NAME, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::MIDDLE_NAME, $builder->toArray());
+        $builder->setMiddleName('Patronymic');
+        $this->assertArrayHasKey(NameFieldsUniteller::MIDDLE_NAME, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::PHONE, $builder->toArray());
+        $builder->setPhone('+79120900000');
+        $this->assertArrayHasKey(NameFieldsUniteller::PHONE, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::PHONE_VERIFIED, $builder->toArray());
+        $builder->setPhoneVerified('+79501234567890');
+        $this->assertArrayHasKey(NameFieldsUniteller::PHONE_VERIFIED, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::ADDRESS, $builder->toArray());
+        $builder->setAddress('some address');
+        $this->assertArrayHasKey(NameFieldsUniteller::ADDRESS, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::COUNTRY, $builder->toArray());
+        $builder->setCountry('Argentina');
+        $this->assertArrayHasKey(NameFieldsUniteller::COUNTRY, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::STATE, $builder->toArray());
+        $builder->setState('Argentina');
+        $this->assertArrayHasKey(NameFieldsUniteller::STATE, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::CITY, $builder->toArray());
+        $builder->setCity('Moscow');
+        $this->assertArrayHasKey(NameFieldsUniteller::CITY, $builder->toArray());
+
+        $this->assertArrayNotHasKey(NameFieldsUniteller::ZIP, $builder->toArray());
+        $builder->setZip(213123);
+        $this->assertArrayHasKey(NameFieldsUniteller::ZIP, $builder->toArray());
     }
 }
