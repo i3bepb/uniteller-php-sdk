@@ -128,11 +128,11 @@ final class SignatureCallback extends AbstractSignature
     /**
      * Create signature
      *
-     * @param array|\Tmconsulting\Uniteller\ArraybleInterface $parameters
+     * @param array|\Tmconsulting\Uniteller\ArraybleInterface $builder
      *
      * @return string
      */
-    public function create($parameters): string
+    public function create($builder): string
     {
         return strtoupper(md5(join('', $this->toArray())));
     }

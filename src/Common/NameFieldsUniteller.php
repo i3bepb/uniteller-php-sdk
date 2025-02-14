@@ -9,8 +9,13 @@ use Tmconsulting\Uniteller\ArraybleInterface;
  */
 class NameFieldsUniteller
 {
+    /**
+     * Идентификатор точки продажи в системе Uniteller.
+     */
     const SHOP_IDP = 'Shop_IDP';
-
+    /**
+     * Тоже идентификатор точки продажи в системе Uniteller. Но используется в другом запросе
+     */
     const SHOP_ID = 'Shop_ID';
 
     const ORDER_IDP = 'Order_IDP';
@@ -158,5 +163,7 @@ class NameFieldsUniteller
     const ROW_DELIMITER = 'RowDelimiter';
 
     const S_FIELDS = 'S_FIELDS';
+
+    const BASE_URI = 'base_uri';
 
 }

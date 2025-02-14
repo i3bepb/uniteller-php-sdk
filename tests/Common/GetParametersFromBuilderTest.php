@@ -43,14 +43,14 @@ class GetParametersFromBuilderTest extends TestCase
     {
         $objectWithTrait = $this->getObjectForTrait(GetParametersFromBuilder::class);
         $builder = new PaymentBuilder();
-        $builder->setShopIdp('0009999')
+        $builder->setShopId('0009999')
             ->setOrderIdp(100)
             ->setSubtotalP(5000)
             ->setUrlReturnOk('https://google.com/pay?q=banana')
             ->setUrlReturnNo('https://google.com/pay?q=banana');
         $result = $this->privateMethodWithParameters($objectWithTrait, 'getParameters', [$builder]);
         $this->assertCount(5, $result);
-        $this->assertEquals($builder->getShopIdp(), $result[NameFieldsUniteller::SHOP_IDP]);
+        $this->assertEquals($builder->getShopId(), $result[NameFieldsUniteller::SHOP_IDP]);
         $this->assertEquals($builder->getOrderIdp(), $result[NameFieldsUniteller::ORDER_IDP]);
         $this->assertEquals($builder->getSubtotalP(), $result[NameFieldsUniteller::SUBTOTAL_P]);
         $this->assertEquals($builder->getUrlReturnOk(), $result[NameFieldsUniteller::URL_RETURN_OK]);

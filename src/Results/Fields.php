@@ -75,7 +75,7 @@ final class Fields
     /**
      * Тип электронной валюты.
      *
-     * @see \Tmconsulting\Uniteller\Payment\EMoneyType
+     * @see \Tmconsulting\Uniteller\Common\EMoneyType
      */
     const E_MONEY_TYPE = 'EMoneyType';
     /**

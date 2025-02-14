@@ -1,19 +1,7 @@
 <?php
-/**
- * Created by Roquie.
- * E-mail: roquie0@gmail.com
- * GitHub: Roquie
- */
 
-namespace Tmconsulting\Uniteller\Payment;
+namespace Tmconsulting\Uniteller\Common;
 
-use Tmconsulting\Uniteller\Common\EnumToArray;
-
-/**
- * Class EMoneyType
- *
- * @package Tmconsulting\Client\Payment
- */
 final class EMoneyType
 {
     use EnumToArray;

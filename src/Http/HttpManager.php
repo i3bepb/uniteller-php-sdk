@@ -82,12 +82,7 @@ class HttpManager implements HttpManagerInterface
      */
     public function request($uri, $method = 'POST', $data = null, array $headers = [], string $format = 'xml'): string
     {
-        $uri = sprintf('%s/%s?%s', $this->options['base_uri'], $uri, http_build_query([
-            'Shop_ID'  => $this->options['shop_id'],
-            'Login'    => $this->options['login'],
-            'Password' => $this->options['password'],
-            'Format'   => Format::{"resolve$format"}($uri),
-        ]));
+        $uri = sprintf('%s/%s?%s', $this->options['base_uri'], $uri, $data);
 
         $request = new Request($method, $uri, array_merge($this->getDefaultHeaders($format), $headers), $data);
 
@@ -102,6 +97,7 @@ class HttpManager implements HttpManagerInterface
         }
 
         $body = (string) $response->getBody();
+        print_r($body); exit;
 
         $this->providerError($body, $request, $response, $format);
 

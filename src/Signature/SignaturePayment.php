@@ -7,6 +7,9 @@
 
 namespace Tmconsulting\Uniteller\Signature;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Tmconsulting\Uniteller\Builder\BuilderInterface;
 use Tmconsulting\Uniteller\Common\NameFieldsUniteller;
 
 /**
@@ -14,69 +17,76 @@ use Tmconsulting\Uniteller\Common\NameFieldsUniteller;
  *
  * @package Tmconsulting\Client
  */
-final class SignaturePayment extends AbstractSignature implements SignatureInterface
+final class SignaturePayment extends AbstractSignature implements SignatureInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * Create signature
      *
-     * @param \Tmconsulting\Uniteller\Payment\PaymentBuilder $parameters
+     * @param \Tmconsulting\Uniteller\Payment\PaymentBuilder $builder
      *
      * @return string
      *
      * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
      */
-    public function create($parameters): string
+    public function create(BuilderInterface $builder): string
     {
-        $arr = [
-            NameFieldsUniteller::SHOP_IDP => $parameters->getShopIdp(),
-            NameFieldsUniteller::ORDER_IDP => $parameters->getOrderIdp(),
-            NameFieldsUniteller::SUBTOTAL_P => $parameters->getSubtotalP(),
-            NameFieldsUniteller::MEAN_TYPE => $parameters->getMeanType(),
-            NameFieldsUniteller::E_MONEY_TYPE => $parameters->getEMoneyType(),
-            NameFieldsUniteller::LIFETIME => $parameters->getLifetime(),
-            NameFieldsUniteller::CUSTOMER_IDP => $parameters->getCustomerIdp(),
-            NameFieldsUniteller::CARD_IDP => $parameters->getCardIdp(),
-            NameFieldsUniteller::I_DATA => $parameters->getIData(),
-            NameFieldsUniteller::PT_CODE => $parameters->getPtCode(),
+        $parameters = [
+            NameFieldsUniteller::SHOP_IDP => $builder->getShopId(),
+            NameFieldsUniteller::ORDER_IDP => $builder->getOrderIdp(),
+            NameFieldsUniteller::SUBTOTAL_P => $builder->getSubtotalP(),
+            NameFieldsUniteller::MEAN_TYPE => $builder->getMeanType(),
+            NameFieldsUniteller::E_MONEY_TYPE => $builder->getEMoneyType(),
+            NameFieldsUniteller::LIFETIME => $builder->getLifetime(),
+            NameFieldsUniteller::CUSTOMER_IDP => $builder->getCustomerIdp(),
+            NameFieldsUniteller::CARD_IDP => $builder->getCardIdp(),
+            NameFieldsUniteller::I_DATA => $builder->getIData(),
+            NameFieldsUniteller::PT_CODE => $builder->getPtCode(),
         ];
-        if ($parameters->getOrderLifetime() !== null) {
-            $arr[NameFieldsUniteller::ORDER_LIFETIME] = $parameters->getOrderLifetime();
+        /**
+         * The sequence of the fields below is very important !
+         */
+        if ($builder->getOrderLifetime() !== null) {
+            $parameters[NameFieldsUniteller::ORDER_LIFETIME] = $builder->getOrderLifetime();
         }
-        if ($parameters->getPhoneVerified() !== null) {
-            $arr[NameFieldsUniteller::PHONE_VERIFIED] = $parameters->getPhoneVerified();
+        if ($builder->getPhoneVerified() !== null) {
+            $parameters[NameFieldsUniteller::PHONE_VERIFIED] = $builder->getPhoneVerified();
         }
-        if ($parameters->getMerchantOrderId() !== null) {
-            $arr[NameFieldsUniteller::MERCHANT_ORDER_ID] = $parameters->getMerchantOrderId();
+        if ($builder->getPaymentTypeLimits() !== null) {
+            $parameters[NameFieldsUniteller::PAYMENT_TYPE_LIMITS] = $builder->getPaymentTypeLimits();
         }
-        if ($parameters->getPaymentTypeLimits() !== null) {
-            $arr[NameFieldsUniteller::PAYMENT_TYPE_LIMITS] = $parameters->getPaymentTypeLimits();
+        if ($builder->getMerchantOrderId() !== null) {
+            $parameters[NameFieldsUniteller::MERCHANT_ORDER_ID] = $builder->getMerchantOrderId();
         }
-        $arr[NameFieldsUniteller::PASSWORD] = $parameters->getPassword();
+        $parameters[NameFieldsUniteller::PASSWORD] = $builder->getPassword();
 
         $string = implode('&', array_map(static function ($item) {
             return md5($item ?? '');
-        }, $arr));
-        $this->logFormula($arr, $string);
+        }, $parameters));
+
+        $this->debugLogSignatureCalculation($parameters, $string);
 
         return strtoupper(md5($string));
     }
 
     /**
-     * @param array $arr Fields involved in the signature
-     * @param string $hash
+     * @param array $parameters Fields including in signature creation.
+     * @param string $hash Middle not fully finished hash.
      */
-    private function logFormula(array $arr, string $hash)
+    private function debugLogSignatureCalculation(array $parameters, string $hash)
     {
         if ($this->logger) {
-            $str = 'Fields involved in the signature: ' . PHP_EOL . print_r($arr, true) . PHP_EOL . 'Formula: ' . PHP_EOL;
-            $newArr = [];
-            $newArr2 = [];
-            foreach ($arr as $k => $v) {
-                $newArr[] = 'md5(' . $k . ')';
-                $newArr2[] = 'md5(' . ($v ?? '') . ')';
+            $str = 'Parameters including in signature: ' . PHP_EOL . print_r($parameters, true) . PHP_EOL
+                . 'Calculation: ' . PHP_EOL;
+            $arr1 = explode('&', $hash);
+            $arr2 = [];
+            $i = 0;
+            foreach ($parameters as $k => $v) {
+                $arr2['md5("' . $k . '")'] = $arr1[$i];
+                ++$i;
             }
-            $str .= 'strtoupper(md5(' . implode(' + & + ', $newArr) . '))' . PHP_EOL;
-            $str .= 'strtoupper(md5(' . implode(' + & + ', $newArr2) . '))' . PHP_EOL;
+            $str .= print_r($arr2, true) . PHP_EOL;
             $str .= 'strtoupper(md5("' . $hash . '"))' . PHP_EOL;
             $this->logger->debug($str);
         }

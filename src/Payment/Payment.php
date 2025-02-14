@@ -20,7 +20,7 @@ class Payment implements PaymentInterface
      *
      * @return \Tmconsulting\Uniteller\Payment\UriInterface
      */
-    public function execute(array $parameters, array $options)
+    public function execute(array $parameters, array $options): Uri
     {
         $uri = sprintf('%s/pay?%s', $options['base_uri'], http_build_query($parameters));
 

@@ -7,7 +7,7 @@
 
 namespace Tmconsulting\Uniteller\Signature;
 
-use Psr\Log\LoggerInterface;
+use Tmconsulting\Uniteller\Builder\BuilderInterface;
 
 /**
  * Class Signature
@@ -17,26 +17,13 @@ use Psr\Log\LoggerInterface;
 abstract class AbstractSignature implements SignatureInterface
 {
     /**
-     * @var \Psr\Log\LoggerInterface|null
-     */
-    protected $logger;
-
-    /**
-     * @param \Psr\Log\LoggerInterface|null $logger
-     */
-    public function __construct(LoggerInterface $logger = null)
-    {
-        $this->logger = $logger;
-    }
-
-    /**
      * Create signature
      *
-     * @param \Tmconsulting\Uniteller\Common\Builder $parameters
+     * @param \Tmconsulting\Uniteller\Builder\BuilderInterface $builder
      *
      * @return string
      */
-    public function create($parameters): string
+    public function create(BuilderInterface $builder): string
     {
         $string = implode('&', array_map(static function ($item) {
             return md5($item ?? '');

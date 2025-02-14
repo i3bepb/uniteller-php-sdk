@@ -2,14 +2,14 @@
 
 namespace Tmconsulting\Uniteller\Tests\Payment;
 
+use Tmconsulting\Uniteller\Common\EMoneyType;
+use Tmconsulting\Uniteller\Common\MeanType;
 use Tmconsulting\Uniteller\Common\NameFieldsUniteller;
 use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
 use Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException;
 use Tmconsulting\Uniteller\Payment\CallbackFields;
 use Tmconsulting\Uniteller\Payment\Currency;
-use Tmconsulting\Uniteller\Payment\EMoneyType;
 use Tmconsulting\Uniteller\Payment\Language;
-use Tmconsulting\Uniteller\Payment\MeanType;
 use Tmconsulting\Uniteller\Payment\PaymentBuilder;
 use Tmconsulting\Uniteller\Payment\PaymentType;
 use Tmconsulting\Uniteller\Tests\TestCase;
@@ -22,8 +22,8 @@ class PaymentBuilderTest extends TestCase
     public function testGetShopIdp()
     {
         $builder = new PaymentBuilder();
-        $builder->setShopIdp('0009999');
-        $this->assertEquals('0009999', $builder->getShopIdp());
+        $builder->setShopId('0009999');
+        $this->assertEquals('0009999', $builder->getShopId());
     }
 
     /**
@@ -34,10 +34,10 @@ class PaymentBuilderTest extends TestCase
     public function testGetShopIdpEmptyString()
     {
         $this->expectException(RequiredParameterException::class);
-        $this->expectExceptionMessage('Parameter Shop_IDP empty or not set');
+        $this->expectExceptionMessage('Parameter Shop_ID empty or not set');
         $builder = new PaymentBuilder();
-        $builder->setShopIdp('');
-        $builder->getShopIdp();
+        $builder->setShopId('');
+        $builder->getShopId();
     }
 
     /**
@@ -48,9 +48,9 @@ class PaymentBuilderTest extends TestCase
     public function testGetShopIdpNotSet()
     {
         $this->expectException(RequiredParameterException::class);
-        $this->expectExceptionMessage('Parameter Shop_IDP empty or not set');
+        $this->expectExceptionMessage('Parameter Shop_ID empty or not set');
         $builder = new PaymentBuilder();
-        $builder->getShopIdp();
+        $builder->getShopId();
     }
 
     public static function dataProviderGetOrderIdp(): array
@@ -436,9 +436,9 @@ class PaymentBuilderTest extends TestCase
     public function testIsRecurrentStart()
     {
         $builder = new PaymentBuilder();
-        $this->assertNull($builder->isIsRecurrentStart());
+        $this->assertNull($builder->isRecurrentStart());
         $builder->useRecurrentPayment();
-        $this->assertEquals('1', $builder->isIsRecurrentStart());
+        $this->assertEquals('1', $builder->isRecurrentStart());
     }
 
     public function testGetCallbackFields()
@@ -675,11 +675,17 @@ class PaymentBuilderTest extends TestCase
     public function testNotSetNotExistToArray()
     {
         $builder = (new PaymentBuilder())
-            ->setShopIdp('009999')
+            ->setShopId('009999')
             ->setOrderIdp(1)
             ->setSubtotalP(10)
             ->setUrlReturnOk('https://google.ru/?q=success')
             ->setUrlReturnNo('https://google.ru/?q=failure');
+        $arr = $builder->toArray();
+        $this->assertArrayHasKey(NameFieldsUniteller::SHOP_IDP, $arr);
+        $this->assertArrayHasKey(NameFieldsUniteller::ORDER_IDP, $arr);
+        $this->assertArrayHasKey(NameFieldsUniteller::SUBTOTAL_P, $arr);
+        $this->assertArrayHasKey(NameFieldsUniteller::URL_RETURN_OK, $arr);
+        $this->assertArrayHasKey(NameFieldsUniteller::URL_RETURN_NO, $arr);
 
         $this->assertArrayNotHasKey(NameFieldsUniteller::MEAN_TYPE, $builder->toArray());
         $builder->setMeanType(MeanType::VISA);

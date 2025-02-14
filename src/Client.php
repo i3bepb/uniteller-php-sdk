@@ -7,34 +7,46 @@
 
 namespace Tmconsulting\Uniteller;
 
-use Psr\Log\LoggerInterface;
+use GuzzleHttp\Client as GuzzleClient;
+use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Tmconsulting\Uniteller\Cancel\CancelRequest;
 use Tmconsulting\Uniteller\Common\GetParametersFromBuilder;
 use Tmconsulting\Uniteller\Common\NameFieldsUniteller;
+use Tmconsulting\Uniteller\Dependency\ContainerAwareInterface;
+use Tmconsulting\Uniteller\Dependency\ContainerAwareTrait;
 use Tmconsulting\Uniteller\Exception\NotImplementedException;
 use Tmconsulting\Uniteller\Http\HttpManager;
 use Tmconsulting\Uniteller\Http\HttpManagerInterface;
 use Tmconsulting\Uniteller\Order\Order;
 use Tmconsulting\Uniteller\Payment\Payment;
-use Tmconsulting\Uniteller\Payment\PaymentInterface;
+use Tmconsulting\Uniteller\Payment\PaymentBuilder;
+use Tmconsulting\Uniteller\Payment\Uri;
 use Tmconsulting\Uniteller\Recurrent\RecurrentRequest;
 use Tmconsulting\Uniteller\Request\RequestInterface;
+use Tmconsulting\Uniteller\Results\ResultsBuilder;
 use Tmconsulting\Uniteller\Results\ResultsRequest;
 use Tmconsulting\Uniteller\Signature\SignatureCallback;
 use Tmconsulting\Uniteller\Signature\SignatureInterface;
 use Tmconsulting\Uniteller\Signature\SignaturePayment;
 use Tmconsulting\Uniteller\Signature\SignatureRecurrent;
-use GuzzleHttp\Client as GuzzleClient;
-use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 
 /**
  * Class Client
  *
  * @package Tmconsulting\Uniteller
  */
-class Client implements ClientInterface
+class Client implements ClientInterface, ContainerAwareInterface, LoggerAwareInterface
 {
     use GetParametersFromBuilder;
+    use ContainerAwareTrait;
+    use LoggerAwareTrait;
+
+    /**
+     * @var \Tmconsulting\Uniteller\Dependency\UnitellerContainer
+     */
+    protected $container;
 
     /**
      * @var string
@@ -45,16 +57,6 @@ class Client implements ClientInterface
      * @var array
      */
     protected $options = [];
-
-    /**
-     * @var PaymentInterface
-     */
-    protected $payment;
-
-    /**
-     * @var \Tmconsulting\Uniteller\Signature\SignaturePayment
-     */
-    protected $signaturePayment;
 
     /**
      * @var SignatureInterface
@@ -74,37 +76,23 @@ class Client implements ClientInterface
     /**
      * @var RequestInterface
      */
-    protected $resultsRequest;
-
-    /**
-     * @var RequestInterface
-     */
     protected $recurrentRequest;
 
     /**
      * @var HttpManagerInterface
      */
     protected $httpManager;
-    /**
-     * @var \Psr\Log\LoggerInterface|null
-     */
-    protected $logger;
 
     /**
      * Client constructor.
-     *
-     * @param \Psr\Log\LoggerInterface|null $logger
      */
-    public function __construct(LoggerInterface $logger = null)
+    public function __construct()
     {
-        $this->logger = $logger;
-        $this->registerPayment(new Payment());
+        $this->setHttpManager(new HttpManager(new GuzzleAdapter(new GuzzleClient()), ['base_uri' => $this->getBaseUri()]));
         $this->registerCancelRequest(new CancelRequest());
-        $this->registerResultsRequest(new ResultsRequest());
         $this->registerRecurrentRequest(new RecurrentRequest());
-        $this->registerSignaturePayment(new SignaturePayment($this->logger));
-        $this->registerSignatureRecurrent(new SignatureRecurrent($this->logger));
-        $this->registerSignatureCallback(new SignatureCallback($this->logger));
+        $this->registerSignatureRecurrent(new SignatureRecurrent());
+        $this->registerSignatureCallback(new SignatureCallback());
     }
 
     /**
@@ -144,18 +132,6 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param \Tmconsulting\Uniteller\Payment\PaymentInterface $payment
-     *
-     * @return \Tmconsulting\Uniteller\Client
-     */
-    public function registerPayment(PaymentInterface $payment): Client
-    {
-        $this->payment = $payment;
-
-        return $this;
-    }
-
-    /**
      * @param \Tmconsulting\Uniteller\Request\RequestInterface $cancel
      *
      * @return \Tmconsulting\Uniteller\Client
@@ -172,33 +148,9 @@ class Client implements ClientInterface
      *
      * @return \Tmconsulting\Uniteller\Client
      */
-    public function registerResultsRequest(RequestInterface $request): Client
-    {
-        $this->resultsRequest = $request;
-
-        return $this;
-    }
-
-    /**
-     * @param \Tmconsulting\Uniteller\Request\RequestInterface $request
-     *
-     * @return \Tmconsulting\Uniteller\Client
-     */
     public function registerRecurrentRequest(RequestInterface $request): Client
     {
         $this->recurrentRequest = $request;
-
-        return $this;
-    }
-
-    /**
-     * @param \Tmconsulting\Uniteller\Signature\SignatureInterface $signature
-     *
-     * @return \Tmconsulting\Uniteller\Client
-     */
-    public function registerSignaturePayment(SignatureInterface $signature): Client
-    {
-        $this->signaturePayment = $signature;
 
         return $this;
     }
@@ -259,14 +211,6 @@ class Client implements ClientInterface
     }
 
     /**
-     * @return \Tmconsulting\Uniteller\Payment\PaymentInterface
-     */
-    public function getPayment()
-    {
-        return $this->payment;
-    }
-
-    /**
      * @return \Tmconsulting\Uniteller\Request\RequestInterface
      */
     public function getCancelRequest()
@@ -277,25 +221,9 @@ class Client implements ClientInterface
     /**
      * @return \Tmconsulting\Uniteller\Request\RequestInterface
      */
-    public function getResultsRequest()
-    {
-        return $this->resultsRequest;
-    }
-
-    /**
-     * @return \Tmconsulting\Uniteller\Request\RequestInterface
-     */
     public function getRecurrentRequest()
     {
         return $this->recurrentRequest;
-    }
-
-    /**
-     * @return \Tmconsulting\Uniteller\Signature\SignatureInterface
-     */
-    public function getSignaturePayment()
-    {
-        return $this->signaturePayment;
     }
 
     /**
@@ -325,22 +253,27 @@ class Client implements ClientInterface
     /**
      * Получение платежной ссылки или сразу переход к оплате.
      *
-     * @param \Tmconsulting\Uniteller\Payment\PaymentBuilder $paymentBuilder
+     * @param \Tmconsulting\Uniteller\Payment\PaymentBuilder|array $paymentBuilder
      *
      * @return \Tmconsulting\Uniteller\Payment\UriInterface
      *
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
      * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
      */
-    public function payment($paymentBuilder)
+    public function payment($paymentBuilder): Uri
     {
-        $array = $paymentBuilder->toArray();
-        $array[NameFieldsUniteller::SIGNATURE] = $this->signaturePayment->create($paymentBuilder);
+        if (is_array($paymentBuilder)) {
+            $paymentBuilder = PaymentBuilder::setFromArray($paymentBuilder);
+        }
+        $parameters = $paymentBuilder->toArray();
+        $parameters[NameFieldsUniteller::SIGNATURE] = $this->container->get(SignaturePayment::class)->create($paymentBuilder);
 
         if ($this->logger) {
-            $this->logger->debug('Fields in request: ' . PHP_EOL . print_r($array, true));
+            $this->logger->debug('Parameters in request: ' . PHP_EOL . print_r($parameters, true));
         }
-
-        return $this->getPayment()->execute($array, ['base_uri' => $this->getBaseUri()]);
+        return $this->container->get(Payment::class)->execute($parameters, ['base_uri' => $paymentBuilder->getBaseUri()]);
     }
 
     /**
@@ -356,12 +289,24 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param \Tmconsulting\Uniteller\Cancel\CancelBuilder|array $parameters
+     * @param \Tmconsulting\Uniteller\Results\ResultsBuilder|array $resultsBuilder
+     *
      * @return Order
+     *
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
      */
-    public function results($parameters)
+    public function results($resultsBuilder)
     {
-        return $this->callRequestFor('results', $parameters);
+        if (is_array($resultsBuilder)) {
+            $resultsBuilder = ResultsBuilder::setFromArray($resultsBuilder);
+        }
+        $request = $this->container->get(ResultsRequest::class);
+
+        return $request->execute(
+            $this->getHttpManager(),
+            $resultsBuilder->toArray()
+        );
     }
 
     /**
@@ -423,11 +368,6 @@ class Client implements ClientInterface
      */
     private function callRequestFor($name, $parameters)
     {
-        if (! $this->getHttpManager()) {
-            $httpClient = new GuzzleAdapter(new GuzzleClient());
-            $this->setHttpManager(new HttpManager($httpClient, $this->getOptions()));
-        }
-
         /** @var RequestInterface $request */
         $request = $this->{'get' . ucfirst($name) . 'Request'}();
 

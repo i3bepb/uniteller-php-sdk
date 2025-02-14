@@ -8,7 +8,6 @@
 namespace Tmconsulting\Uniteller;
 
 use Tmconsulting\Uniteller\Order\Order;
-use Tmconsulting\Uniteller\Payment\UriInterface;
 
 /**
  * Interface ClientInterface
@@ -20,7 +19,7 @@ interface ClientInterface
     /**
      * @param \Tmconsulting\Uniteller\Payment\PaymentBuilder|array $paymentBuilder
      *
-     * @return UriInterface
+     * @return \Tmconsulting\Uniteller\Payment\UriInterface
      */
     public function payment($paymentBuilder);
 
@@ -31,10 +30,11 @@ interface ClientInterface
     public function cancel($parameters);
 
     /**
-     * @param \Tmconsulting\Uniteller\Cancel\CancelBuilder|array $parameters
+     * @param \Tmconsulting\Uniteller\Results\ResultsBuilder|array $resultsBuilder
+     *
      * @return Order
      */
-    public function results($parameters);
+    public function results($resultsBuilder);
 
     /**
      * @param array $parameters

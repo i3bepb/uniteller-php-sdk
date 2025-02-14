@@ -7,12 +7,12 @@
 
 namespace Tmconsulting\Uniteller\Payment;
 
-
 interface PaymentInterface
 {
     /**
      * @param array $parameters
      * @param array $options
+     *
      * @return \Tmconsulting\Uniteller\Payment\UriInterface
      */
     public function execute(array $parameters, array $options);

@@ -7,6 +7,8 @@
 
 namespace Tmconsulting\Uniteller\Results;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use Tmconsulting\Uniteller\Http\HttpManagerInterface;
 use Tmconsulting\Uniteller\Order\Order;
 use Tmconsulting\Uniteller\Request\RequestInterface;
@@ -17,8 +19,10 @@ use Tmconsulting\Uniteller;
  *
  * @package Tmconsulting\Uniteller\Results
  */
-class ResultsRequest implements RequestInterface
+class ResultsRequest implements RequestInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * Выполнение запроса к шлюзу.
      *
@@ -28,7 +32,14 @@ class ResultsRequest implements RequestInterface
      */
     public function execute(HttpManagerInterface $httpManager, array $parameters = [])
     {
+        if ($this->logger) {
+            $this->logger->debug(print_r($parameters, true));
+        }
         $response = $httpManager->request('results', 'POST', http_build_query($parameters));
+        if ($this->logger) {
+            $this->logger->debug(print_r($response, true));
+        }
+        exit;
         $xml      = new \SimpleXMLElement($response);
 
         $array = [];

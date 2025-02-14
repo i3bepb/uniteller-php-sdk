@@ -7,13 +7,12 @@
 
 namespace Tmconsulting\Uniteller\Payment;
 
-
 interface UriInterface
 {
     /**
      * @return string
      */
-    public function getUri();
+    public function getUri(): string;
 
     /**
      * @return void

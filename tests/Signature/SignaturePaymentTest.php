@@ -2,9 +2,9 @@
 
 namespace Tmconsulting\Uniteller\Tests\Signature;
 
+use Tmconsulting\Uniteller\Common\EMoneyType;
+use Tmconsulting\Uniteller\Common\MeanType;
 use Tmconsulting\Uniteller\Payment\CallbackFields;
-use Tmconsulting\Uniteller\Payment\EMoneyType;
-use Tmconsulting\Uniteller\Payment\MeanType;
 use Tmconsulting\Uniteller\Payment\PaymentBuilder;
 use Tmconsulting\Uniteller\Signature\SignaturePayment;
 use Tmconsulting\Uniteller\Tests\TestCase;
@@ -16,7 +16,7 @@ class SignaturePaymentTest extends TestCase
         return [
             [
                 (new PaymentBuilder())
-                    ->setShopIdp('00030576')
+                    ->setShopId('00030576')
                     ->setOrderIdp(999)
                     ->setSubtotalP(50)
                     ->setPassword('password'),
@@ -24,7 +24,7 @@ class SignaturePaymentTest extends TestCase
             ],
             [
                 (new PaymentBuilder())
-                    ->setShopIdp('0099999')
+                    ->setShopId('0099999')
                     ->setPassword('qwert12345')
                     ->setOrderIdp(25)
                     ->setSubtotalP(1000)
@@ -37,7 +37,7 @@ class SignaturePaymentTest extends TestCase
             ],
             [
                 (new PaymentBuilder())
-                    ->setShopIdp('10030576')
+                    ->setShopId('10030576')
                     ->setPassword('dpdmIXkHQ2GCGb46imY4AruqMg')
                     ->setOrderIdp(999)
                     ->setSubtotalP(50)
