@@ -11,7 +11,7 @@ class Vat
     /**
      * Не облагается НДС.
      */
-    const FREE = -1;
+    const NO_VAT = -1;
     /**
      * Облагается НДС по ставке 0%.
      */
@@ -33,19 +33,27 @@ class Vat
      */
     const TWENTY = 20;
     /**
-     * Облагается НДС по ставке 5/105.
+     * Облагается НДС по ставке 22%.
      */
-    const FIVE_INCLUDING = 105;
+    const TWENTY_TWO = 22;
     /**
-     * Облагается НДС по ставке 7/107.
+     * Облагается НДС по расчетной ставке 5/105.
      */
-    const SEVEN_INCLUDING = 107;
+    const FIVE_CALCULATED = 105;
     /**
-     * Облагается НДС по ставке 10/110.
+     * Облагается НДС по расчетной ставке 7/107.
      */
-    const TEN_INCLUDING = 110;
+    const SEVEN_CALCULATED = 107;
     /**
-     * Облагается НДС по ставке 20/120.
+     * Облагается НДС по расчетной ставке 10/110.
      */
-    const TWENTY_INCLUDING = 120;
+    const TEN_CALCULATED = 110;
+    /**
+     * Облагается НДС по расчетной ставке 20/120.
+     */
+    const TWENTY_CALCULATED = 120;
+    /**
+     * Облагается НДС по расчетной ставке 22/122.
+     */
+    const TWENTY_TWO_CALCULATED = 122;
 }

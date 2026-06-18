@@ -2,6 +2,9 @@
 
 namespace Tmconsulting\Uniteller\Receipt;
 
+/**
+ * Данные для чека коррекции ФФД 1.05.
+ */
 class CorrectReceipt implements \JsonSerializable
 {
     /**
@@ -11,7 +14,7 @@ class CorrectReceipt implements \JsonSerializable
      *
      * @var int
      */
-    private $correctionType;
+    protected $correctionType;
 
     /**
      * Дата документа основания для коррекции.
@@ -19,14 +22,14 @@ class CorrectReceipt implements \JsonSerializable
      *
      * @var \DateTime
      */
-    private $causeDocumentDate;
+    protected $causeDocumentDate;
 
     /**
      * Номер документа основания для коррекции.
      *
      * @var string
      */
-    private $causeDocumentNumber;
+    protected $causeDocumentNumber;
 
     /**
      * Значение системы налогообложения.
@@ -35,21 +38,21 @@ class CorrectReceipt implements \JsonSerializable
      *
      * @var int
      */
-    private $taxmode;
+    protected $taxmode;
 
     /**
      * Обязательный блок информации об оплате дополнительными платежными средствами.
      *
      * @var \Tmconsulting\Uniteller\Receipt\PaymentInfo[]
      */
-    private $payments = [];
+    protected $payments = [];
 
     /**
      * Итоговая сумма чека.
      *
      * @var float
      */
-    private $total;
+    protected $total;
 
     /**
      * Сумма НДС чека по ставке 20%.
@@ -57,7 +60,7 @@ class CorrectReceipt implements \JsonSerializable
      *
      * @var float
      */
-    private $tax1Sum;
+    protected $tax1Sum;
 
     /**
      * Сумма НДС чека по ставке 10%.
@@ -65,7 +68,7 @@ class CorrectReceipt implements \JsonSerializable
      *
      * @var float
      */
-    private $tax2Sum;
+    protected $tax2Sum;
 
     /**
      * Сумма расчета по чеку с НДС по ставке 0%.
@@ -73,7 +76,7 @@ class CorrectReceipt implements \JsonSerializable
      *
      * @var float
      */
-    private $tax3Sum;
+    protected $tax3Sum;
 
     /**
      * Сумма расчета по чеку без НДС.
@@ -81,7 +84,7 @@ class CorrectReceipt implements \JsonSerializable
      *
      * @var float
      */
-    private $tax4Sum;
+    protected $tax4Sum;
 
     /**
      * Сумма НДС чека по расч. ставке 20/120.
@@ -89,7 +92,7 @@ class CorrectReceipt implements \JsonSerializable
      *
      * @var float
      */
-    private $tax5Sum;
+    protected $tax5Sum;
 
     /**
      * Сумма НДС чека по расч. ставке 10/110.
@@ -97,7 +100,7 @@ class CorrectReceipt implements \JsonSerializable
      *
      * @var float
      */
-    private $tax6Sum;
+    protected $tax6Sum;
 
     /**
      * @param int $correctionType Тип коррекции. Смотри класс \Tmconsulting\Uniteller\Receipt\Enum\CorrectionType.

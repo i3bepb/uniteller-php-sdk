@@ -28,8 +28,9 @@ $builder->setShopId($shopId)
 //        SFields::BILL_NUMBER,
 //        SFields::QRC_ID,
 //        SFields::SBER_ORDER_ID,
+//        SFields::TOTAL,
 //        SFields::SUM,
-//    ])
+//    ]);
 //    ->setStart(\DateTime::createFromFormat('Y-m-d', '2026-05-11'))
 //    ->setEnd(\DateTime::createFromFormat('Y-m-d', '2026-05-14'));
 

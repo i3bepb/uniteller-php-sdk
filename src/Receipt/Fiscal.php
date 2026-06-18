@@ -13,89 +13,87 @@ use Tmconsulting\Uniteller\Receipt\Fiscal\Register;
 class Fiscal implements \JsonSerializable
 {
     /**
-     * Уникальный идентификатор чека в платежном шлюзе Uniteller.
+     * Идентификатор чека в Uniteller.
      *
      * @var string
      */
-    private $id;
+    protected $id;
 
     /**
-     * Дата чека. Формат Y-m-d H:i:s.
+     * Формат Y-m-d H:i:s.
      *
-     * @var string
+     * @var string|null
      */
-    private $date;
+    protected $date;
 
     /**
-     * Тип документа.
+     * Тип документа/чека.
      *
      * @see \Tmconsulting\Uniteller\Receipt\Enum\DocumentType
      *
      * @var int
      */
-    private $type;
+    protected $type;
+
     /**
-     * Информации о регистрации чека.
-     * Может отсутствовать или быть пустым.
+     * Информация о регистрации чека.
      *
      * @var \Tmconsulting\Uniteller\Receipt\Fiscal\Register
      */
-    private $register;
+    protected $register;
 
     /**
-     * Информации о ККМ (контрольно-кассовая машина).
+     * Информация о ККМ (контрольно-кассовой машине).
      *
      * @var \Tmconsulting\Uniteller\Receipt\Fiscal\ElectronicCashRegister
      */
-    private $ecr;
+    protected $ecr;
 
     /**
      * Информации о компании.
      *
      * @var \Tmconsulting\Uniteller\Receipt\Fiscal\Company
      */
-    private $company;
+    protected $company;
 
     /**
-     * Информации об ОФД (Оператор Фискальных Данных).
+     * Информация об ОФД (Операторе Фискальных Данных).
      *
      * @var \Tmconsulting\Uniteller\Receipt\Fiscal\FiscalDataOperator
      */
-    private $fdo;
+    protected $fdo;
 
     /**
-     * Опциональный параметр с произвольными данными от мерчанта.
-     * Транслируется в неизменном виде во всех фискализированных чеках, созданных в процессе оплаты по исходному
-     * чеку для фискализации.
+     * Опциональный параметр с произвольными данными от мерчанта. Транслируется в неизменном виде во всех
+     * фискализированных чеках, созданных в процессе оплаты по исходному чеку для фискализации.
      * Формат: json-объект произвольной внутренней структуры.
      *
      * @var array|null
      */
-    private $optional = [];
+    protected $optional;
 
     /**
      * Дополнительные параметры платежа.
      * Этот блок может отсутствовать целиком, или в нем могут отсутствовать какие-то элементы.
-     * В параметре place можно указать url одного из сайтов, перечисленных в Личном кабинете налоговой мерчанта.
      *
      * @var \Tmconsulting\Uniteller\Receipt\Params|null
      */
-    private $params;
+    protected $params;
 
     /**
      * @param string $id Уникальный идентификатор чека в платежном шлюзе Uniteller.
-     * @param string $date Дата чека.
+     * @param string|null $date Формат Y-m-d H:i:s.
      * @param int $type Тип документа. Смотри класс \Tmconsulting\Uniteller\Receipt\Enum\DocumentType.
-     * @param \Tmconsulting\Uniteller\Receipt\Fiscal\ElectronicCashRegister $ecr Информации о ККМ (контрольно-кассовая машина).
+     * @param \Tmconsulting\Uniteller\Receipt\Fiscal\ElectronicCashRegister $ecr Информация о ККМ (контрольно-кассовой машине).
      * @param \Tmconsulting\Uniteller\Receipt\Fiscal\Company $company Информации о компании.
-     * @param \Tmconsulting\Uniteller\Receipt\Fiscal\FiscalDataOperator $fdo Информации об ОФД (Оператор Фискальных Данных).
-     * @param \Tmconsulting\Uniteller\Receipt\Fiscal\Register|null $register Информации о регистрации чека.
+     * @param \Tmconsulting\Uniteller\Receipt\Fiscal\FiscalDataOperator $fdo Информация об ОФД (Операторе Фискальных Данных).
+     * @param \Tmconsulting\Uniteller\Receipt\Fiscal\Register $register Информация о регистрации чека.
      * @param array|null $optional Произвольные данные от мерчанта.
      * @param \Tmconsulting\Uniteller\Receipt\Params|null $params Дополнительные параметры платежа.
      */
     public function __construct(
         string                 $id,
-        string                 $date,
+        ?string                $date,
         int                    $type,
         ElectronicCashRegister $ecr,
         Company                $company,
@@ -121,19 +119,121 @@ class Fiscal implements \JsonSerializable
     {
         $arr = [
             'id'       => $this->id,
-            'date'     => $this->date,
             'type'     => $this->type,
             'register' => $this->register,
             'ecr'      => $this->ecr,
             'company'  => $this->company,
             'fdo'      => $this->fdo,
         ];
-        if (!empty($this->optional)) {
+        if ($this->date !== null) {
+            $arr['date'] = $this->date;
+        }
+        if ($this->optional !== null) {
             $arr['optional'] = $this->optional;
         }
-        if (!empty($this->params)) {
+        if ($this->params !== null) {
             $arr['params'] = $this->params;
         }
         return $arr;
+    }
+
+    /**
+     * Уникальный идентификатор чека в платежном шлюзе Uniteller.
+     *
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    /**
+     * Формат Y-m-d H:i:s.
+     *
+     * @return string|null
+     */
+    public function getDate(): ?string
+    {
+        return $this->date;
+    }
+
+    /**
+     * Тип документа.
+     *
+     * @see \Tmconsulting\Uniteller\Receipt\Enum\DocumentType
+     *
+     * @return int
+     */
+    public function getType(): int
+    {
+        return $this->type;
+    }
+
+    /**
+     * Информация о регистрации чека.
+     *
+     * @return \Tmconsulting\Uniteller\Receipt\Fiscal\Register
+     */
+    public function getRegister(): Register
+    {
+        return $this->register;
+    }
+
+    /**
+     * Информация о ККМ (контрольно-кассовой машине).
+     *
+     * @return \Tmconsulting\Uniteller\Receipt\Fiscal\ElectronicCashRegister
+     */
+    public function getEcr(): ElectronicCashRegister
+    {
+        return $this->ecr;
+    }
+
+    /**
+     * Информация о компании.
+     *
+     * @return \Tmconsulting\Uniteller\Receipt\Fiscal\Company
+     */
+    public function getCompany(): Company
+    {
+        return $this->company;
+    }
+
+    /**
+     * Информация об ОФД (Операторе Фискальных Данных).
+     *
+     * @return \Tmconsulting\Uniteller\Receipt\Fiscal\FiscalDataOperator
+     */
+    public function getFdo(): FiscalDataOperator
+    {
+        return $this->fdo;
+    }
+
+    /**
+     * Опциональный параметр с произвольными данными от мерчанта.
+     * Транслируется в неизменном виде во всех фискализированных чеках,
+     * созданных в процессе оплаты по исходному чеку для фискализации.
+     *
+     * Формат: JSON-объект произвольной внутренней структуры.
+     *
+     * @return array|null
+     */
+    public function getOptional(): ?array
+    {
+        return $this->optional;
+    }
+
+    /**
+     * Дополнительные параметры платежа.
+     * Блок может отсутствовать целиком или содержать не все элементы.
+     *
+     * В параметре place можно указать URL одного из сайтов,
+     * перечисленных в Личном кабинете налоговой мерчанта.
+     *
+     * @return \Tmconsulting\Uniteller\Receipt\Params|null
+     */
+    public function getParams(): ?Params
+    {
+        return $this->params;
     }
 }

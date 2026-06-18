@@ -56,7 +56,7 @@ class ItemTest extends TestCase
             1,
             0,
             10,
-            Vat::FREE,
+            Vat::NO_VAT,
             Payattr::ADVANCE_PAYMENT,
             Lineattr::PRODUCT
         );
@@ -72,7 +72,7 @@ class ItemTest extends TestCase
             0,
             0,
             10,
-            Vat::FREE,
+            Vat::NO_VAT,
             Payattr::ADVANCE_PAYMENT,
             Lineattr::PRODUCT
         );
@@ -104,7 +104,7 @@ class ItemTest extends TestCase
             1,
             0,
             10,
-            Vat::FREE,
+            Vat::NO_VAT,
             999,
             Lineattr::PRODUCT
         );
@@ -120,7 +120,7 @@ class ItemTest extends TestCase
             1,
             0,
             10,
-            Vat::FREE,
+            Vat::NO_VAT,
             Payattr::ADVANCE_PAYMENT,
             999
         );

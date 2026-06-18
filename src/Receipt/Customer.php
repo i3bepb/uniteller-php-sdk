@@ -12,37 +12,36 @@ class Customer implements \JsonSerializable
      *
      * @var string|null
      */
-    private $phone;
+    protected $phone;
 
     /**
      * Email плательщика.
      *
      * @var string|null
      */
-    private $email;
+    protected $email;
 
     /**
      * Идентификатор плательщика, присвоенный мерчантом.
      *
      * @var string|null
      */
-    private $id;
+    protected $id;
 
     /**
-     * Название плательщика.
+     * Имя/наименование плательщика.
      * Максимально 243 символов включительно.
      *
      * @var string|null
      */
-    private $name;
+    protected $name;
 
     /**
-     * ИНН плательщика.
-     * 10-12 цифр.
+     * ИНН плательщика. 10 или 12 цифр.
      *
-     * @var int|null
+     * @var string|null
      */
-    private $inn;
+    protected $inn;
 
     /**
      * Дата рождения плательщика.
@@ -50,15 +49,15 @@ class Customer implements \JsonSerializable
      *
      * @var string|null
      */
-    private $birthday;
+    protected $birthday;
 
     /**
-     * Гражданство. Три цифры код страны.
+     * Гражданство по ОКСМ — Общероссийскому классификатору стран мира. Три цифры код страны.
      * Например, 643 для России, 840 для США.
      *
      * @var string|null
      */
-    private $citizenship;
+    protected $citizenship;
 
     /**
      * Код вида документа, удостоверяющего личность.
@@ -68,7 +67,7 @@ class Customer implements \JsonSerializable
      *
      * @var string|null
      */
-    private $doccode;
+    protected $doccode;
 
     /**
      * Данные документа, удостоверяющего личность.
@@ -76,7 +75,7 @@ class Customer implements \JsonSerializable
      *
      * @var string|null
      */
-    private $docdata;
+    protected $docdata;
 
     /**
      * Адрес плательщика.
@@ -84,17 +83,17 @@ class Customer implements \JsonSerializable
      *
      * @var string|null
      */
-    private $address;
+    protected $address;
 
     /**
      * @param string|null $phone Номер телефона плательщика.
      * @param string|null $email Email плательщика.
      * @param string|null $id Идентификатор плательщика, присвоенный мерчантом.
-     * @param string|null $name Название плательщика. Максимально 243 символов включительно.
-     * @param int|string|null $inn ИНН плательщика. 10-12 цифр.
+     * @param string|null $name Имя/наименование плательщика. Максимально 243 символов включительно.
+     * @param int|string|null $inn ИНН плательщика. 10 или 12 цифр.
      * @param string|null $birthday Дата рождения плательщика. Формат ДД.ММ.ГГГГ
      * @param string|null $citizenship Гражданство. Три цифры. Смотри стандарт ISO 3166-1 numeric, например, 643 для России.
-     * @param string|null $doccode Код вида документа, удостоверяющего личность. See \Tmconsulting\Uniteller\Receipt\Enum\DocCode
+     * @param string|int|null $doccode Код вида документа, удостоверяющего личность. Смотри \Tmconsulting\Uniteller\Receipt\Enum\DocCode.
      * @param string|null $docdata Данные документа, удостоверяющего личность.
      * @param string|null $address Адрес плательщика.
      */
@@ -106,7 +105,7 @@ class Customer implements \JsonSerializable
         $inn = null,
         ?string $birthday = null,
         ?string $citizenship = null,
-        ?string $doccode = null,
+        $doccode = null,
         ?string $docdata = null,
         ?string $address = null
     )
@@ -118,9 +117,86 @@ class Customer implements \JsonSerializable
         $this->setInn($inn);
         $this->birthday = $birthday;
         $this->citizenship = $citizenship;
-        $this->doccode = $doccode;
+        $this->setDocCode($doccode);
         $this->docdata = $docdata;
         $this->address = $address;
+    }
+
+    #[\ReturnTypeWillChange]
+    public function jsonSerialize()
+    {
+        $arr = [];
+        if ($this->phone !== null) {
+            $arr['phone'] = $this->phone;
+        }
+        if ($this->email !== null) {
+            $arr['email'] = $this->email;
+        }
+        if ($this->id !== null) {
+            $arr['id'] = $this->id;
+        }
+        if ($this->name !== null) {
+            $arr['name'] = $this->name;
+        }
+        if ($this->inn !== null) {
+            $arr['inn'] = $this->inn;
+        }
+        if ($this->birthday !== null) {
+            $arr['birthday'] = $this->birthday;
+        }
+        if ($this->citizenship !== null) {
+            $arr['citizenship'] = $this->citizenship;
+        }
+        if ($this->doccode !== null) {
+            $arr['doccode'] = $this->doccode;
+        }
+        if ($this->docdata !== null) {
+            $arr['docdata'] = $this->docdata;
+        }
+        if ($this->address !== null) {
+            $arr['address'] = $this->address;
+        }
+        return $arr;
+    }
+    /**
+     * Возвращает номер телефона плательщика.
+     *
+     * @return string|null
+     */
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    /**
+     * Возвращает email плательщика.
+     *
+     * @return string|null
+     */
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    /**
+     * Возвращает идентификатор плательщика, присвоенный мерчантом.
+     *
+     * @return string|null
+     */
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    /**
+     * Возвращает название плательщика.
+     * Максимальная длина — 243 символа включительно.
+     *
+     * @return string|null
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
     }
 
     /**
@@ -128,47 +204,83 @@ class Customer implements \JsonSerializable
      */
     protected function setInn($inn)
     {
-        if (!empty($inn)) {
-            $this->inn = (int)$inn;
-        } else {
-            $this->inn = null;
-        }
+        $this->inn = ($inn !== null && $inn !== '' ? (string) $inn : null);
     }
 
-    #[\ReturnTypeWillChange]
-    public function jsonSerialize()
+    /**
+     * Возвращает ИНН плательщика.
+     *
+     * @return string|null
+     */
+    public function getInn(): ?string
     {
-        $arr = [];
-        if (!empty($this->phone)) {
-            $arr['phone'] = $this->phone;
-        }
-        if (!empty($this->email)) {
-            $arr['email'] = $this->email;
-        }
-        if (!empty($this->id)) {
-            $arr['id'] = $this->id;
-        }
-        if (!empty($this->name)) {
-            $arr['name'] = $this->name;
-        }
-        if (!empty($this->inn)) {
-            $arr['inn'] = $this->inn;
-        }
-        if (!empty($this->birthday)) {
-            $arr['birthday'] = $this->birthday;
-        }
-        if (!empty($this->citizenship)) {
-            $arr['citizenship'] = $this->citizenship;
-        }
-        if (!empty($this->doccode)) {
-            $arr['doccode'] = (int)$this->doccode;
-        }
-        if (!empty($this->docdata)) {
-            $arr['docdata'] = $this->docdata;
-        }
-        if (!empty($this->address)) {
-            $arr['address'] = $this->address;
-        }
-        return $arr;
+        return $this->inn;
+    }
+
+    /**
+     * Возвращает дату рождения плательщика.
+     * Формат: ДД.ММ.ГГГГ.
+     *
+     * @return string|null
+     */
+    public function getBirthday(): ?string
+    {
+        return $this->birthday;
+    }
+
+    /**
+     * Возвращает код страны гражданства плательщика.
+     *
+     * Трёхзначный код страны по стандарту ISO 3166-1 numeric.
+     * Например: 643 — Россия, 840 — США.
+     *
+     * @return string|null
+     */
+    public function getCitizenship(): ?string
+    {
+        return $this->citizenship;
+    }
+
+    /**
+     * @param string|int|null $docCode Код вида документа, удостоверяющего личность.
+     */
+    protected function setDocCode($docCode)
+    {
+        $this->doccode = ($docCode !== null && $docCode !== '' ? (string) $docCode : null);
+    }
+
+    /**
+     * Возвращает код вида документа, удостоверяющего личность.
+     * Например: 21 — паспорт гражданина РФ.
+     *
+     * @see \Tmconsulting\Uniteller\Receipt\Enum\DocCode
+     *
+     * @return string|null
+     */
+    public function getDocCode(): ?string
+    {
+        return $this->doccode;
+    }
+
+    /**
+     * Возвращает данные документа, удостоверяющего личность.
+     * Максимальная длина — 64 символа.
+     *
+     * @return string|null
+     */
+    public function getDocData(): ?string
+    {
+        return $this->docdata;
+    }
+
+    /**
+     * Возвращает адрес плательщика.
+     * Максимальная длина — 256 символов.
+     *
+     * @return string|null
+     */
+    public function getAddress(): ?string
+    {
+        return $this->address;
     }
 }

@@ -2,40 +2,74 @@
 
 namespace Tmconsulting\Uniteller\Receipt;
 
+/**
+ * Данные кассира.
+ */
 class Cashier implements \JsonSerializable
 {
     /**
-     * ФИО кассира.
-     * Максимально 240 символов включительно.
+     * ФИО кассира. Максимальная длина — 240 символов включительно.
      *
      * @var string|null
      */
-    private $name;
+    protected $name;
 
     /**
-     * ИНН кассира.
-     * 10 цифр.
+     * ИНН кассира. Содержит 12 или 10 цифр.
      *
-     * @var int
+     * @var string|null
      */
-    private $inn;
+    protected $inn;
 
     /**
-     * @param string|null $name ФИО кассира. Максимально 240 символов включительно.
-     * @param int|string|null $inn ИНН кассира. 10 цифр.
+     * @param string|null $name ФИО кассира. Максимальная длина — 240 символов включительно.
+     * @param int|string|null $inn ИНН кассира. Содержит 12 или 10 цифр.
      */
     public function __construct(?string $name = null, $inn = null)
     {
         $this->name = $name;
-        $this->inn = (int)$inn;
+        $this->setInn($inn);
     }
 
     #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
-        return [
-            'name' => $this->name,
-            'inn'  => $this->inn,
-        ];
+        $arr = [];
+        if ($this->name !== null) {
+            $arr['name'] = $this->name;
+        }
+        if ($this->inn !== null) {
+            $arr['inn'] = $this->inn;
+        }
+
+        return $arr;
+    }
+
+    /**
+     * Возвращает ФИО кассира. Максимальная длина — 240 символов включительно.
+     *
+     * @return string|null
+     */
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Возвращает ИНН кассира. Содержит 10 цифр.
+     *
+     * @return string|null
+     */
+    public function getInn(): ?string
+    {
+        return $this->inn;
+    }
+
+    /**
+     * @param int|string|null $inn
+     */
+    protected function setInn($inn)
+    {
+        $this->inn = ($inn !== null && $inn !== '' ? (string) $inn : null);
     }
 }
