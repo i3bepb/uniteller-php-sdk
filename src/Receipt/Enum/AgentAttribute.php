@@ -4,7 +4,7 @@ namespace Tmconsulting\Uniteller\Receipt\Enum;
 
 use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 
-class AgentAttribute
+final class AgentAttribute
 {
     use EnumToArrayTrait;
 

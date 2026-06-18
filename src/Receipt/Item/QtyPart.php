@@ -12,14 +12,14 @@ class QtyPart implements \JsonSerializable
      *
      * @var int
      */
-    private $numerator;
+    protected $numerator;
 
     /**
      * Знаменатель.
      *
      * @var int
      */
-    private $denominator;
+    protected $denominator;
 
     /**
      * @param int $numerator Числитель.
@@ -35,8 +35,28 @@ class QtyPart implements \JsonSerializable
     public function jsonSerialize()
     {
         return [
-            'numerator' => $this->numerator,
+            'numerator'   => $this->numerator,
             'denominator' => $this->denominator,
         ];
+    }
+
+    /**
+     * Возвращает числитель дробного количества товара.
+     *
+     * @return int
+     */
+    public function getNumerator(): int
+    {
+        return $this->numerator;
+    }
+
+    /**
+     * Возвращает знаменатель дробного количества товара.
+     *
+     * @return int
+     */
+    public function getDenominator(): int
+    {
+        return $this->denominator;
     }
 }

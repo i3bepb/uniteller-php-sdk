@@ -4,7 +4,7 @@ namespace Tmconsulting\Uniteller\Parameter\Enum;
 
 use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 
-class PaymentType
+final class PaymentType
 {
     use EnumToArrayTrait;
 

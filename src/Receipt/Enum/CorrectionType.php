@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Тип коррекции.
  */
-class CorrectionType
+final class CorrectionType
 {
     use EnumToArrayTrait;
 

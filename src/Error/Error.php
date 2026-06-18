@@ -7,7 +7,7 @@
 
 namespace Tmconsulting\Uniteller\Error;
 
-class Error
+final class Error
 {
     /**
      * Authentication error

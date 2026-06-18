@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Список дополнительных полей, передаваемых в уведомлении об изменении статуса заказа.
  */
-class CallbackFields
+final class CallbackFields
 {
     use EnumToArrayTrait;
 

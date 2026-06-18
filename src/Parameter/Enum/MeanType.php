@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Платёжная система кредитной карты.
  */
-class MeanType
+final class MeanType
 {
     use EnumToArrayTrait;
 

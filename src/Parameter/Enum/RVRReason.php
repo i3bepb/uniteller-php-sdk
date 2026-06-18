@@ -13,7 +13,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
  * Причина отмена операции.
  * По умолчанию 1.
  */
-class RVRReason
+final class RVRReason
 {
     use EnumToArrayTrait;
 

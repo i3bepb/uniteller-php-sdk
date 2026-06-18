@@ -2,6 +2,9 @@
 
 namespace Tmconsulting\Uniteller\Receipt\Item;
 
+/**
+ * Данные агента и поставщика по товарной позиции.
+ */
 class Agent implements \JsonSerializable
 {
     /**
@@ -11,80 +14,80 @@ class Agent implements \JsonSerializable
      *
      * @var int
      */
-    private $agentattr;
+    protected $agentattr;
 
     /**
      * Телефон платежного агента.
      *
      * @var string|null
      */
-    private $agentphone;
+    protected $agentphone;
 
     /**
      * Телефон оператора по приему платежей.
      *
      * @var string|null
      */
-    private $accopphone;
+    protected $accopphone;
 
     /**
      * Телефон оператора перевода.
      *
      * @var string|null
      */
-    private $opphone;
+    protected $opphone;
 
     /**
      * Наименование оператора перевода.
      *
      * @var string|null
      */
-    private $opname;
+    protected $opname;
 
     /**
      * ИНН оператора перевода.
      *
      * @var string|null
      */
-    private $opinn;
+    protected $opinn;
 
     /**
      * Адрес оператора перевода.
      *
      * @var string|null
      */
-    private $opaddress;
+    protected $opaddress;
 
     /**
      * Операция платежного агента.
      *
      * @var string|null
      */
-    private $operation;
+    protected $operation;
 
     /**
      * Наименование поставщика.
      *
      * @var string|null
      */
-    private $suppliername;
+    protected $suppliername;
 
     /**
      * ИНН поставщика.
      *
      * @var string|null
      */
-    private $supplierinn;
+    protected $supplierinn;
 
     /**
      * Телефон поставщика, строго в формате "+7XXXXXXXXXX" или "+7-XXX-XXX-XX-XX".
      *
      * @var string|null
      */
-    private $supplierphone;
+    protected $supplierphone;
 
     /**
-     * @param string $agentattr Признак агента. See \Tmconsulting\Uniteller\Receipt\Enum\AgentAttribute.
+     * @param string|int $agentattr Признак агента. See \Tmconsulting\Uniteller\Receipt\Enum\AgentAttribute.
      * @param string|null $agentphone Телефон платежного агента.
      * @param string|null $accopphone Телефон оператора по приему платежей.
      * @param string|null $opphone Телефон оператора перевода.
@@ -97,7 +100,7 @@ class Agent implements \JsonSerializable
      * @param string|null $supplierphone Телефон поставщика, строго в формате "+7XXXXXXXXXX" или "+7-XXX-XXX-XX-XX".
      */
     public function __construct(
-        string  $agentattr,
+        $agentattr,
         ?string $agentphone = null,
         ?string $accopphone = null,
         ?string $opphone = null,
@@ -163,6 +166,10 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает признак агента.
+     *
+     * @see \Tmconsulting\Uniteller\Receipt\Enum\AgentAttribute
+     *
      * @return int
      */
     public function getAgentAttr(): int
@@ -171,6 +178,8 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает телефон платежного агента.
+     *
      * @return string|null
      */
     public function getAgentPhone(): ?string
@@ -179,6 +188,8 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает телефон оператора по приему платежей.
+     *
      * @return string|null
      */
     public function getAccOpPhone(): ?string
@@ -187,6 +198,8 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает телефон оператора перевода.
+     *
      * @return string|null
      */
     public function getOpPhone(): ?string
@@ -195,6 +208,8 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает наименование оператора перевода.
+     *
      * @return string|null
      */
     public function getOpName(): ?string
@@ -203,6 +218,8 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает ИНН оператора перевода.
+     *
      * @return string|null
      */
     public function getOpInn(): ?string
@@ -211,6 +228,8 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает адрес оператора перевода.
+     *
      * @return string|null
      */
     public function getOpAddress(): ?string
@@ -219,6 +238,8 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает описание операции платежного агента.
+     *
      * @return string|null
      */
     public function getOperation(): ?string
@@ -227,6 +248,8 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает наименование поставщика.
+     *
      * @return string|null
      */
     public function getSupplierName(): ?string
@@ -235,6 +258,8 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает ИНН поставщика.
+     *
      * @return string|null
      */
     public function getSupplierInn(): ?string
@@ -243,6 +268,10 @@ class Agent implements \JsonSerializable
     }
 
     /**
+     * Возвращает телефон поставщика.
+     *
+     * Допустимый формат: +7XXXXXXXXXX или +7-XXX-XXX-XX-XX.
+     *
      * @return string|null
      */
     public function getSupplierPhone(): ?string

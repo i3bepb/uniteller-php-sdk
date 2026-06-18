@@ -3,8 +3,7 @@
 namespace Tmconsulting\Uniteller\Receipt\Fiscal;
 
 /**
- * ОФД (Оператор Фискальных Данных).
- * Fiscal Data Operator" (FDO)
+ * Информация об ОФД (Операторе Фискальных Данных).
  */
 class FiscalDataOperator implements \JsonSerializable
 {
@@ -13,21 +12,21 @@ class FiscalDataOperator implements \JsonSerializable
      *
      * @var string
      */
-    private $name;
+    protected $name;
 
     /**
      * ИНН оператора фискальных данных.
      *
      * @var string
      */
-    private $inn;
+    protected $inn;
 
     /**
      * Адрес сайта ОФД.
      *
      * @var string
      */
-    private $www;
+    protected $www;
 
     /**
      * @param string $name Название компании ОФД.
@@ -49,5 +48,35 @@ class FiscalDataOperator implements \JsonSerializable
             'inn'  => $this->inn,
             'www'  => $this->www,
         ];
+    }
+
+    /**
+     * Возвращает название компании ОФД.
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Возвращает ИНН оператора фискальных данных.
+     *
+     * @return string
+     */
+    public function getInn(): string
+    {
+        return $this->inn;
+    }
+
+    /**
+     * Возвращает адрес сайта ОФД.
+     *
+     * @return string
+     */
+    public function getWww(): string
+    {
+        return $this->www;
     }
 }

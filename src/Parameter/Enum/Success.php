@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Какие операции включать в ответ.
  */
-class Success
+final class Success
 {
     use EnumToArrayTrait;
 

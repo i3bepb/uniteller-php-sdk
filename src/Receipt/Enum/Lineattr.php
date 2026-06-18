@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Признак предмета расчета.
  */
-class Lineattr
+final class Lineattr
 {
     use EnumToArrayTrait;
 

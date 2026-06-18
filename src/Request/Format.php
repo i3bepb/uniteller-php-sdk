@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Exception\EndpointNotSupportedException;
 use Tmconsulting\Uniteller\Exception\FormatNotSupportedException;
 use Tmconsulting\Uniteller\Exception\ParserNotImplementedException;
 
-class Format
+final class Format
 {
     use EnumToArrayTrait;
 

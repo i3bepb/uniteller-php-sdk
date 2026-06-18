@@ -3,7 +3,7 @@
 namespace Tmconsulting\Uniteller\Receipt\Fiscal;
 
 /**
- * Информации о регистрации чека.
+ * Информация о регистрации чека.
  */
 class Register implements \JsonSerializable
 {
@@ -12,66 +12,71 @@ class Register implements \JsonSerializable
      *
      * @var string
      */
-    private $fiscalNumber;
+    protected $fiscalNumber;
 
     /**
      * Номер смены.
      *
      * @var string
      */
-    private $shiftNumber;
+    protected $shiftNumber;
 
     /**
      * Номер чека внутри смены.
      *
      * @var string
      */
-    private $shiftIndex;
+    protected $shiftIndex;
 
     /**
      * Дата регистрации документа в ФН.
      *
      * @var string
      */
-    private $fiscalDate;
+    protected $fiscalDate;
 
     /**
-     * Фискальный признак документа.
+     * Фискальный признак документа - криптографически сформированное значение, которым фискальный
+     * накопитель "подписывает" конкретный фискальный документ/чек.
      *
      * @var string
      */
-    private $fiscalAttr;
+    protected $fiscalAttr;
 
     /**
      * Дата регистрации документа в ОФД.
      *
      * @var string
      */
-    private $fdoDate;
+    protected $fdoDate;
 
     /**
      * Фискальный признак от ОФД.
      *
      * @var string
      */
-    private $fdoAttr;
+    protected $fdoAttr;
 
     /**
      * Ссылка для проверки чека на сайте налоговой.
      *
      * @var string|null
      */
-    private $fiscalLink;
+    protected $fiscalLink;
 
     /**
-     * @var string
+     * ФФД «QR-код», тег 1196.
+     *
+     * @var string|null
      */
-    private $qr;
+    protected $qr;
 
     /**
-     * @var array
+     * Результаты проверки кодов маркировки товаров.
+     *
+     * @var array|null
      */
-    private $markingInfo;
+    protected $markingInfo;
 
     /**
      * @param string $fiscalNumber Фискальный номер документа.
@@ -82,8 +87,8 @@ class Register implements \JsonSerializable
      * @param string $fdoDate Дата регистрации документа в ОФД.
      * @param string $fdoAttr Фискальный признак от ОФД.
      * @param string|null $fiscalLink Ссылка для проверки чека на сайте налоговой.
-     * @param string|null $qr
-     * @param array|null $markingInfo
+     * @param string|null $qr ФФД «QR-код», тег 1196.
+     * @param array|null $markingInfo Результаты проверки кодов маркировки товаров.
      */
     public function __construct(
         string $fiscalNumber,
@@ -96,8 +101,7 @@ class Register implements \JsonSerializable
         ?string $fiscalLink = null,
         ?string $qr = null,
         ?array $markingInfo = null
-    )
-    {
+    ) {
         $this->fiscalNumber = $fiscalNumber;
         $this->shiftNumber = $shiftNumber;
         $this->shiftIndex = $shiftIndex;
@@ -122,15 +126,117 @@ class Register implements \JsonSerializable
             'fdo_date'      => $this->fdoDate,
             'fdo_attr'      => $this->fdoAttr,
         ];
-        if (!empty($this->fiscalLink)) {
+        if ($this->fiscalLink !== null) {
             $arr['fiscal_link'] = $this->fiscalLink;
         }
-        if (!empty($this->qr)) {
+        if ($this->qr !== null) {
             $arr['qr'] = $this->qr;
         }
-        if (!empty($this->markingInfo)) {
-            $arr['markinginfo'] = json_encode($this->markingInfo);
+        if ($this->markingInfo !== null) {
+            $arr['markinginfo'] = $this->markingInfo;
         }
+
         return $arr;
+    }
+
+    /**
+     * Возвращает фискальный номер документа.
+     *
+     * @return string
+     */
+    public function getFiscalNumber(): string
+    {
+        return $this->fiscalNumber;
+    }
+
+    /**
+     * Возвращает номер смены.
+     *
+     * @return string
+     */
+    public function getShiftNumber(): string
+    {
+        return $this->shiftNumber;
+    }
+
+    /**
+     * Возвращает номер чека внутри смены.
+     *
+     * @return string
+     */
+    public function getShiftIndex(): string
+    {
+        return $this->shiftIndex;
+    }
+
+    /**
+     * Возвращает дату регистрации документа в ФН.
+     *
+     * @return string
+     */
+    public function getFiscalDate(): string
+    {
+        return $this->fiscalDate;
+    }
+
+    /**
+     * Возвращает фискальный признак документа.
+     *
+     * @return string
+     */
+    public function getFiscalAttr(): string
+    {
+        return $this->fiscalAttr;
+    }
+
+    /**
+     * Возвращает дату регистрации документа в ОФД.
+     *
+     * @return string
+     */
+    public function getFdoDate(): string
+    {
+        return $this->fdoDate;
+    }
+
+    /**
+     * Возвращает фискальный признак от ОФД.
+     *
+     * @return string
+     */
+    public function getFdoAttr(): string
+    {
+        return $this->fdoAttr;
+    }
+
+    /**
+     * Возвращает ссылку для проверки чека на сайте налоговой.
+     *
+     * @return string|null
+     */
+    public function getFiscalLink(): ?string
+    {
+        return $this->fiscalLink;
+    }
+
+    /**
+     * ФФД «QR-код», тег 1196.
+     *
+     * @return string|null
+     */
+    public function getQr(): ?string
+    {
+        return $this->qr;
+    }
+
+    /**
+     * Результаты проверки кодов маркировки товаров.
+     * Структура поля в документации Uniteller не описана.
+     *
+     * @return array|null
+     */
+    public function getMarkingInfo(): ?array
+    {
+        return $this->markingInfo;
     }
 }

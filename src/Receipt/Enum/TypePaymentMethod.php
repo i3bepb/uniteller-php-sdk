@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Тип дополнительного платежного средства.
  */
-class TypePaymentMethod
+final class TypePaymentMethod
 {
     use EnumToArrayTrait;
 

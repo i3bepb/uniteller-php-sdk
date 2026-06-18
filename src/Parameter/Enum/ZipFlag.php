@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Режим выдачи результата.
  */
-class ZipFlag
+final class ZipFlag
 {
     use EnumToArrayTrait;
 

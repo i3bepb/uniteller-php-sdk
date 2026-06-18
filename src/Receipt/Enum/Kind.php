@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Вид платежного средства.
  */
-class Kind
+final class Kind
 {
     use EnumToArrayTrait;
 

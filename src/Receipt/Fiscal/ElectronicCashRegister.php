@@ -3,8 +3,7 @@
 namespace Tmconsulting\Uniteller\Receipt\Fiscal;
 
 /**
- * Информации о ККМ (контрольно-кассовая машина).
- * Electronic Cash Register (ECR).
+ * Информация о ККМ (контрольно-кассовой машине).
  */
 class ElectronicCashRegister implements \JsonSerializable
 {
@@ -13,21 +12,21 @@ class ElectronicCashRegister implements \JsonSerializable
      *
      * @var string
      */
-    private $sn;
+    protected $sn;
 
     /**
      * Регистрационный номер ККМ.
      *
      * @var string
      */
-    private $rn;
+    protected $rn;
 
     /**
      * Номер фискального накопителя.
      *
      * @var string
      */
-    private $fs;
+    protected $fs;
 
     /**
      * @param string $sn Заводской номер ККМ.
@@ -49,5 +48,35 @@ class ElectronicCashRegister implements \JsonSerializable
             'rn' => $this->rn,
             'fs' => $this->fs,
         ];
+    }
+
+    /**
+     * Возвращает заводской номер ККМ.
+     *
+     * @return string
+     */
+    public function getSn(): string
+    {
+        return $this->sn;
+    }
+
+    /**
+     * Возвращает регистрационный номер ККМ.
+     *
+     * @return string
+     */
+    public function getRn(): string
+    {
+        return $this->rn;
+    }
+
+    /**
+     * Возвращает номер фискального накопителя.
+     *
+     * @return string
+     */
+    public function getFs(): string
+    {
+        return $this->fs;
     }
 }

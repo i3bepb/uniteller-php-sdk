@@ -12,7 +12,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Валюта
  */
-class Currency
+final class Currency
 {
     use EnumToArrayTrait;
 

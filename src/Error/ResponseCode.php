@@ -15,7 +15,7 @@ namespace Tmconsulting\Uniteller\Error;
  * Response_code имеет смысл только по оплатам картами.
  * По операциям с электронными валютами этот параметр не имеет смысла, так как оплата является отложенной.
  */
-class ResponseCode
+final class ResponseCode
 {
     /**
      * @var array

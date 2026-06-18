@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Тип документа
  */
-class DocumentType
+final class DocumentType
 {
     use EnumToArrayTrait;
 

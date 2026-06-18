@@ -10,7 +10,7 @@ namespace Tmconsulting\Uniteller\Builder\Enum;
 /**
  * Class Type
  */
-class Type
+final class Type
 {
     /**
      * Оплата кредитной картой;

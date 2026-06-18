@@ -5,44 +5,46 @@ namespace Tmconsulting\Uniteller\Receipt;
 use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
 use Tmconsulting\Uniteller\Receipt\Enum\Lineattr;
 use Tmconsulting\Uniteller\Receipt\Enum\Payattr;
-use Tmconsulting\Uniteller\Receipt\Enum\Vat;
 use Tmconsulting\Uniteller\Receipt\Item\Agent;
 use Tmconsulting\Uniteller\Receipt\Item\Product;
 use Tmconsulting\Uniteller\Receipt\Item\QtyPart;
+use Tmconsulting\Uniteller\Support\RawDataAwareTrait;
 
 /**
  * Описание позиции.
  */
 class Item implements \JsonSerializable
 {
+    use RawDataAwareTrait;
+
     /**
      * Наименование позиции.
      * Максимально 128 символов.
      *
      * @var string
      */
-    private $name;
+    protected $name;
 
     /**
      * Цена за единицу измерения.
      *
-     * @var float
+     * @var string
      */
-    private $price;
+    protected $price;
 
     /**
      * Количество. Не может иметь нулевое значение.
      *
      * @var int
      */
-    private $qty = 0;
+    protected $qty;
 
     /**
      * Дробное количество маркированного товара. Доступно только для товаров с маркировкой.
      *
      * @var \Tmconsulting\Uniteller\Receipt\Item\QtyPart|null
      */
-    private $qtypart;
+    protected $qtypart;
 
     /**
      * Код меры количества предмета расчета.
@@ -51,14 +53,14 @@ class Item implements \JsonSerializable
      *
      * @var int
      */
-    private $unit;
+    protected $unit;
 
     /**
      * Сумма.
      *
-     * @var float
+     * @var string
      */
-    private $sum = 0;
+    protected $sum;
 
     /**
      * Код значения ставки НДС.
@@ -67,7 +69,7 @@ class Item implements \JsonSerializable
      *
      * @var int
      */
-    private $vat = Vat::FREE;
+    protected $vat;
 
     /**
      * Признак способа расчета.
@@ -76,7 +78,7 @@ class Item implements \JsonSerializable
      *
      * @var int
      */
-    private $payattr;
+    protected $payattr;
 
     /**
      * Признак предмета расчета.
@@ -85,21 +87,42 @@ class Item implements \JsonSerializable
      *
      * @var int
      */
-    private $lineattr;
+    protected $lineattr;
 
     /**
      * Дополнительные сведения о продукте.
      *
      * @var \Tmconsulting\Uniteller\Receipt\Item\Product|null
      */
-    private $product;
+    protected $product;
 
     /**
      * Данные агента.
      *
      * @var \Tmconsulting\Uniteller\Receipt\Item\Agent|null
      */
-    private $agent;
+    protected $agent;
+
+    /**
+     * Планируемый статус товара, подлежащего обязательной маркировке средством идентификации (тег 2003, goodstatus).
+     * Параметр обязателен для маркированного товара и может принимать одно из значений GoodStatus.
+     *
+     * @see \Tmconsulting\Uniteller\Receipt\Enum\GoodStatus
+     *
+     * @var int|null
+     */
+    protected $goodstatus;
+
+    /**
+     * Отраслевые реквизиты предмета расчёта.
+     *
+     * Каждый элемент массива содержит идентификатор федерального органа исполнительной власти, дату и номер
+     * документа-основания, а также значение отраслевого реквизита. Значение передаётся в формате
+     * param1=value1&param2=value2...; символ & внутри значения должен передаваться как &&.
+     *
+     * @var \Tmconsulting\Uniteller\Receipt\IndustryProps[]|null
+     */
+    protected $industryProps;
 
     /**
      * @param string $name Наименование позиции. Максимально 128 символов.
@@ -113,8 +136,12 @@ class Item implements \JsonSerializable
      * @param \Tmconsulting\Uniteller\Receipt\Item\Product|null $product Дополнительные сведения о продукте.
      * @param \Tmconsulting\Uniteller\Receipt\Item\Agent|null $agent Данные агента.
      * @param \Tmconsulting\Uniteller\Receipt\Item\QtyPart|null $qtypart Дробное количество маркированного товара.
+     * @param int|null $goodstatus Планируемый статус товара, подлежащего обязательной маркировке средством идентификации (тег 2003, goodstatus).
+     * @param \Tmconsulting\Uniteller\Receipt\IndustryProps[]|null $industryProps Отраслевые реквизиты предмета расчёта.
+     * @param array $rawData Исходные данные, т.е. ассоциативный массив, который получился из json.
      *
      * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
+     * @throws \ReflectionException
      */
     public function __construct(
         string   $name,
@@ -127,20 +154,26 @@ class Item implements \JsonSerializable
         int      $lineattr,
         ?Product $product = null,
         ?Agent   $agent = null,
-        ?QtyPart $qtypart = null
+        ?QtyPart $qtypart = null,
+        ?int     $goodstatus = null,
+        ?array   $industryProps = null,
+        array    $rawData = []
     )
     {
-        $this->setName($name);
-        $this->price = (float)$price;
+        $this->name = $name;
+        $this->price = (string)$price;
         $this->setQty($qty);
         $this->qtypart = $qtypart;
         $this->unit = $unit;
-        $this->sum = (float)$sum;
-        $this->setVat($vat);
+        $this->sum = (string)$sum;
+        $this->vat = $vat;
         $this->setPayattr($payattr);
         $this->setLineattr($lineattr);
         $this->product = $product;
         $this->agent = $agent;
+        $this->goodstatus = $goodstatus;
+        $this->setIndustryProps($industryProps);
+        $this->setRawData($rawData);
     }
 
     #[\ReturnTypeWillChange]
@@ -150,33 +183,28 @@ class Item implements \JsonSerializable
             'name'     => $this->name,
             'price'    => $this->price,
             'qty'      => $this->qty,
-            'qtypart'  => $this->qtypart,
             'unit'     => $this->unit,
             'sum'      => $this->sum,
             'vat'      => $this->vat,
             'payattr'  => $this->payattr,
             'lineattr' => $this->lineattr,
         ];
-        if (!empty($this->product)) {
+        if ($this->qtypart !== null) {
+            $arr['qtypart'] = $this->qtypart;
+        }
+        if ($this->product !== null) {
             $arr['product'] = $this->product;
         }
-        if (!empty($this->agent)) {
+        if ($this->agent !== null) {
             $arr['agent'] = $this->agent;
         }
-        return $arr;
-    }
-
-    /**
-     * @param string $name
-     *
-     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
-     */
-    protected function setName(string $name)
-    {
-        if (mb_strlen($name) > 128) {
-            throw new NotValidParameterException('Not valid parameter name, max 128 chars');
+        if ($this->goodstatus !== null) {
+            $arr['goodstatus'] = $this->goodstatus;
         }
-        $this->name = $name;
+        if ($this->industryProps !== null) {
+            $arr['industryProps'] = $this->industryProps;
+        }
+        return $arr;
     }
 
     /**
@@ -190,22 +218,6 @@ class Item implements \JsonSerializable
             throw new NotValidParameterException('Not valid parameter qty, must be > 0');
         }
         $this->qty = $qty;
-    }
-
-    /**
-     * @param int $vat
-     *
-     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException
-     */
-    protected function setVat(int $vat)
-    {
-        $vats = Vat::toArray();
-        if (!in_array($vat, $vats, true)) {
-            throw new NotValidParameterException(
-                'Not valid parameter vat, must be one of the values: ' . implode(',', $vats)
-            );
-        }
-        $this->vat = $vat;
     }
 
     /**
@@ -241,6 +253,122 @@ class Item implements \JsonSerializable
     }
 
     /**
+     * Возвращает наименование позиции.
+     *
+     * Максимальная длина — 128 символов.
+     *
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Возвращает цену за единицу измерения.
+     *
+     * @return string
+     */
+    public function getPrice(): string
+    {
+        return $this->price;
+    }
+
+    /**
+     * Возвращает количество товара.
+     *
+     * Значение не может быть равно нулю.
+     *
+     * @return int
+     */
+    public function getQty(): int
+    {
+        return $this->qty;
+    }
+
+    /**
+     * Возвращает дробное количество маркированного товара.
+     *
+     * Параметр используется только для товаров с маркировкой.
+     *
+     * @return \Tmconsulting\Uniteller\Receipt\Item\QtyPart|null
+     */
+    public function getQtyPart(): ?QtyPart
+    {
+        return $this->qtypart;
+    }
+
+    /**
+     * Возвращает код меры количества предмета расчета.
+     *
+     * @see \Tmconsulting\Uniteller\Receipt\Enum\Unit
+     *
+     * @return int
+     */
+    public function getUnit(): int
+    {
+        return $this->unit;
+    }
+
+    /**
+     * Возвращает сумму по позиции.
+     *
+     * @return string
+     */
+    public function getSum(): string
+    {
+        return $this->sum;
+    }
+
+    /**
+     * Возвращает код значения ставки НДС.
+     *
+     * @see \Tmconsulting\Uniteller\Receipt\Enum\Vat
+     *
+     * @return int
+     */
+    public function getVat(): int
+    {
+        return $this->vat;
+    }
+
+    /**
+     * Возвращает признак способа расчета.
+     *
+     * @see \Tmconsulting\Uniteller\Receipt\Enum\Payattr
+     *
+     * @return int
+     */
+    public function getPayattr(): int
+    {
+        return $this->payattr;
+    }
+
+    /**
+     * Возвращает признак предмета расчета.
+     *
+     * @see \Tmconsulting\Uniteller\Receipt\Enum\Lineattr
+     *
+     * @return int
+     */
+    public function getLineattr(): int
+    {
+        return $this->lineattr;
+    }
+
+    /**
+     * Возвращает дополнительные сведения о продукте.
+     *
+     * @return \Tmconsulting\Uniteller\Receipt\Item\Product|null
+     */
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    /**
+     * Возвращает данные агента.
+     *
      * @return \Tmconsulting\Uniteller\Receipt\Item\Agent|null
      */
     public function getAgent(): ?Agent
@@ -248,4 +376,34 @@ class Item implements \JsonSerializable
         return $this->agent;
     }
 
+    /**
+     * Планируемый статус товара, подлежащего обязательной маркировке средством идентификации (тег 2003, goodstatus).
+     * Параметр обязателен для маркированного товара и может принимать одно из значений GoodStatus.
+     *
+     * @see \Tmconsulting\Uniteller\Receipt\Enum\GoodStatus
+     *
+     * @return int|null
+     */
+    public function getGoodstatus(): ?int
+    {
+        return $this->goodstatus;
+    }
+
+    /**
+     * @param array|null $industryProps Отраслевые реквизиты предмета расчёта.
+     */
+    public function setIndustryProps(?array $industryProps)
+    {
+        $this->industryProps = !empty($industryProps) ? $industryProps : null;
+    }
+
+    /**
+     * Возвращает отраслевые реквизиты предмета расчёта.
+     *
+     * @return \Tmconsulting\Uniteller\Receipt\IndustryProps[]|null
+     */
+    public function getIndustryProps(): ?array
+    {
+        return $this->industryProps;
+    }
 }

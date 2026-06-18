@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Параметр S_FIELDS определяет набор информационных полей, возвращаемых в ответе на запрос.
  */
-class SFields
+final class SFields
 {
     use EnumToArrayTrait;
 
@@ -242,4 +242,8 @@ class SFields
      * Неизвестно
      */
     const BNPL_REQUEST_ID = 'bnplRequestId';
+    /**
+     * Ссылка на подробную информацию о заказе
+     */
+    const LK_ORDER_URL = 'LkOrderUrl';
 }

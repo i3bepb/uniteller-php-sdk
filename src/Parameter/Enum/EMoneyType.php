@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Тип электронной валюты.
  */
-class EMoneyType
+final class EMoneyType
 {
     use EnumToArrayTrait;
 

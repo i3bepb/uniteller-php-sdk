@@ -97,6 +97,7 @@ class ParserCsv implements ParserInterface
                 ->setGiftCert($item[SFields::GIFT_CERT] ?? null)
                 ->setOpkcID($item[SFields::OPKC_ID] ?? null)
                 ->setTpayRequestId($item[SFields::TPAY_REQUEST_ID] ?? null)
+                ->setLkOrderUrl($item[SFields::LK_ORDER_URL] ?? null)
                 ->setBnplRequestId($item[SFields::BNPL_REQUEST_ID] ?? null);
             if (isset($item[SFields::CVC2])) {
                 $order->setCvc2((int)$item[SFields::CVC2]);

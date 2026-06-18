@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Признак способа расчета.
  */
-class Payattr
+final class Payattr
 {
     use EnumToArrayTrait;
 

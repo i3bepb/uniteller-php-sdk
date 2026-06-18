@@ -10,6 +10,7 @@ use Tmconsulting\Uniteller\Receipt\Fiscal\ElectronicCashRegister;
 use Tmconsulting\Uniteller\Receipt\Fiscal\FiscalDataOperator;
 use Tmconsulting\Uniteller\Receipt\Fiscal\Register;
 use Tmconsulting\Uniteller\Receipt\FiscalReceipt;
+use Tmconsulting\Uniteller\Receipt\IndustryProps;
 use Tmconsulting\Uniteller\Receipt\Item;
 use Tmconsulting\Uniteller\Receipt\Item\Agent;
 use Tmconsulting\Uniteller\Receipt\Item\Product;
@@ -20,7 +21,7 @@ use Tmconsulting\Uniteller\Receipt\PaymentInfo;
 class ParserReceiptFromBase64
 {
     /**
-     * @param string $base64
+     * @param string $base64 Чек в формате base64.
      *
      * @return \Tmconsulting\Uniteller\Receipt\FiscalReceipt[]
      *
@@ -40,7 +41,13 @@ class ParserReceiptFromBase64
         if ($arr === null) {
             throw new \RuntimeException('Not valid json receipt');
         }
+        if (!is_array($arr)) {
+            throw new \RuntimeException('Invalid receipt structure');
+        }
         foreach ($arr as $data) {
+            if (!is_array($data)) {
+                throw new \RuntimeException('Invalid receipt structure');
+            }
             $lines = [];
             if (!empty($data['lines'])) {
                 foreach ($data['lines'] as $line) {
@@ -76,18 +83,33 @@ class ParserReceiptFromBase64
                             (int)$line['qtypart']['denominator']
                         );
                     }
+                    $industryProps = [];
+                    if (!empty($line['industryProps']) && is_array($line['industryProps'])) {
+                        foreach ($line['industryProps'] as $industryProp) {
+                            $industryProps[] = new IndustryProps(
+                                isset($industryProp['id']) ? (string)$industryProp['id'] : null,
+                                isset($industryProp['date']) ? (string)$industryProp['date'] : null,
+                                isset($industryProp['number']) ? (string)$industryProp['number'] : null,
+                                isset($industryProp['values']) ? (string)$industryProp['values'] : null,
+                                $industryProp
+                            );
+                        }
+                    }
                     $lines[] = new Item(
                         $line['name'],
                         $line['price'],
                         (int)$line['qty'],
-                        (int)$line['unit'],
+                        (empty($line['unit']) ? 0 : (int)$line['unit']),
                         $line['sum'],
                         (int)$line['vat'],
                         (int)$line['payattr'],
                         (int)$line['lineattr'],
                         $product,
                         $agent,
-                        $qtyPart
+                        $qtyPart,
+                        isset($line['goodstatus']) ? (int)$line['goodstatus'] : null,
+                        $industryProps,
+                        $line
                     );
                 }
             }
@@ -132,14 +154,15 @@ class ParserReceiptFromBase64
                     $payments[] = new PaymentInfo(
                         (int)$payment['kind'],
                         (int)$payment['type'],
-                        (float)$payment['amount'],
-                        $payment['id'] ?? null
+                        (string)$payment['amount'],
+                        isset($payment['id']) ? (string)$payment['id'] : null,
+                        $payment
                     );
                 }
             }
 
             $optionalFiscal = null;
-            if (!empty($data['fiscal']['optional'])) {
+            if (!empty($data['fiscal']['optional']) && is_array($data['fiscal']['optional'])) {
                 $optionalFiscal = $data['fiscal']['optional'];
             }
             $register = new Register(
@@ -154,22 +177,37 @@ class ParserReceiptFromBase64
                 $data['fiscal']['register']['qr'] ?? null,
                 $data['fiscal']['register']['markinginfo'] ?? null
             );
-            $paramsFiscal = null;
-            if (!empty($data['fiscal']['params']['place'])) {
-                $paramsFiscal = new Params($data['fiscal']['params']['place']);
+            $fiscalParams = null;
+            if (isset($data['fiscal']['params']['place'])) {
+                $fiscalParams = new Params(
+                    (string)$data['fiscal']['params']['place']
+                );
             }
             $fiscal = new Fiscal(
                 $data['fiscal']['id'],
-                $data['fiscal']['date'],
+                isset($data['fiscal']['date']) ? (string)$data['fiscal']['date'] : null,
                 (int)$data['fiscal']['type'],
                 new ElectronicCashRegister($data['fiscal']['ecr']['sn'], $data['fiscal']['ecr']['rn'], $data['fiscal']['ecr']['fs']),
-                new Company($data['fiscal']['company']['name'], (int)$data['fiscal']['company']['inn']),
+                new Company($data['fiscal']['company']['name'], $data['fiscal']['company']['inn']),
                 new FiscalDataOperator($data['fiscal']['fdo']['name'], $data['fiscal']['fdo']['inn'], $data['fiscal']['fdo']['www']),
                 $register,
                 $optionalFiscal,
-                $paramsFiscal
+                $fiscalParams
             );
+            $industryProps = [];
+            if (!empty($data['industryProps']) && is_array($data['industryProps'])) {
+                foreach ($data['industryProps'] as $industryProp) {
+                    $industryProps[] = new IndustryProps(
+                        isset($industryProp['id']) ? (string)$industryProp['id'] : null,
+                        isset($industryProp['date']) ? (string)$industryProp['date'] : null,
+                        isset($industryProp['number']) ? (string)$industryProp['number'] : null,
+                        isset($industryProp['values']) ? (string)$industryProp['values'] : null,
+                        $industryProp
+                    );
+                }
+            }
             $receipts[] = new FiscalReceipt(
+                $data,
                 $fiscal,
                 (int)$data['taxmode'],
                 $lines,
@@ -179,8 +217,16 @@ class ParserReceiptFromBase64
                 $optional,
                 $customer,
                 $cashier,
+                isset($data['internet']) ? (int)$data['internet'] : null,
+                isset($data['timezone']) ? (int)$data['timezone'] : null,
+                $data['additionalRequisite'] ?? null,
                 $params,
-                $userrequisite
+                $userrequisite,
+                $industryProps,
+                isset($data['correctionType']) ? (int)$data['correctionType'] : null,
+                isset($data['causeDocumentNumber']) ? (string)$data['causeDocumentNumber'] : null,
+                isset($data['causeDocumentDate']) ? (string)$data['causeDocumentDate'] : null,
+                isset($data['correctionSubject']) ? (int)$data['correctionSubject'] : null
             );
         }
         return $receipts;

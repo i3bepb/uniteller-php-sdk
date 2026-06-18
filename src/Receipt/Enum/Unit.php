@@ -7,7 +7,7 @@ use Tmconsulting\Uniteller\Builder\Enum\EnumToArrayTrait;
 /**
  * Мера количества предмета расчета.
  */
-class Unit
+final class Unit
 {
     use EnumToArrayTrait;
 
