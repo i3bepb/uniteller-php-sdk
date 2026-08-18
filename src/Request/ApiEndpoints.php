@@ -30,7 +30,6 @@ class ApiEndpoints
 
     /**
      * Отмена платежа без фискализации.
-     * @deprecated
      */
     const CANCEL = 'https://wpay.uniteller.ru/unblock';
 
@@ -68,4 +67,9 @@ class ApiEndpoints
      * Запрос результата авторизации с данными фискализации.
      */
     const FISCAL_RESULTS = 'https://fpay.uniteller.ru/v2/results';
+
+    /**
+     * Проверка доступности сервисов Uniteller.
+     */
+    const PING = 'https://wpay.uniteller.ru/ping';
 }
