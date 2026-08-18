@@ -242,4 +242,8 @@ class SFields
      * Неизвестно
      */
     const BNPL_REQUEST_ID = 'bnplRequestId';
+    /**
+     * Ссылка на подробную информацию о заказе
+     */
+    const LK_ORDER_URL = 'LkOrderUrl';
 }

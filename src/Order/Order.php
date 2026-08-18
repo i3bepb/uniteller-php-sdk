@@ -1,9 +1,4 @@
 <?php
-/**
- * Created by Roquie.
- * E-mail: roquie0@gmail.com
- * GitHub: Roquie
- */
 
 namespace Tmconsulting\Uniteller\Order;
 
@@ -12,26 +7,26 @@ use Tmconsulting\Uniteller\Error\ResponseCode;
 use Tmconsulting\Uniteller\Parameter\Enum\SFields;
 
 /**
- * Class Order
+ * Заказ Uniteller.
  */
 class Order implements \JsonSerializable
 {
     /**
-     * Адрес Держателя карты
+     * Адрес Держателя карты.
      *
      * @var string|null
      */
     protected $address = null;
 
     /**
-     * Код подтверждения транзакции от процессингового центра
+     * Код подтверждения транзакции от процессингового центра.
      *
      * @var string|null
      */
     protected $approvalCode = null;
 
     /**
-     * Имя банка-эмитента
+     * Имя банка-эмитента.
      *
      * @var string|null
      */
@@ -45,21 +40,21 @@ class Order implements \JsonSerializable
     protected $billNumber = null;
 
     /**
-     * Идентификатор (логин) Мерчанта в сервисе Booking.com
+     * Идентификатор (логин) Мерчанта в сервисе Booking.com.
      *
      * @var string|null
      */
     protected $bookingcomId = null;
 
     /**
-     * Пароль Мерчанта в сервисе Booking.com
+     * Пароль Мерчанта в сервисе Booking.com.
      *
      * @var string|null
      */
     protected $bookingcomPincode = null;
 
     /**
-     * Идентификатор зарегистрированной карты
+     * Идентификатор зарегистрированной карты.
      *
      * @var string|null
      */
@@ -73,35 +68,35 @@ class Order implements \JsonSerializable
     protected $cardHolder = null;
 
     /**
-     * Первые 6 цифр и последние 4 цифры номера карты (PAN), соединённые звёздочками
+     * Первые 6 цифр и последние 4 цифры номера карты (PAN), соединённые звёздочками.
      *
      * @var string|null
      */
     protected $cardNumber = null;
 
     /**
-     * Тип платёжной системы карты (возможные значения: visa, mastercard,  dinnersclub, jcb)
+     * Тип платёжной системы карты (возможные значения: visa, mastercard,  dinnersclub, jcb).
      *
      * @var string|null
      */
     protected $cardType = null;
 
     /**
-     * Комментарий к оплате (передаётся в запросе на оплату)
+     * Комментарий к оплате (передаётся в запросе на оплату).
      *
      * @var string|null
      */
     protected $comment = null;
 
     /**
-     * Код валюты
+     * Код валюты.
      *
      * @var string|null
      */
     protected $currency = null;
 
     /**
-     * Наличие CVC2/CVV2/4DBC
+     * Наличие CVC2/CVV2/4DBC.
      * (0 — авторизация без CVC2, 1 — авторизация с СVC2)
      *
      * @var int|null
@@ -109,22 +104,22 @@ class Order implements \JsonSerializable
     protected $cvc2 = null;
 
     /**
-     * Дата и время создания заказа в системе
-     * Client в формате dd.mm.yyyy hh:mm:ss
+     * Дата и время создания заказа в системе.
+     * Формат dd.mm.yyyy hh:mm:ss
      *
      * @var DateTime|null
      */
     protected $date = null;
 
     /**
-     * Адрес электронной почты Держателя карты
+     * Адрес электронной почты Держателя карты.
      *
      * @var string|null
      */
     protected $email = null;
 
     /**
-     * Тип электронной валюты
+     * Тип электронной валюты.
      *
      * @var string|null
      */
@@ -138,21 +133,21 @@ class Order implements \JsonSerializable
     protected $eOrderData = null;
 
     /**
-     * Код ответа процессингового центра
+     * Код ответа процессингового центра.
      *
      * @var int|null
      */
     protected $errorCode = null;
 
     /**
-     * Расшифровка кода ответа процессингового центра
+     * Расшифровка кода ответа процессингового центра.
      *
      * @var string|null
      */
     protected $errorComment = null;
 
     /**
-     * Имя Держателя карты
+     * Имя Держателя карты.
      *
      * @var string|null
      */
@@ -164,49 +159,49 @@ class Order implements \JsonSerializable
     protected $gdsPaymentPurposeId = null;
 
     /**
-     * «Длинная запись» (параметр, включающий дополнительную информацию, необходимую при бронировании и оплате авиабилетов)
+     * «Длинная запись» (параметр, включающий дополнительную информацию, необходимую при бронировании и оплате авиабилетов).
      *
      * @var string|null
      */
     protected $iData = null;
 
     /**
-     * IP-адрес Покупателя
+     * IP-адрес Покупателя.
      *
      * @var string|null
      */
     protected $ip = null;
 
     /**
-     * Фамилия Держателя карты
+     * Фамилия Держателя карты.
      *
      * @var string|null
      */
     protected $lastName = null;
 
     /**
-     * Идентификатор кредитной организации
+     * Идентификатор кредитной организации.
      *
      * @var string|null
      */
     protected $loanId = null;
 
     /**
-     * Сообщение об ошибке (текст ошибки, если она произошла)
+     * Сообщение об ошибке (текст ошибки, если она произошла).
      *
      * @var string|null
      */
     protected $message = null;
 
     /**
-     * Отчество Держателя карты
+     * Отчество Держателя карты.
      *
      * @var string|null
      */
     protected $middleName = null;
 
     /**
-     * Признак необходимости подтверждения преавторизации
+     * Признак необходимости подтверждения преавторизации.
      *
      * «0» — платёж без преавторизации или уже подтверждён;
      * «1» — необходимо подтверждение.
@@ -216,7 +211,7 @@ class Order implements \JsonSerializable
     protected $needConfirm = null;
 
     /**
-     * Номер заказа в интернет-магазине Мерчанта
+     * Номер заказа в интернет-магазине Мерчанта.
      *
      * @var string|null
      */
@@ -241,21 +236,21 @@ class Order implements \JsonSerializable
     protected $paymentType = null;
 
     /**
-     * Телефон Держателя карты
+     * Телефон Держателя карты.
      *
      * @var string|null
      */
     protected $phone = null;
 
     /**
-     * Тип платежа
+     * Тип платежа.
      *
      * @var string|null
      */
     protected $ptCode = null;
 
     /**
-     * Идентификатор QR-кода, выданный НСПК
+     * Идентификатор QR-кода, выданный НСПК.
      *
      * @var string|null
      */
@@ -276,22 +271,23 @@ class Order implements \JsonSerializable
     protected $receipts = null;
 
     /**
-     * Расшифровка кода возврата
+     * Расшифровка кода возврата.
      *
      * @var string|null
      */
     protected $recommendation = null;
 
     /**
-     * Код возврата
+     * Код возврата.
      *
      * @var string|null
      */
     protected $responseCode = null;
 
     /**
-     * Состояние заказа
-     * Order\Status::PAID
+     * Состояние заказа.
+     *
+     * @see \Tmconsulting\Uniteller\Order\Status
      *
      * @var string|null
      */
@@ -299,7 +295,7 @@ class Order implements \JsonSerializable
 
     /**
      * Сумма всех средств, уплаченных по одному заказу.
-     * Десятичный разделитель — точка
+     * Десятичный разделитель — точка.
      *
      * @var string|null
      */
@@ -353,7 +349,7 @@ class Order implements \JsonSerializable
     protected $sum = null;
 
     /**
-     * Уникальный номер заказа в Платёжном шлюзе
+     * Уникальный номер заказа в Платёжном шлюзе.
      *
      * @var string|null
      */
@@ -380,11 +376,18 @@ class Order implements \JsonSerializable
     protected $bnplRequestId = null;
 
     /**
+     * Ссылка на подробную информацию о заказе.
+     *
+     * @var string|null
+     */
+    protected $lkOrderUrl = null;
+
+    /**
      * @param string|null $address
      *
      * @return $this
      */
-    public function setAddress(?string $address): Order
+    public function setAddress(?string $address): self
     {
         $this->address = $address;
 
@@ -396,7 +399,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setApprovalCode(?string $approvalCode): Order
+    public function setApprovalCode(?string $approvalCode): self
     {
         $this->approvalCode = $approvalCode;
 
@@ -408,7 +411,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setBankName(?string $bankName): Order
+    public function setBankName(?string $bankName): self
     {
         $this->bankName = $bankName;
 
@@ -420,7 +423,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setBillNumber(?string $billNumber): Order
+    public function setBillNumber(?string $billNumber): self
     {
         $this->billNumber = $billNumber;
 
@@ -432,7 +435,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setBookingcomId(?string $bookingcomId): Order
+    public function setBookingcomId(?string $bookingcomId): self
     {
         $this->bookingcomId = $bookingcomId;
 
@@ -444,7 +447,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setBookingcomPincode(?string $bookingcomPincode): Order
+    public function setBookingcomPincode(?string $bookingcomPincode): self
     {
         $this->bookingcomPincode = $bookingcomPincode;
 
@@ -456,7 +459,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setCardIdp(?string $cardIdp): Order
+    public function setCardIdp(?string $cardIdp): self
     {
         $this->cardIdp = $cardIdp;
 
@@ -468,7 +471,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setCardHolder(?string $cardHolder): Order
+    public function setCardHolder(?string $cardHolder): self
     {
         $this->cardHolder = $cardHolder;
 
@@ -480,7 +483,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setCardNumber(?string $cardNumber): Order
+    public function setCardNumber(?string $cardNumber): self
     {
         $this->cardNumber = $cardNumber;
 
@@ -492,7 +495,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setCardType(?string $cardType): Order
+    public function setCardType(?string $cardType): self
     {
         $this->cardType = $cardType;
 
@@ -504,7 +507,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setComment(?string $comment): Order
+    public function setComment(?string $comment): self
     {
         $this->comment = $comment;
 
@@ -516,7 +519,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setCurrency(?string $currency): Order
+    public function setCurrency(?string $currency): self
     {
         $this->currency = $currency;
 
@@ -528,7 +531,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setCvc2(?int $value): Order
+    public function setCvc2(?int $value): self
     {
         $this->cvc2 = $value;
 
@@ -538,7 +541,7 @@ class Order implements \JsonSerializable
     /**
      * @return $this
      */
-    public function withCvc2(): Order
+    public function withCvc2(): self
     {
         $this->cvc2 = 1;
 
@@ -548,7 +551,7 @@ class Order implements \JsonSerializable
     /**
      * @return $this
      */
-    public function withoutCvc2(): Order
+    public function withoutCvc2(): self
     {
         $this->cvc2 = 0;
 
@@ -560,7 +563,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setDate(?string $date): Order
+    public function setDate(?string $date): self
     {
         if (empty($date)) {
             return $this;
@@ -584,7 +587,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setEmail(?string $email): Order
+    public function setEmail(?string $email): self
     {
         $this->email = $email;
 
@@ -596,7 +599,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setEMoneyType(?string $eMoneyType): Order
+    public function setEMoneyType(?string $eMoneyType): self
     {
         $this->eMoneyType = $eMoneyType;
 
@@ -608,7 +611,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setEOrderData(?string $eOrderData): Order
+    public function setEOrderData(?string $eOrderData): self
     {
         if (empty($eOrderData)) {
             return $this;
@@ -629,7 +632,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setErrorCode(?int $errorCode): Order
+    public function setErrorCode(?int $errorCode): self
     {
         $this->errorCode = $errorCode;
 
@@ -641,7 +644,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setErrorComment(?string $errorComment): Order
+    public function setErrorComment(?string $errorComment): self
     {
         $this->errorComment = $errorComment;
 
@@ -653,7 +656,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setFirstName(?string $firstName): Order
+    public function setFirstName(?string $firstName): self
     {
         $this->firstName = $firstName;
 
@@ -665,7 +668,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setGdsPaymentPurposeId(?int $gdsPaymentPurposeId): Order
+    public function setGdsPaymentPurposeId(?int $gdsPaymentPurposeId): self
     {
         $this->gdsPaymentPurposeId = $gdsPaymentPurposeId;
 
@@ -677,7 +680,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setIData(?string $iData): Order
+    public function setIData(?string $iData): self
     {
         $this->iData = $iData;
 
@@ -689,7 +692,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setIp(?string $ip): Order
+    public function setIp(?string $ip): self
     {
         $this->ip = $ip;
 
@@ -701,7 +704,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setLastName(?string $lastName): Order
+    public function setLastName(?string $lastName): self
     {
         $this->lastName = $lastName;
 
@@ -713,7 +716,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setLoanId(?string $loanId): Order
+    public function setLoanId(?string $loanId): self
     {
         $this->loanId = $loanId;
 
@@ -725,7 +728,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setMessage(?string $message): Order
+    public function setMessage(?string $message): self
     {
         $this->message = $message;
 
@@ -737,7 +740,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setMiddleName(?string $middleName): Order
+    public function setMiddleName(?string $middleName): self
     {
         $this->middleName = $middleName;
 
@@ -749,7 +752,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setNeedConfirm(?int $needConfirm): Order
+    public function setNeedConfirm(?int $needConfirm): self
     {
         $this->needConfirm = $needConfirm;
 
@@ -761,7 +764,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setOrderNumber(?string $orderNumber): Order
+    public function setOrderNumber(?string $orderNumber): self
     {
         $this->orderNumber = $orderNumber;
 
@@ -773,7 +776,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setParentOrderNumber(?string $parentOrderNumber): Order
+    public function setParentOrderNumber(?string $parentOrderNumber): self
     {
         $this->parentOrderNumber = $parentOrderNumber;
 
@@ -785,7 +788,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setPaymentType(?int $paymentType): Order
+    public function setPaymentType(?int $paymentType): self
     {
         $this->paymentType = $paymentType;
 
@@ -797,7 +800,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setPhone(?string $phone): Order
+    public function setPhone(?string $phone): self
     {
         $this->phone = $phone;
 
@@ -809,7 +812,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setPtCode(?string $ptCode): Order
+    public function setPtCode(?string $ptCode): self
     {
         $this->ptCode = $ptCode;
 
@@ -821,7 +824,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setRecommendation(?string $recommendation): Order
+    public function setRecommendation(?string $recommendation): self
     {
         $this->recommendation = $recommendation;
 
@@ -833,7 +836,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setResponseCode(?string $responseCode): Order
+    public function setResponseCode(?string $responseCode): self
     {
         $this->responseCode = $responseCode;
 
@@ -845,7 +848,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setStatus(?string $status): Order
+    public function setStatus(?string $status): self
     {
         $this->status = Status::resolve($status);
 
@@ -857,7 +860,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setTotal(?string $total): Order
+    public function setTotal(?string $total): self
     {
         $this->total = $total;
 
@@ -1217,7 +1220,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setPacketDate(?string $packetDate): Order
+    public function setPacketDate(?string $packetDate): self
     {
         if (empty($packetDate)) {
             return $this;
@@ -1252,7 +1255,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setCountry(?string $country): Order
+    public function setCountry(?string $country): self
     {
         $this->country = $country;
 
@@ -1272,7 +1275,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setRate(?string $rate): Order
+    public function setRate(?string $rate): self
     {
         $this->rate = $rate;
 
@@ -1292,7 +1295,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setCardSubType(?string $cardSubType): Order
+    public function setCardSubType(?string $cardSubType): self
     {
         $this->cardSubType = $cardSubType;
 
@@ -1312,7 +1315,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setProtocolTypeName(?string $protocolTypeName): Order
+    public function setProtocolTypeName(?string $protocolTypeName): self
     {
         $this->protocolTypeName = $protocolTypeName;
 
@@ -1332,7 +1335,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setProcessingName(?string $processingName): Order
+    public function setProcessingName(?string $processingName): self
     {
         $this->processingName = $processingName;
 
@@ -1352,7 +1355,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setAcquirerID(?string $acquirerID): Order
+    public function setAcquirerID(?string $acquirerID): self
     {
         $this->acquirerID = $acquirerID;
 
@@ -1372,7 +1375,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setIsOtherCard(?bool $isOtherCard): Order
+    public function setIsOtherCard(?bool $isOtherCard): self
     {
         $this->isOtherCard = $isOtherCard;
 
@@ -1392,7 +1395,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setQrcId(?string $qrcId): Order
+    public function setQrcId(?string $qrcId): self
     {
         $this->qrcId = $qrcId;
 
@@ -1412,7 +1415,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setReceipts(?array $receipts): Order
+    public function setReceipts(?array $receipts): self
     {
         $this->receipts = $receipts;
 
@@ -1432,7 +1435,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setSberOrderId(?string $sberOrderId): Order
+    public function setSberOrderId(?string $sberOrderId): self
     {
         $this->sberOrderId = $sberOrderId;
 
@@ -1452,7 +1455,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setSum(?string $sum): Order
+    public function setSum(?string $sum): self
     {
         $this->sum = $sum;
 
@@ -1472,7 +1475,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setTokenIdp(?string $tokenIdp): Order
+    public function setTokenIdp(?string $tokenIdp): self
     {
         $this->tokenIdp = $tokenIdp;
 
@@ -1489,7 +1492,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setGiftCert(?string $giftCert): Order
+    public function setGiftCert(?string $giftCert): self
     {
         $this->giftCert = $giftCert;
 
@@ -1506,7 +1509,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setOpkcID(?string $opkcID): Order
+    public function setOpkcID(?string $opkcID): self
     {
         $this->opkcID = $opkcID;
 
@@ -1523,7 +1526,7 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setTpayRequestId(?string $tpayRequestId): Order
+    public function setTpayRequestId(?string $tpayRequestId): self
     {
         $this->tpayRequestId = $tpayRequestId;
 
@@ -1540,9 +1543,31 @@ class Order implements \JsonSerializable
      *
      * @return $this
      */
-    public function setBnplRequestId(?string $bnplRequestId): Order
+    public function setBnplRequestId(?string $bnplRequestId): self
     {
         $this->bnplRequestId = $bnplRequestId;
+
+        return $this;
+    }
+
+    /**
+     * Ссылка на подробную информацию о заказе.
+     *
+     * @return string|null
+     */
+    public function getLkOrderUrl(): ?string
+    {
+        return $this->lkOrderUrl;
+    }
+
+    /**
+     * @param string|null $lkOrderUrl Ссылка на подробную информацию о заказе.
+     *
+     * @return $this
+     */
+    public function setLkOrderUrl(?string $lkOrderUrl): self
+    {
+        $this->lkOrderUrl = $lkOrderUrl;
 
         return $this;
     }
@@ -1608,6 +1633,7 @@ class Order implements \JsonSerializable
             SFields::OPKC_ID                => $this->getOpkcID(),
             SFields::TPAY_REQUEST_ID        => $this->getTpayRequestId(),
             SFields::BNPL_REQUEST_ID        => $this->getBnplRequestId(),
+            SFields::LK_ORDER_URL           => $this->getLkOrderUrl(),
         ], static function ($value) {
             return $value !== null;
         });
