@@ -83,7 +83,7 @@ class ConfirmBuilder extends BaseBuilder implements ContainerAwareInterface
             new FormatParameter(
                 CanonicalParameterName::FORMAT,
                 UnitellerParameterName::FORMAT,
-                Format::getSupportedForEndpoint($this->getEndpoint()),
+                array_keys(Format::getSupportedForEndpoint($this->getEndpoint())),
                 $this->getEndpoint()
             )
         );

@@ -198,7 +198,7 @@ class ResultsBuilder extends BaseBuilder implements ContainerAwareInterface
             new FormatParameter(
                 CanonicalParameterName::FORMAT,
                 UnitellerParameterName::FORMAT,
-                Format::toArray(),
+                array_keys(Format::getSupportedForEndpoint($this->getEndpoint())),
                 $this->getEndpoint()
             )
         );

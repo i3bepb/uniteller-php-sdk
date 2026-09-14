@@ -8,7 +8,7 @@ use Tmconsulting\Uniteller\Request\Format;
 class FormatParameter extends BaseParameter
 {
     /**
-     * @var array
+     * @var string[]
      */
     private $allowed;
 
@@ -22,7 +22,7 @@ class FormatParameter extends BaseParameter
      *                              Одно из \Tmconsulting\Uniteller\Builder\Enum\CanonicalParameterName.
      * @param string $unitellerName Наименнование параметра в API Uniteller.
      *                              Одно из \Tmconsulting\Uniteller\Builder\Enum\UnitellerParameterName.
-     * @param array $allowed Возможные значения.
+     * @param string[] $allowed Строковые имена форматов, допустимых для endpoint.
      * @param string $endpoint
      * @param bool $shouldBeSent Включается ли параметр в запрос.
      *
@@ -50,10 +50,12 @@ class FormatParameter extends BaseParameter
      */
     protected function validate($value): void
     {
-        if (!is_string($value) && !is_int($value)) {
-            throw new NotValidParameterException("Invalid {$this->unitellerName}: must be string or int.");
+        if (!is_string($value)) {
+            throw new NotValidParameterException("Invalid {$this->unitellerName}: must be a format name string.");
         }
-        if (!in_array($value, $this->allowed, true)) {
+        if (!in_array($value, $this->allowed, true)
+            || !array_key_exists($value, Format::getSupportedForEndpoint($this->endpoint))
+        ) {
             throw new NotValidParameterException(
                 "Invalid {$this->unitellerName}. Allowed values: " . implode(', ', $this->allowed) . '.'
             );

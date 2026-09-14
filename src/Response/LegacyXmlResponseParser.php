@@ -92,7 +92,7 @@ class LegacyXmlResponseParser implements LegacyResponseParserInterface
                     ->setIsOtherCard((bool)(!empty($item['isothercard']) ? $item['isothercard'] : false))
                     ->setParentOrderNumber((!empty($item['parent_order_number']) ? $item['parent_order_number'] : ''))
                     ->setNeedConfirm((bool)(!empty($item['need_confirm']) ? $item['need_confirm'] : false))
-                    ->setGdsPaymentPurposeId((int)(!empty($item['firstname']) ? $item['firstname'] : 0))
+                    ->setGdsPaymentPurposeId((int)(!empty($item['gds_payment_purpose_id']) ? $item['gds_payment_purpose_id'] : 0))
                     ->setBookingcomId((!empty($item['bookingcom_id']) ? $item['bookingcom_id'] : ''))
                     ->setBookingcomPincode((!empty($item['bookingcom_pincode']) ? $item['bookingcom_pincode'] : ''))
                     ->setLoanId((!empty($item['loan_id']) ? $item['loan_id'] : ''))

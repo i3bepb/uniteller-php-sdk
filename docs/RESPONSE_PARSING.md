@@ -28,15 +28,38 @@ Builders с результатом `Order[]` сохраняют этот кон�
 - В описании процедуры подтверждения той же версии документа употребляется `ErrorCode` и имя `Subtotal_P`, тогда как таблицы запроса/ответа §3.10 содержат `Subtotal` и `Result`. Для разбора ответа приоритет отдан таблице 7: `ErrorCode` не заменяет отсутствующий `Result`.
 - Код 4 отсутствует в приложении 8, но указан в описании процедуры подтверждения как ошибка суммы. Значения `FiscalConfirmResultCode` не изменены; код 11 подтверждён приложением 8.
 - В актуальном [документе интернет-эквайринга, §8.3.1.5](тп_интернет-эквайринг_-_v1.43_rev._48.md#page-87) XML содержит атрибуты `firstcode`/`secondcode`. Прежняя обработка SDK их не интерпретировала; в этом рефакторинге это поведение сохранено. Поддержка ошибок из этих атрибутов требует отдельной задачи.
-- В legacy XML-преобразовании сохранилось старое чтение `gdsPaymentPurposeId` из `firstname`, хотя документация описывает отдельное поле `gds_payment_purpose_id`. Это отдельное исправление семантики полей.
+- `gdsPaymentPurposeId` исправлен: читается из `gds_payment_purpose_id` независимо от `firstname`. Имя поля подтверждено таблицей полей результатов авторизации на [стр. 82 актуального документа интернет-эквайринга](тп_интернет-эквайринг_-_v1.43_rev._48.md#page-82). В сокращённом примере XML §8.3.1.5 это поле не перечислено. Значение 123 в регрессионном тесте проверяет перенос значения; в документации описаны значения 10/20.
 
-Дополнительная обнаруженная проблема вне обработки ответов: `ConfirmBuilder` передаёт в `FormatParameter` числовые значения допустимых форматов, а преобразование параметра ожидает строковое имя. Явный `setFormat()` у него работает некорректно; текущий путь без этого параметра использует CSV. У `ResultsBuilder` валидация требует явного формата; использование `setFormat(Format::CSV)` сохранено.
+`ConfirmBuilder` и `ResultsBuilder` теперь передают в `FormatParameter` единый список строковых имён: `array_keys(Format::getSupportedForEndpoint($endpoint))`. `FiscalResultsBuilder` наследует эту настройку. `setFormat(Format::CSV)` и `setFormat(Format::XML)` сохраняют публичный контракт; `getResponseFormat()` возвращает строковое имя, а сериализация через `Format::resolve()` — числовой код для endpoint. Валидация проверяет и список `allowed`, и поддержку endpoint, чтобы ошибочно расширенный список не откладывал отказ до сериализации. Числовые коды как вход `setFormat()` не принимаются. У `ResultsBuilder` требование явно установить формат сохранено.
+
+Другие подозрительные legacy XML mappings оставлены без изменений:
+
+- `billnumber` приводится к `int` перед строковым setter: ведущие нули теряются.
+- `sum` приводится к `float` перед строковым setter: исходная десятичная запись и точность могут измениться.
 
 ## Кандидаты на следующий рефакторинг
 
 WDDX, SOAP и BRACKETS присутствуют в `Format` и проверках допустимых значений, но реализованных декодеров для них нет: `getParserByFormat()` выбрасывает `ParserNotImplementedException`. Встроенные builders не выбирают их по умолчанию. Эти записи сохранены. CSV и XML используются активно; JSON нужен для отмены с фискализацией. Таблица форматов для `ApiEndpoints::CARD` также не имеет соответствующего builder в текущем `src/`.
 
-## Проверки
+## Проверки исправлений FormatParameter и GDS
+
+- 108 тестов форматов, GDS и регрессий обработки ответов: 372 assertions, успешно (PHPUnit 8.5.42, PHP 7.4).
+- Синтаксис всех 232 PHP-файлов `src/` и `tests/` проверен PHP 7.2, ошибок нет.
+- Полный suite повторно запущен: обнаружены 1232 теста; выполнение снова обрывается на отсутствующем `Concern\HasAddress` в старых тестах. Общий suite не проходит.
+- Другие legacy XML mappings, архитектура response parsing, FiscalConfirm и константы `Format` в этом исправлении не менялись.
+
+Файлы этого исправления:
+
+- [`src/Parameter/FormatParameter.php`](../src/Parameter/FormatParameter.php)
+- [`src/Confirm/ConfirmBuilder.php`](../src/Confirm/ConfirmBuilder.php)
+- [`src/Results/ResultsBuilder.php`](../src/Results/ResultsBuilder.php)
+- [`src/Response/LegacyXmlResponseParser.php`](../src/Response/LegacyXmlResponseParser.php)
+- [`tests/Parameter/FormatParameterTest.php`](../tests/Parameter/FormatParameterTest.php) — новый.
+- [`tests/Response/BuilderFormatsTest.php`](../tests/Response/BuilderFormatsTest.php) — новый.
+- [`tests/Response/LegacyXmlResponseParserTest.php`](../tests/Response/LegacyXmlResponseParserTest.php)
+- [`docs/RESPONSE_PARSING.md`](RESPONSE_PARSING.md)
+
+## Проверки исходного рефакторинга
 
 - PHPUnit 8.5.42 на PHP 7.4: 85 тестов затронутых обработчиков и методов `process()`, 300 assertions — успешно.
 - PHP 7.2: синтаксическая проверка всех 230 PHP-файлов в `src/` и `tests/` — успешно. Установленный `vendor` требует PHP >=7.4, поэтому полный PHPUnit на PHP 7.2 блокируется Composer platform check; зависимости в рамках задачи не менялись.
@@ -44,7 +67,7 @@ WDDX, SOAP и BRACKETS присутствуют в `Format` и проверка�
 - Дополнительно полный suite выполнен с `--process-isolation`: 1209 тестов, 867 assertions, 673 errors, 38 failures, 165 warnings. Общий suite не проходит. Среди проблем — старые отсутствующие traits, `SignatureInterface`, устаревшие классы builders и проверки прежних сообщений валидации. Это не заменяет отдельную миграцию устаревшего набора тестов.
 - `git diff --check` — успешно.
 
-## Файлы рефакторинга
+## Файлы исходного рефакторинга
 
 Изменены:
 

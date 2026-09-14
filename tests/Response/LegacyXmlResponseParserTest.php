@@ -48,6 +48,26 @@ class LegacyXmlResponseParserTest extends TestCase
         $this->assertSame([], $result);
     }
 
+    public function testGdsPaymentPurposeIsIndependentOfFirstName()
+    {
+        $data = (new ParserXml())->parse(
+            '<unitellerresult><orders><order><firstname>John</firstname>' .
+            '<gds_payment_purpose_id>123</gds_payment_purpose_id></order></orders></unitellerresult>'
+        );
+        $orders = $this->parseOrders($data);
+
+        $this->assertSame('John', $orders[0]->getFirstName());
+        $this->assertSame(123, $orders[0]->getGdsPaymentPurposeId());
+    }
+
+    public function testMissingGdsPaymentPurposeDoesNotUseNumericFirstName()
+    {
+        $orders = $this->parseOrders(['orders' => ['order' => ['firstname' => '123']]]);
+
+        $this->assertSame('123', $orders[0]->getFirstName());
+        $this->assertSame(0, $orders[0]->getGdsPaymentPurposeId());
+    }
+
     public function testParseOrdersWithSingleOrder()
     {
         $this->parserReceiptMock->method('parse')
