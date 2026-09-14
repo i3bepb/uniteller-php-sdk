@@ -13,7 +13,7 @@ use Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException;
 use Tmconsulting\Uniteller\Recurrent\RecurrentBuilder;
 use Tmconsulting\Uniteller\Request\ApiEndpoints;
 use Tmconsulting\Uniteller\Request\RequestManager;
-use Tmconsulting\Uniteller\Signature\SignatureInterface;
+use Tmconsulting\Uniteller\Signature\Signature;
 use Tmconsulting\Uniteller\Tests\TestCase;
 
 /**
@@ -25,8 +25,8 @@ class RecurrentBuilderTest extends TestCase
 
     protected function setUp(): void
     {
-        $signatureCreator = $this->createMock(SignatureInterface::class);
-        $signatureCreator->method('setFields')->willReturnSelf();
+        $signatureCreator = $this->createMock(Signature::class);
+        $signatureCreator->method('setParameters')->willReturnSelf();
         $signatureCreator->method('createMd5')->willReturn('mocked_signature');
         $this->builder = new RecurrentBuilder($signatureCreator);
     }
@@ -164,24 +164,17 @@ class RecurrentBuilderTest extends TestCase
 
     public function testProcess()
     {
-        $mockRequestManager = $this->createMock(RequestManager::class);
-        $mockRequestManager->method('executeRequestAndParseResponseOrders')->willReturn('some_response');
-        $mockRequestManager->method('setOptions')->willReturn($mockRequestManager);
-        $container = $this->getMockBuilder(Container::class)
-            ->onlyMethods(['get'])
-            ->getMock();
-        $container->method('get')->willReturn($mockRequestManager);
-
-        $this->builder->setOrderId('12345');
-        $this->builder->setSubtotalP(100.50);
-        $this->builder->setParentOrderIdp('parent123');
-        $this->builder->setParentShopIdp('shop123');
-
-        $this->builder->setContainer($container);
-
+        $decoded = new \Tmconsulting\Uniteller\Request\DecodedResponse(
+            [['OrderNumber' => '123']],
+            new \GuzzleHttp\Psr7\Request('POST', $this->builder->getEndpoint()),
+            new \GuzzleHttp\Psr7\Response(200)
+        );
+        $requestManager = $this->createMock(RequestManager::class);
+        $requestManager->expects($this->once())->method('executeRequest')->with($this->builder)->willReturn($decoded);
+        $this->builder->setContainer(new Container([RequestManager::class => $requestManager]));
         $result = $this->builder->process();
-
-        $this->assertEquals('some_response', $result);
+        $this->assertInstanceOf(\Tmconsulting\Uniteller\Order\Order::class, $result[0]);
+        $this->assertSame('123', $result[0]->getOrderNumber());
     }
 
     public function testGetRequestName()

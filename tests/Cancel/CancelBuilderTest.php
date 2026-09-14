@@ -330,19 +330,15 @@ class CancelBuilderTest extends TestCase
      */
     public function testProcess()
     {
+        $decoded = new \Tmconsulting\Uniteller\Request\DecodedResponse(
+            ['Code' => '00', 'Status' => 'canceled'],
+            new \GuzzleHttp\Psr7\Request('POST', $this->builder->getEndpoint()),
+            new \GuzzleHttp\Psr7\Response(200)
+        );
         $requestManager = $this->createMock(RequestManager::class);
-        $requestManager->method('executeRequestAndParseResponseOrders')->willReturn('success');
-        $requestManager->method('setOptions')->willReturn($requestManager);
-        $container = new Container([
-            \Psr\Http\Client\ClientInterface::class          => \GuzzleHttp\Client::class,
-            \Psr\Http\Message\RequestFactoryInterface::class => \GuzzleHttp\Psr7\HttpFactory::class,
-            \Psr\Http\Message\StreamFactoryInterface::class  => \GuzzleHttp\Psr7\HttpFactory::class,
-            RequestManager::class                            => $requestManager,
-        ]);
-        $this->builder->setContainer($container);
-
+        $requestManager->expects($this->once())->method('executeRequest')->with($this->builder)->willReturn($decoded);
+        $this->builder->setContainer(new Container([RequestManager::class => $requestManager]));
         $result = $this->builder->process();
-
-        $this->assertEquals('success', $result);
+        $this->assertSame(['Code' => '00', 'Status' => 'canceled'], $result);
     }
 }

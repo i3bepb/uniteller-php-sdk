@@ -36,7 +36,7 @@ class RequestManager implements LoggerAwareInterface
     /**
      * @var \Tmconsulting\Uniteller\Request\ParserInterface
      */
-    protected $parserOrders;
+    protected $parser;
 
     /**
      * @param \Psr\Http\Message\RequestFactoryInterface $requestFactory
@@ -54,7 +54,7 @@ class RequestManager implements LoggerAwareInterface
         $this->requestFactory = $requestFactory;
         $this->streamFactory = $streamFactory;
         $this->httpClient = $httpClient;
-        $this->parserOrders = $parser;
+        $this->parser = $parser;
     }
 
     /**
@@ -94,10 +94,17 @@ class RequestManager implements LoggerAwareInterface
      *
      * @throws \Psr\Http\Client\ClientExceptionInterface
      * @throws \Random\RandomException
-     * @throws \Tmconsulting\Uniteller\Exception\ErrorException
      * @throws \Tmconsulting\Uniteller\Exception\UnitellerException
      */
     public function request(string $url, string $method = 'POST', ?array $data = null, array $headers = [], string $responseFormat = 'xml'): array
+    {
+        return $this->requestDecoded($url, $method, $data, $headers, $responseFormat)->getData();
+    }
+
+    /**
+     * Keeps HTTP context available to endpoint-specific response parsers.
+     */
+    public function requestDecoded(string $url, string $method = 'POST', ?array $data = null, array $headers = [], string $responseFormat = 'xml'): DecodedResponse
     {
         $requestId = $this->generateRequestId();
 
@@ -116,7 +123,7 @@ class RequestManager implements LoggerAwareInterface
 
         $this->validateResponse($request, $response);
 
-        return $this->parseResponse($response, $request);
+        return new DecodedResponse($this->parser->parse((string)$response->getBody()), $request, $response);
     }
 
     /**
@@ -171,23 +178,6 @@ class RequestManager implements LoggerAwareInterface
     }
 
     /**
-     * @param \Psr\Http\Message\ResponseInterface $response
-     * @param \Psr\Http\Message\RequestInterface $request
-     *
-     * @return array
-     *
-     * @throws \Tmconsulting\Uniteller\Exception\ErrorException
-     */
-    protected function parseResponse(ResponseInterface $response, RequestInterface $request): array
-    {
-        $body = (string)$response->getBody();
-        $data = $this->parserOrders->parse($body);
-        $this->parserOrders->parseErrors($data, $request, $response);
-
-        return $data;
-    }
-
-    /**
      * Маскирует чувствительные данные (например, пароль) перед логированием.
      *
      * @param array $data
@@ -203,35 +193,13 @@ class RequestManager implements LoggerAwareInterface
     }
 
     /**
-     * Выполнение запроса, когда в ответе возвращаются заказы.
-     *
-     * @param \Tmconsulting\Uniteller\Builder\BuilderInterface $builder
-     *
-     * @return \Tmconsulting\Uniteller\Order\Order[]
-     *
-     * @throws \Throwable
+     * Sends a builder request and decodes its body without endpoint interpretation.
      */
-    public function executeRequestAndParseResponseOrders(BuilderInterface $builder)
+    public function executeRequest(BuilderInterface $builder): DecodedResponse
     {
-        $response = $this->request($builder->getEndpoint(), 'POST', $builder->toArray(), [], $builder->getResponseFormat());
-
-        return $this->parserOrders->parseOrders($response);
-    }
-
-    /**
-     * Выполнение запроса, когда в ответе возвращаются чеки. Запрос отмены оплаты с чеком.
-     *
-     * @param \Tmconsulting\Uniteller\Builder\BuilderInterface $builder
-     *
-     * @return \Tmconsulting\Uniteller\Order\Order[]
-     *
-     * @throws \Throwable
-     */
-    public function executeRequestAndParseResponseReceipt(BuilderInterface $builder)
-    {
-        $response = $this->request($builder->getEndpoint(), 'POST', $builder->toArray(), [], $builder->getResponseFormat());
-
-        return $this->parserOrders->parseResults($response);
+        return $this->requestDecoded(
+            $builder->getEndpoint(), 'POST', $builder->toArray(), [], $builder->getResponseFormat()
+        );
     }
 
     /**

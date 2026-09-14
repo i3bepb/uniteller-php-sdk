@@ -15,14 +15,14 @@ class FiscalConfirmResult
     private $errorMessage;
 
     /**
-     * @var \Tmconsulting\Uniteller\Receipt\Receipt[] Массив с чеками.
+     * @var \Tmconsulting\Uniteller\Receipt\FiscalReceipt[] Массив с чеками.
      */
     private $receipts;
 
     /**
      * @param int $result Код результата ответа. {@see \Tmconsulting\Uniteller\Confirm\FiscalConfirmResultCode}
      * @param string|null $errorMessage Сообщение ошибки.
-     * @param \Tmconsulting\Uniteller\Receipt\Receipt[] $receipts Массив с чеками.
+     * @param \Tmconsulting\Uniteller\Receipt\FiscalReceipt[] $receipts Массив с чеками.
      */
     public function __construct(int $result, ?string $errorMessage, array $receipts)
     {
@@ -47,7 +47,7 @@ class FiscalConfirmResult
     }
 
     /**
-     * @return \Tmconsulting\Uniteller\Receipt\Receipt[]
+     * @return \Tmconsulting\Uniteller\Receipt\FiscalReceipt[]
      */
     public function getReceipts(): array
     {

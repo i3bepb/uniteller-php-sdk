@@ -17,6 +17,7 @@ use Tmconsulting\Uniteller\Request\ApiEndpoints;
 use Tmconsulting\Uniteller\Request\Format;
 use Tmconsulting\Uniteller\Request\ParserInterface;
 use Tmconsulting\Uniteller\Request\RequestManager;
+use Tmconsulting\Uniteller\Response\LegacyResponseParserFactory;
 
 /**
  * Сценарии рекуррентного платежа.
@@ -203,7 +204,9 @@ class RecurrentBuilder extends BaseBuilder implements ContainerAwareInterface
         }
 
         try {
-            $result = $request->executeRequestAndParseResponseOrders($this);
+            $response = $request->executeRequest($this);
+            $parser = $this->container->get(LegacyResponseParserFactory::class)->create($this->getResponseFormat());
+            $result = $parser->parse($response);
         } catch (\Throwable $e) {
             $this->logger->error($e->getMessage(), ['exception' => $e]);
             throw $e;

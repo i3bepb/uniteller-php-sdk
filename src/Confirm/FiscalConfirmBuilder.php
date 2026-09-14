@@ -161,7 +161,7 @@ class FiscalConfirmBuilder extends BaseBuilder implements ContainerAwareInterfac
         return Format::XML;
     }
 
-    public function process()
+    public function process(): FiscalConfirmResult
     {
         $this->container->set(ParserInterface::class, Format::getParserByFormat($this->getResponseFormat()));
         $requestManager = $this->container->get(RequestManager::class);
@@ -174,7 +174,8 @@ class FiscalConfirmBuilder extends BaseBuilder implements ContainerAwareInterfac
         }
 
         try {
-            $result = $requestManager->executeRequestAndParseResponseReceipt($this);
+            $response = $requestManager->executeRequest($this);
+            $result = $this->container->get(FiscalConfirmResultParser::class)->parse($response->getData());
         } catch (\Throwable $e) {
             $this->logger->error($e->getMessage(), ['exception' => $e]);
             throw $e;

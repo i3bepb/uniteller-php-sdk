@@ -16,7 +16,7 @@ use Tmconsulting\Uniteller\Request\ApiEndpoints;
 use Tmconsulting\Uniteller\Request\Format;
 use Tmconsulting\Uniteller\Request\RequestManager;
 use Tmconsulting\Uniteller\Results\ResultsBuilder;
-use Tmconsulting\Uniteller\Signature\SignatureInterface;
+use Tmconsulting\Uniteller\Signature\Signature;
 use Tmconsulting\Uniteller\Tests\TestCase;
 
 /**
@@ -36,7 +36,7 @@ class ResultsBuilderTest extends TestCase
     protected function setUp(): void
     {
         $this->logger = $this->createMock(LoggerInterface::class);
-        $signatureCreator = $this->createMock(SignatureInterface::class);
+        $signatureCreator = $this->createMock(Signature::class);
 
         $this->builder = new ResultsBuilder($signatureCreator);
         $this->builder->setLogger($this->logger);
@@ -46,7 +46,6 @@ class ResultsBuilderTest extends TestCase
         $this->builder->setLogin('test_login');
         $this->builder->setPassword('test_password');
         $this->builder->setFormat(Format::XML);
-        $this->builder->setBaseUri('https://api.uniteller.test');
     }
 
     public static function dataProviderSetGetOrderId(): array
@@ -229,26 +228,17 @@ class ResultsBuilderTest extends TestCase
 
     public function testProcessSuccess()
     {
-        $expectedResult = ['result' => 'success'];
-
+        $decoded = new \Tmconsulting\Uniteller\Request\DecodedResponse(
+            ['orders' => ['order' => ['ordernumber' => '123']]],
+            new \GuzzleHttp\Psr7\Request('POST', $this->builder->getEndpoint()),
+            new \GuzzleHttp\Psr7\Response(200)
+        );
         $requestManager = $this->createMock(RequestManager::class);
-        $requestManager->method('executeRequestAndParseResponseOrders')->with($this->builder)->willReturn($expectedResult);
-        $requestManager->method('setOptions')->willReturn($requestManager);
-
-        $container = $this->createMock(Container::class);
-        $container->method('get')->with(RequestManager::class)->willReturn($requestManager);
-        $container->method('set')->willReturn(true);
-
-        $this->builder->setContainer($container);
-
-        // Включение debug режима
-        $this->builder->setDebug(true);
-        $this->logger->expects($this->once())
-            ->method('debug');
-
+        $requestManager->expects($this->once())->method('executeRequest')->with($this->builder)->willReturn($decoded);
+        $this->builder->setContainer(new Container([RequestManager::class => $requestManager]));
         $result = $this->builder->process();
-
-        $this->assertEquals($expectedResult, $result);
+        $this->assertInstanceOf(\Tmconsulting\Uniteller\Order\Order::class, $result[0]);
+        $this->assertSame('123', $result[0]->getOrderNumber());
     }
 
     public function testProcessFailure()
@@ -256,12 +246,10 @@ class ResultsBuilderTest extends TestCase
         $exception = new \Exception('Test exception');
 
         $requestManager = $this->createMock(RequestManager::class);
-        $requestManager->method('executeRequestAndParseResponseOrders')->willThrowException($exception);
-        $requestManager->method('setOptions')->willReturn($requestManager);
+        $requestManager->method('executeRequest')->willThrowException($exception);
 
         $container = $this->createMock(Container::class);
         $container->method('get')->with(RequestManager::class)->willReturn($requestManager);
-        $container->method('set')->willReturn(true);
 
         $this->builder->setContainer($container);
 

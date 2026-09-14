@@ -200,21 +200,16 @@ class ReceiptedConfirmBuilderTest extends TestCase
      */
     public function testProcess()
     {
-        $logger = $this->createMock(LoggerInterface::class);
-        $container = $this->createMock(Container::class);
+        $decoded = new \Tmconsulting\Uniteller\Request\DecodedResponse(
+            ['Result' => '0'],
+            new \GuzzleHttp\Psr7\Request('POST', $this->builder->getEndpoint()),
+            new \GuzzleHttp\Psr7\Response(200)
+        );
         $requestManager = $this->createMock(RequestManager::class);
-        $this->createMock(ParserInterface::class);
-
-        $requestManager->method('setOptions')->willReturn($requestManager);
-        $requestManager->method('executeRequestAndParseResponseReceipt')->willReturn('success');
-        $container->method('get')->willReturn($requestManager);
-        $container->method('set')->willReturn(ParserCsv::class);
-
-        $this->builder->setLogger($logger);
-        $this->builder->setContainer($container);
-
+        $requestManager->expects($this->once())->method('executeRequest')->with($this->builder)->willReturn($decoded);
+        $this->builder->setContainer(new Container([RequestManager::class => $requestManager]));
         $result = $this->builder->process();
-
-        $this->assertEquals('success', $result);
+        $this->assertInstanceOf(\Tmconsulting\Uniteller\Confirm\FiscalConfirmResult::class, $result);
+        $this->assertTrue($result->isSuccess());
     }
 }

@@ -12,14 +12,17 @@ use Psr\Log\NullLogger;
 use Tmconsulting\Uniteller\Builder\BuilderInterface;
 use Tmconsulting\Uniteller\Callback\Callback;
 use Tmconsulting\Uniteller\Cancel\CancelBuilder;
+use Tmconsulting\Uniteller\Cancel\CancelResultParser;
 use Tmconsulting\Uniteller\Confirm\ConfirmBuilder;
 use Tmconsulting\Uniteller\Confirm\FiscalConfirmBuilder;
+use Tmconsulting\Uniteller\Confirm\FiscalConfirmResultParser;
 use Tmconsulting\Uniteller\Payment\PaymentBuilder;
 use Tmconsulting\Uniteller\Recurrent\RecurrentBuilder;
 use Tmconsulting\Uniteller\Request\ParserCsv;
 use Tmconsulting\Uniteller\Request\ParserInterface;
 use Tmconsulting\Uniteller\Request\ParserReceiptFromBase64;
 use Tmconsulting\Uniteller\Request\RequestManager;
+use Tmconsulting\Uniteller\Response\LegacyResponseParserFactory;
 use Tmconsulting\Uniteller\Results\FiscalResultsBuilder;
 use Tmconsulting\Uniteller\Results\ResultsBuilder;
 use Tmconsulting\Uniteller\Signature\Signature;
@@ -52,6 +55,9 @@ class Container implements ContainerInterface, DebugAwareInterface
         $this->debug = $debug;
 
         $defaults = [
+            CancelResultParser::class => CancelResultParser::class,
+            FiscalConfirmResultParser::class => FiscalConfirmResultParser::class,
+            LegacyResponseParserFactory::class => LegacyResponseParserFactory::class,
             Callback::class                => Callback::class,
             CancelBuilder::class           => CancelBuilder::class,
             ConfirmBuilder::class          => ConfirmBuilder::class,
@@ -177,7 +183,11 @@ class Container implements ContainerInterface, DebugAwareInterface
             $args[] = $this->get(ClientInterface::class);
             $args[] = $this->get(ParserInterface::class);
         }
-        if (isset($interfaces[ParserInterface::class])) {
+        if (in_array($class, [
+            CancelResultParser::class,
+            FiscalConfirmResultParser::class,
+            LegacyResponseParserFactory::class,
+        ], true)) {
             $args[] = $this->get(ParserReceiptFromBase64::class);
         }
         $reflection = new \ReflectionClass($class);
@@ -203,7 +213,8 @@ class Container implements ContainerInterface, DebugAwareInterface
      */
     protected function isShared(string $id): bool
     {
-        return !$this->isPrototype($id);
+        // Each manager keeps the format parser selected for the current builder.
+        return $id !== RequestManager::class && !$this->isPrototype($id);
     }
 
     /**

@@ -169,7 +169,8 @@ class CancelBuilder extends BaseBuilder implements ContainerAwareInterface
         }
 
         try {
-            $result = $requestManager->executeRequestAndParseResponseOrders($this);
+            $response = $requestManager->executeRequest($this);
+            $result = $this->container->get(CancelResultParser::class)->parse($response);
         } catch (\Throwable $e) {
             $this->logger->error($e->getMessage(), ['exception' => $e]);
             throw $e;

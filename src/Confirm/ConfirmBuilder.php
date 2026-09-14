@@ -20,6 +20,7 @@ use Tmconsulting\Uniteller\Request\ApiEndpoints;
 use Tmconsulting\Uniteller\Request\Format;
 use Tmconsulting\Uniteller\Request\ParserInterface;
 use Tmconsulting\Uniteller\Request\RequestManager;
+use Tmconsulting\Uniteller\Response\LegacyResponseParserFactory;
 
 /**
  * Подтверждение без фискализации.
@@ -181,7 +182,9 @@ class ConfirmBuilder extends BaseBuilder implements ContainerAwareInterface
         }
 
         try {
-            $result = $requestManager->executeRequestAndParseResponseOrders($this);
+            $response = $requestManager->executeRequest($this);
+            $parser = $this->container->get(LegacyResponseParserFactory::class)->create($this->getResponseFormat());
+            $result = $parser->parse($response);
         } catch (\Throwable $e) {
             $this->logger->error($e->getMessage(), ['exception' => $e]);
             throw $e;
