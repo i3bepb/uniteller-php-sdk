@@ -14,6 +14,11 @@ use Tmconsulting\Uniteller\Exception\RequestException;
 use Tmconsulting\Uniteller\Exception\ServerErrorException;
 use Tmconsulting\Uniteller\Parameter\Enum\UnitellerParameterName;
 
+/**
+ * Отправляет HTTP-запросы, проверяет HTTP-статус и декодирует тело ответа.
+ *
+ * Разбор результата операции выполняется отдельным парсером на стороне билдера.
+ */
 class RequestManager implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
@@ -84,25 +89,24 @@ class RequestManager implements LoggerAwareInterface
     }
 
     /**
-     * @param string $url
-     * @param string $method
-     * @param array|null $data
-     * @param array $headers
-     * @param string $responseFormat Формат ответа.
+     * Отправляет запрос и сохраняет HTTP-сообщения вместе с декодированным телом ответа.
      *
-     * @return array
+     * Проверяет HTTP-статус; поля ошибок Uniteller обрабатываются парсером результата операции.
+     * Формат заголовка Accept должен соответствовать парсеру, переданному в конструктор.
      *
-     * @throws \Psr\Http\Client\ClientExceptionInterface
-     * @throws \Random\RandomException
-     * @throws \Tmconsulting\Uniteller\Exception\UnitellerException
-     */
-    public function request(string $url, string $method = 'POST', ?array $data = null, array $headers = [], string $responseFormat = 'xml'): array
-    {
-        return $this->requestDecoded($url, $method, $data, $headers, $responseFormat)->getData();
-    }
-
-    /**
-     * Keeps HTTP context available to endpoint-specific response parsers.
+     * @param string $url Адрес метода API.
+     * @param string $method HTTP-метод.
+     * @param array|null $data Параметры для строки запроса и тела в формате application/x-www-form-urlencoded.
+     * @param array $headers HTTP-заголовки, дополняющие или заменяющие заголовки по умолчанию.
+     * @param string $responseFormat Формат ответа для заголовка Accept.
+     *
+     * @return DecodedResponse Декодированные данные, отправленный запрос и полученный ответ.
+     *
+     * @throws \Psr\Http\Client\ClientExceptionInterface При ошибке HTTP-клиента.
+     * @throws \Random\RandomException Если не удалось создать идентификатор запроса.
+     * @throws RequestException При HTTP-статусе 4xx.
+     * @throws ServerErrorException При HTTP-статусе 500 и выше.
+     * @throws \Tmconsulting\Uniteller\Exception\InvalidResponseException При ошибке декодирования ответа.
      */
     public function requestDecoded(string $url, string $method = 'POST', ?array $data = null, array $headers = [], string $responseFormat = 'xml'): DecodedResponse
     {
@@ -193,7 +197,17 @@ class RequestManager implements LoggerAwareInterface
     }
 
     /**
-     * Sends a builder request and decodes its body without endpoint interpretation.
+     * Отправляет POST-запрос с параметрами билдера и декодирует тело ответа.
+     *
+     * @param BuilderInterface $builder Обертка над параметрами запроса.
+     *
+     * @return DecodedResponse Декодированные данные с исходными HTTP-сообщениями.
+     *
+     * @throws \Psr\Http\Client\ClientExceptionInterface При ошибке HTTP-клиента.
+     * @throws \Random\RandomException Если не удалось создать идентификатор запроса.
+     * @throws \Tmconsulting\Uniteller\Exception\UnitellerException При ошибке HTTP-статуса или декодирования.
+     *
+     * @see requestDecoded()
      */
     public function executeRequest(BuilderInterface $builder): DecodedResponse
     {

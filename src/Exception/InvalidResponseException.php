@@ -3,7 +3,7 @@
 namespace Tmconsulting\Uniteller\Exception;
 
 /**
- * The response cannot be decoded or does not have the expected structure.
+ * Ответ не удалось декодировать либо его структура не соответствует ожидаемой.
  */
 class InvalidResponseException extends UnitellerRuntimeException
 {

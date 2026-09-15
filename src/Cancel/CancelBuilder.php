@@ -154,6 +154,10 @@ class CancelBuilder extends BaseBuilder implements ContainerAwareInterface
     }
 
     /**
+     * Отправляет отмену и разбирает JSON-ответ с проверкой кода ошибки и декодированием чеков.
+     *
+     * @return array Поля ответа; непустое поле Receipt заменяется массивом FiscalReceipt.
+     *
      * @throws \Throwable
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \ReflectionException

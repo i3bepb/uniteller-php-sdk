@@ -161,6 +161,13 @@ class FiscalConfirmBuilder extends BaseBuilder implements ContainerAwareInterfac
         return Format::XML;
     }
 
+    /**
+     * Отправляет запрос подтверждение и возвращает результат разбора XML-ответа.
+     *
+     * @return FiscalConfirmResult Результат запроса подтверждения.
+     *
+     * @throws \Throwable При ошибке подготовки запроса, отправки или разбора ответа.
+     */
     public function process(): FiscalConfirmResult
     {
         $this->container->set(ParserInterface::class, Format::getParserByFormat($this->getResponseFormat()));

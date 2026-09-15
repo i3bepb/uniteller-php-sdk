@@ -5,15 +5,18 @@ namespace Tmconsulting\Uniteller\Parameter;
 use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
 use Tmconsulting\Uniteller\Request\Format;
 
+/**
+ * Принимает строковое имя формата и преобразует его в значение API для выбранного метода.
+ */
 class FormatParameter extends BaseParameter
 {
     /**
-     * @var string[]
+     * @var string[] Допустимые строковые имена форматов.
      */
     private $allowed;
 
     /**
-     * @var string
+     * @var string Адрес метода API, определяющий кодировку формата.
      */
     private $endpoint;
 
@@ -22,8 +25,8 @@ class FormatParameter extends BaseParameter
      *                              Одно из \Tmconsulting\Uniteller\Builder\Enum\CanonicalParameterName.
      * @param string $unitellerName Наименнование параметра в API Uniteller.
      *                              Одно из \Tmconsulting\Uniteller\Builder\Enum\UnitellerParameterName.
-     * @param string[] $allowed Строковые имена форматов, допустимых для endpoint.
-     * @param string $endpoint
+     * @param string[] $allowed Имена форматов из ключей Format::getSupportedForEndpoint().
+     * @param string $endpoint Адрес метода API.
      * @param bool $shouldBeSent Включается ли параметр в запрос.
      *
      * @see \Tmconsulting\Uniteller\Parameter\Enum\CanonicalParameterName
@@ -42,7 +45,10 @@ class FormatParameter extends BaseParameter
     }
 
     /**
-     * @param mixed $value
+     * Проверяет, что строковое имя формата разрешено параметром и поддерживается методом API.
+     * Числовые коды форматов API и их строковые записи не принимаются.
+     *
+     * @param mixed $value Проверяемое имя формата.
      *
      * @return void
      *
@@ -63,7 +69,7 @@ class FormatParameter extends BaseParameter
     }
 
     /**
-     * @return int
+     * @return int Код выбранного строкового формата для метода API.
      *
      * @throws \Tmconsulting\Uniteller\Exception\FormatNotSupportedException
      */

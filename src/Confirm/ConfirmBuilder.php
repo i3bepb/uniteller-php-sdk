@@ -172,6 +172,13 @@ class ConfirmBuilder extends BaseBuilder implements ContainerAwareInterface
         return Format::CSV;
     }
 
+    /**
+     * Отправляет подтверждение и разбирает заказы и ошибки в выбранном формате CSV или XML.
+     *
+     * @return \Tmconsulting\Uniteller\Order\Order[] Заказы из ответа Uniteller.
+     *
+     * @throws \Throwable При ошибке подготовки запроса, отправки или разбора ответа.
+     */
     public function process()
     {
         $this->container->set(ParserInterface::class, Format::getParserByFormat($this->getResponseFormat()));

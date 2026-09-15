@@ -188,7 +188,9 @@ class RecurrentBuilder extends BaseBuilder implements ContainerAwareInterface
     }
 
     /**
-     * @return \Tmconsulting\Uniteller\Order\Order[]
+     * Отправляет рекуррентный платёж и разбирает заказы и ошибки в формате ответа билдера.
+     *
+     * @return \Tmconsulting\Uniteller\Order\Order[] Заказы из ответа Uniteller.
      *
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \ReflectionException

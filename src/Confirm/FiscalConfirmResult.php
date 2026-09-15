@@ -2,6 +2,9 @@
 
 namespace Tmconsulting\Uniteller\Confirm;
 
+/**
+ * Результат запроса подтверждения: код результат, сообщение ошибки и полученные фискальные чеки.
+ */
 class FiscalConfirmResult
 {
     /**
@@ -31,23 +34,32 @@ class FiscalConfirmResult
         $this->receipts = $receipts;
     }
 
+    /**
+     * @return int Код Result из ответа. {@see \Tmconsulting\Uniteller\Confirm\FiscalConfirmResultCode}
+     */
     public function getResult(): int
     {
         return $this->result;
     }
 
+    /**
+     * @return bool Соответствует ли код результата успешному подтверждению.
+     */
     public function isSuccess(): bool
     {
         return $this->result === FiscalConfirmResultCode::SUCCESS;
     }
 
+    /**
+     * @return string|null Сообщение ошибки, null при отсутствии поля ErrorMessage в ответе.
+     */
     public function getErrorMessage(): ?string
     {
         return $this->errorMessage;
     }
 
     /**
-     * @return \Tmconsulting\Uniteller\Receipt\FiscalReceipt[]
+     * @return \Tmconsulting\Uniteller\Receipt\FiscalReceipt[] Фискальные чеки, пустой массив, если Receipt отсутствовал.
      */
     public function getReceipts(): array
     {

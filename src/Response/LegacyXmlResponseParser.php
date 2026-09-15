@@ -10,18 +10,31 @@ use Tmconsulting\Uniteller\Request\DecodedResponse;
 use Tmconsulting\Uniteller\Request\ParserReceiptFromBase64;
 
 /**
- * Interprets legacy XML responses, preserving their field names and defaults.
+ * Разбирает заказы и ошибки XML-ответов, сохраняя прежние правила заполнения полей.
  */
 class LegacyXmlResponseParser implements LegacyResponseParserInterface
 {
-    /** @var ParserReceiptFromBase64 */
+    /** @var ParserReceiptFromBase64 Парсер фискальных чеков заказа. */
     private $parserReceipt;
 
+    /**
+     * @param ParserReceiptFromBase64 $parserReceipt Парсер чеков в кодировке Base64.
+     */
     public function __construct(ParserReceiptFromBase64 $parserReceipt)
     {
         $this->parserReceipt = $parserReceipt;
     }
 
+    /**
+     * Проверяет ошибки Uniteller и преобразует данные ответа в заказы.
+     *
+     * @param DecodedResponse $response Декодированный XML-ответ с исходными HTTP-сообщениями.
+     *
+     * @return \Tmconsulting\Uniteller\Order\Order[] Заказы с декодированными чеками.
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\ErrorException Если ответ содержит ошибку Uniteller.
+     * @throws \RuntimeException Если не удалось декодировать чеки.
+     */
     public function parse(DecodedResponse $response): array
     {
         $data = $response->getData();
@@ -31,7 +44,10 @@ class LegacyXmlResponseParser implements LegacyResponseParserInterface
     }
 
     /**
-     * @param array $data
+     * Преобразует один или несколько элементов orders/order в заказы.
+     * При отсутствии чека используется пустой массив; назначение платежа берётся из gds_payment_purpose_id.
+     *
+     * @param array $data Декодированные данные XML-ответа.
      *
      * @return \Tmconsulting\Uniteller\Order\Order[]
      *
@@ -105,6 +121,18 @@ class LegacyXmlResponseParser implements LegacyResponseParserInterface
         return $orders;
     }
 
+    /**
+     * Проверяет ErrorMessage и код ошибки из ErrorCode либо Result.
+     * При отсутствии кода подбирает исключение по тексту сообщения.
+     *
+     * @param array $data Декодированные поля XML-ответа.
+     * @param RequestInterface $request Исходный HTTP-запрос.
+     * @param ResponseInterface $response Исходный HTTP-ответ.
+     *
+     * @return void
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\ErrorException Если присутствует ErrorMessage.
+     */
     protected function parseErrors($data, RequestInterface $request, ResponseInterface $response)
     {
         if (isset($data['ErrorMessage']) && isset($data['ErrorCode'])) {

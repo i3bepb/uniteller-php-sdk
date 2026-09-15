@@ -159,6 +159,7 @@ class Container implements ContainerInterface, DebugAwareInterface
 
     /**
      * Создаёт экземпляр класса и внедряет в него необходимые зависимости.
+     * Парсеры результатов и их фабрика получают парсер чеков; менеджер запросов — парсер формата.
      *
      * @param class-string|string $class Имя класса.
      *
@@ -207,13 +208,15 @@ class Container implements ContainerInterface, DebugAwareInterface
     /**
      * Определяет, должен ли сервис кэшироваться в контейнере.
      *
+     * RequestManager создаётся заново, чтобы получить парсер формата текущего билдера.
+     * Готовые объекты, зарегистрированные через set(), возвращаются напрямую из get().
+     *
      * @param string $id Идентификатор сервиса.
      *
      * @return bool
      */
     protected function isShared(string $id): bool
     {
-        // Each manager keeps the format parser selected for the current builder.
         return $id !== RequestManager::class && !$this->isPrototype($id);
     }
 

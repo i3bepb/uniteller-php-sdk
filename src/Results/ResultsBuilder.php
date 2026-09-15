@@ -553,7 +553,9 @@ class ResultsBuilder extends BaseBuilder implements ContainerAwareInterface
     }
 
     /**
-     * @return \Tmconsulting\Uniteller\Order\Order[]
+     * Запрашивает результаты платежей и разбирает заказы и ошибки в выбранном формате CSV или XML.
+     *
+     * @return \Tmconsulting\Uniteller\Order\Order[] Заказы из ответа Uniteller.
      *
      * @throws \Throwable
      * @throws \Tmconsulting\Uniteller\Exception\FormatNotSupportedException

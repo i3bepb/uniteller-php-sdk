@@ -73,11 +73,15 @@ class RequestManagerTest extends TestCase
         return [['csv', 'text/csv'], ['xml', 'application/xml'], ['json', 'application/json']];
     }
 
-    public function testRequestReturnsOnlyDecodedArray()
+    /**
+     * Декодирование сохраняет поля ошибки Uniteller для последующего разбора результата операции.
+     */
+    public function testRequestDecodedPreservesBusinessErrorData()
     {
         $this->client->method('sendRequest')->willReturn(new Response(200, [], 'body'));
-        $this->parser->method('parse')->willReturn(['ErrorMessage' => 'Business error']);
-        $this->assertSame(['ErrorMessage' => 'Business error'], $this->manager->request('https://uniteller.test'));
+        $this->parser->expects($this->once())->method('parse')->with('body')->willReturn(['ErrorMessage' => 'Business error']);
+        $decoded = $this->manager->requestDecoded('https://uniteller.test');
+        $this->assertSame(['ErrorMessage' => 'Business error'], $decoded->getData());
     }
 
     /** @dataProvider httpErrors */
@@ -87,7 +91,7 @@ class RequestManagerTest extends TestCase
         $this->client->method('sendRequest')->willReturn($response);
         $this->parser->expects($this->never())->method('parse');
         $this->expectException($exception);
-        $this->manager->request('https://uniteller.test');
+        $this->manager->requestDecoded('https://uniteller.test');
     }
 
     public function httpErrors(): array
@@ -101,6 +105,6 @@ class RequestManagerTest extends TestCase
         $this->client->method('sendRequest')->willThrowException($exception);
         $this->parser->expects($this->never())->method('parse');
         $this->expectExceptionObject($exception);
-        $this->manager->request('https://uniteller.test');
+        $this->manager->requestDecoded('https://uniteller.test');
     }
 }

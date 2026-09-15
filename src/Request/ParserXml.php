@@ -5,8 +5,18 @@ namespace Tmconsulting\Uniteller\Request;
 use Mtownsend\XmlToArray\XmlToArray;
 use Tmconsulting\Uniteller\Exception\InvalidResponseException;
 
+/**
+ * Проверяет корректность XML и преобразует его в массив с исходным регистром имён полей.
+ */
 class ParserXml implements ParserInterface
 {
+    /**
+     * @param string $response Тело XML-ответа.
+     *
+     * @return array Декодированные XML-элементы без внешнего корневого элемента.
+     *
+     * @throws InvalidResponseException Если ответ пуст, XML некорректен или преобразование не удалось.
+     */
     public function parse(string $response): array
     {
         if (trim($response) === '') {
@@ -15,7 +25,7 @@ class ParserXml implements ParserInterface
 
         $previous = libxml_use_internal_errors(true);
         try {
-            // The converter does not check loadXML() failures itself.
+            // Конвертер сам не проверяет ошибки loadXML().
             $document = new \DOMDocument();
             if (!$document->loadXML($response, LIBXML_NONET)) {
                 throw new InvalidResponseException('Invalid XML response');

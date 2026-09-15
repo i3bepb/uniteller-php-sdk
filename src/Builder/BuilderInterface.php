@@ -2,6 +2,9 @@
 
 namespace Tmconsulting\Uniteller\Builder;
 
+/**
+ * Обертка над параметрами запроса.
+ */
 interface BuilderInterface
 {
     /**

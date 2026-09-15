@@ -2,7 +2,7 @@
 
 `ParserInterface::parse(string $response): array` описывает только декодирование формата. CSV, XML и JSON не создают доменные объекты и не интерпретируют коды операций.
 
-`RequestManager` создаёт и отправляет HTTP-запрос, логирует обмен, проверяет HTTP-статус и декодирует body. `executeRequest()` и `requestDecoded()` возвращают `DecodedResponse`: массив данных вместе с исходными PSR request/response. Метод `request()` возвращает только массив данных. Интерпретация бизнес-ошибок выполняется после него.
+`RequestManager` создаёт и отправляет HTTP-запрос, логирует обмен, проверяет HTTP-статус и декодирует body. `executeRequest()` и `requestDecoded()` возвращают `DecodedResponse`: массив данных вместе с исходными PSR request/response. Массив данных доступен через `DecodedResponse::getData()`. Интерпретация бизнес-ошибок выполняется после декодирования.
 
 Цепочки builders:
 

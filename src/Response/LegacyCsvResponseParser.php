@@ -11,18 +11,31 @@ use Tmconsulting\Uniteller\Request\DecodedResponse;
 use Tmconsulting\Uniteller\Request\ParserReceiptFromBase64;
 
 /**
- * Interprets legacy CSV responses, preserving their field names and defaults.
+ * Разбирает заказы и ошибки CSV-ответов, сохраняя прежние правила заполнения полей.
  */
 class LegacyCsvResponseParser implements LegacyResponseParserInterface
 {
-    /** @var ParserReceiptFromBase64 */
+    /** @var ParserReceiptFromBase64 Парсер фискальных чеков заказа. */
     private $parserReceipt;
 
+    /**
+     * @param ParserReceiptFromBase64 $parserReceipt Парсер чеков в кодировке Base64.
+     */
     public function __construct(ParserReceiptFromBase64 $parserReceipt)
     {
         $this->parserReceipt = $parserReceipt;
     }
 
+    /**
+     * Проверяет ошибки Uniteller и преобразует данные ответа в заказы.
+     *
+     * @param DecodedResponse $response Декодированный CSV-ответ с исходными HTTP-сообщениями.
+     *
+     * @return \Tmconsulting\Uniteller\Order\Order[] Заказы с декодированными чеками.
+     *
+     * @throws \Tmconsulting\Uniteller\Exception\ErrorException Если ответ содержит ошибку Uniteller.
+     * @throws \RuntimeException Если не удалось декодировать чеки.
+     */
     public function parse(DecodedResponse $response): array
     {
         $data = $response->getData();
@@ -32,9 +45,14 @@ class LegacyCsvResponseParser implements LegacyResponseParserInterface
     }
 
     /**
-     * @param array $data
+     * Преобразует строки CSV в заказы.
+     * Отсутствующее поле чека сохраняется как null.
      *
-     * @return array|\Tmconsulting\Uniteller\Order\Order[]
+     * @param array $data Декодированные данные CSV-ответа.
+     *
+     * @return \Tmconsulting\Uniteller\Order\Order[] Заказы с прежними значениями по умолчанию.
+     *
+     * @throws \RuntimeException Если не удалось декодировать чеки.
      */
     protected function parseOrders(array $data): array
     {
@@ -119,9 +137,14 @@ class LegacyCsvResponseParser implements LegacyResponseParserInterface
     }
 
     /**
-     * @param $data
-     * @param \Psr\Http\Message\RequestInterface $request
-     * @param \Psr\Http\Message\ResponseInterface $response
+     * Проверяет ErrorMessage и ErrorCode в первой строке CSV-ответа.
+     * При отсутствии кода подбирает исключение по тексту сообщения.
+     *
+     * @param array $data Декодированные строки CSV.
+     * @param \Psr\Http\Message\RequestInterface $request Исходный HTTP-запрос.
+     * @param \Psr\Http\Message\ResponseInterface $response Исходный HTTP-ответ.
+     *
+     * @return void
      *
      * @throws \Tmconsulting\Uniteller\Exception\ErrorException
      */
