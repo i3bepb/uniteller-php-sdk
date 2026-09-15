@@ -89,48 +89,6 @@ class RequestManager implements LoggerAwareInterface
     }
 
     /**
-     * Отправляет запрос и сохраняет HTTP-сообщения вместе с декодированным телом ответа.
-     *
-     * Проверяет HTTP-статус; поля ошибок Uniteller обрабатываются парсером результата операции.
-     * Формат заголовка Accept должен соответствовать парсеру, переданному в конструктор.
-     *
-     * @param string $url Адрес метода API.
-     * @param string $method HTTP-метод.
-     * @param array|null $data Параметры для строки запроса и тела в формате application/x-www-form-urlencoded.
-     * @param array $headers HTTP-заголовки, дополняющие или заменяющие заголовки по умолчанию.
-     * @param string $responseFormat Формат ответа для заголовка Accept.
-     *
-     * @return DecodedResponse Декодированные данные, отправленный запрос и полученный ответ.
-     *
-     * @throws \Psr\Http\Client\ClientExceptionInterface При ошибке HTTP-клиента.
-     * @throws \Random\RandomException Если не удалось создать идентификатор запроса.
-     * @throws RequestException При HTTP-статусе 4xx.
-     * @throws ServerErrorException При HTTP-статусе 500 и выше.
-     * @throws \Tmconsulting\Uniteller\Exception\InvalidResponseException При ошибке декодирования ответа.
-     */
-    public function requestDecoded(string $url, string $method = 'POST', ?array $data = null, array $headers = [], string $responseFormat = 'xml'): DecodedResponse
-    {
-        $requestId = $this->generateRequestId();
-
-        $query = $data !== null ? http_build_query($data) : '';
-        $fullUrl = sprintf('%s?%s', $url, $query);
-
-        $request = $this->requestFactory->createRequest($method, $fullUrl)
-            ->withBody($this->streamFactory->createStream($query));
-        foreach (array_merge($this->getDefaultHeaders($responseFormat), $headers) as $name => $value) {
-            $request = $request->withHeader($name, $value);
-        }
-
-        $this->logRequest($requestId, $request, $url, $data);
-        $response = $this->httpClient->sendRequest($request);
-        $this->logResponse($requestId, $response);
-
-        $this->validateResponse($request, $response);
-
-        return new DecodedResponse($this->parser->parse((string)$response->getBody()), $request, $response);
-    }
-
-    /**
      * @param string $requestId
      * @param \Psr\Http\Message\RequestInterface $request
      * @param string $uri
@@ -199,21 +157,40 @@ class RequestManager implements LoggerAwareInterface
     /**
      * Отправляет POST-запрос с параметрами билдера и декодирует тело ответа.
      *
-     * @param BuilderInterface $builder Обертка над параметрами запроса.
+     * Проверяет HTTP-статус; поля ошибок Uniteller обрабатываются парсером результата операции.
+     * Формат заголовка Accept должен соответствовать парсеру, переданному в конструктор.
+     *
+     * @param BuilderInterface $builder Источник адреса, параметров и формата ответа.
      *
      * @return DecodedResponse Декодированные данные с исходными HTTP-сообщениями.
      *
      * @throws \Psr\Http\Client\ClientExceptionInterface При ошибке HTTP-клиента.
      * @throws \Random\RandomException Если не удалось создать идентификатор запроса.
      * @throws \Tmconsulting\Uniteller\Exception\UnitellerException При ошибке HTTP-статуса или декодирования.
-     *
-     * @see requestDecoded()
      */
     public function executeRequest(BuilderInterface $builder): DecodedResponse
     {
-        return $this->requestDecoded(
-            $builder->getEndpoint(), 'POST', $builder->toArray(), [], $builder->getResponseFormat()
-        );
+        $url = $builder->getEndpoint();
+        $data = $builder->toArray();
+        $responseFormat = $builder->getResponseFormat();
+        $requestId = $this->generateRequestId();
+
+        $query = http_build_query($data);
+        $fullUrl = sprintf('%s?%s', $url, $query);
+
+        $request = $this->requestFactory->createRequest('POST', $fullUrl)
+            ->withBody($this->streamFactory->createStream($query));
+        foreach ($this->getDefaultHeaders($responseFormat) as $name => $value) {
+            $request = $request->withHeader($name, $value);
+        }
+
+        $this->logRequest($requestId, $request, $url, $data);
+        $response = $this->httpClient->sendRequest($request);
+        $this->logResponse($requestId, $response);
+
+        $this->validateResponse($request, $response);
+
+        return new DecodedResponse($this->parser->parse((string)$response->getBody()), $request, $response);
     }
 
     /**
