@@ -70,8 +70,8 @@ class RequestManagerTest extends TestCase
                 $stages[] = 'send';
                 $sentRequest = $request;
                 $this->assertSame('POST', $request->getMethod());
-                $this->assertSame($endpoint . '?' . $query, (string)$request->getUri());
-                $this->assertSame($query, $request->getUri()->getQuery());
+                $this->assertSame($endpoint, (string)$request->getUri());
+                $this->assertSame('', $request->getUri()->getQuery());
                 $this->assertSame($accept, $request->getHeaderLine('Accept'));
                 $this->assertSame('application/x-www-form-urlencoded', $request->getHeaderLine('Content-Type'));
                 $this->assertSame($query, (string)$request->getBody());

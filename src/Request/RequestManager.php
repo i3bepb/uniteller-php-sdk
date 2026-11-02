@@ -172,11 +172,10 @@ class RequestManager implements LoggerAwareInterface
         $responseFormat = $builder->getResponseFormat();
         $requestId = $this->generateRequestId();
 
-        $query = http_build_query($data);
-        $fullUrl = sprintf('%s?%s', $url, $query);
+        $body = http_build_query($data);
 
-        $request = $this->requestFactory->createRequest('POST', $fullUrl)
-            ->withBody($this->streamFactory->createStream($query));
+        $request = $this->requestFactory->createRequest('POST', $url)
+            ->withBody($this->streamFactory->createStream($body));
         foreach ($this->getDefaultHeaders($responseFormat) as $name => $value) {
             $request = $request->withHeader($name, $value);
         }
