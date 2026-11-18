@@ -2,7 +2,7 @@
 
 namespace Tmconsulting\Uniteller\Tests\Cancel;
 
-use Tmconsulting\Uniteller\Cancel\CancelBuilder;
+use Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder;
 use Tmconsulting\Uniteller\Dependency\Container;
 use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
 use Tmconsulting\Uniteller\Parameter\Enum\Currency;
@@ -16,7 +16,7 @@ use Tmconsulting\Uniteller\Signature\Signature;
 use Tmconsulting\Uniteller\Tests\TestCase;
 
 /**
- * @coversDefaultClass \Tmconsulting\Uniteller\Cancel\CancelBuilder
+ * @coversDefaultClass \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder
  */
 class CancelBuilderTest extends TestCase
 {
@@ -24,7 +24,7 @@ class CancelBuilderTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->builder = new CancelBuilder(new Signature());
+        $this->builder = new FiscalCancelBuilder(new Signature());
     }
 
     public static function dataProviderGetBillNumber(): array
@@ -44,8 +44,8 @@ class CancelBuilderTest extends TestCase
      *
      * @dataProvider dataProviderGetBillNumber
      *
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::setBillNumber
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::getBillNumber
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::setBillNumber
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::getBillNumber
      */
     public function testSetAndGetBillNumber($set, $get)
     {
@@ -72,8 +72,8 @@ class CancelBuilderTest extends TestCase
      *
      * @dataProvider dataProviderGetOrderId
      *
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::setOrderId
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::getOrderId
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::setOrderId
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::getOrderId
      */
     public function testSetAndGetOrderId($set, $get)
     {
@@ -105,8 +105,8 @@ class CancelBuilderTest extends TestCase
      *
      * @dataProvider dataProviderGetCurrency
      *
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::setCurrency
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::getCurrency
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::setCurrency
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::getCurrency
      */
     public function testSetAndGetCurrency($set, $get, bool $exception)
     {
@@ -136,8 +136,8 @@ class CancelBuilderTest extends TestCase
      *
      * @dataProvider dataProviderGetRvrReason
      *
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::setRvrReason
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::getRvrReason
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::setRvrReason
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::getRvrReason
      */
     public function testSetAndGetRvrReason($set, $get, bool $exception)
     {
@@ -166,8 +166,8 @@ class CancelBuilderTest extends TestCase
      *
      * @dataProvider dataProviderGetLanguage
      *
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::setLanguage
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::getLanguage
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::setLanguage
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::getLanguage
      */
     public function testSetAndGetLanguage($set, $get, bool $exception)
     {
@@ -194,8 +194,8 @@ class CancelBuilderTest extends TestCase
      *
      * @dataProvider dataProviderGetFields
      *
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::setFields
-     * @covers       \Tmconsulting\Uniteller\Cancel\CancelBuilder::getFields
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::setFields
+     * @covers       \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::getFields
      */
     public function testSetAndGetFields($set, $get)
     {
@@ -206,7 +206,7 @@ class CancelBuilderTest extends TestCase
     }
 
     /**
-     * @covers \Tmconsulting\Uniteller\Cancel\CancelBuilder::toArray
+     * @covers \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::toArray
      */
     public function testBuildObject()
     {
@@ -235,7 +235,7 @@ class CancelBuilderTest extends TestCase
     }
 
     /**
-     * @covers \Tmconsulting\Uniteller\Cancel\CancelBuilder::toArray
+     * @covers \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::toArray
      */
     public function testNotSetNotExistToArray()
     {
@@ -294,7 +294,7 @@ class CancelBuilderTest extends TestCase
     }
 
     /**
-     * @covers \Tmconsulting\Uniteller\Cancel\CancelBuilder::getSignature
+     * @covers \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::getSignature
      */
     public function testGetSignature()
     {
@@ -318,7 +318,7 @@ class CancelBuilderTest extends TestCase
     }
 
     /**
-     * @covers \Tmconsulting\Uniteller\Cancel\CancelBuilder::getRequestName
+     * @covers \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::getRequestName
      */
     public function testGetRequestName()
     {
@@ -326,7 +326,7 @@ class CancelBuilderTest extends TestCase
     }
 
     /**
-     * @covers \Tmconsulting\Uniteller\Cancel\CancelBuilder::process
+     * @covers \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder::process
      */
     public function testProcess()
     {

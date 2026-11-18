@@ -6,15 +6,83 @@ use GuzzleHttp\Psr7\Response;
 use Tmconsulting\Uniteller\Confirm\FiscalConfirmResult;
 use Tmconsulting\Uniteller\Confirm\FiscalConfirmResultParser;
 use Tmconsulting\Uniteller\Exception\InvalidResponseException;
+use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
 use Tmconsulting\Uniteller\Exception\RequestException;
 use Tmconsulting\Uniteller\Exception\ServerErrorException;
 use Tmconsulting\Uniteller\Receipt\FiscalReceipt;
 use Tmconsulting\Uniteller\Request\ApiEndpoints;
+use Tmconsulting\Uniteller\Request\Format;
 use Tmconsulting\Uniteller\Request\ParserReceiptFromBase64;
 use Tmconsulting\Uniteller\Tests\ResponseTestCase;
 
 class FiscalConfirmResponseTest extends ResponseTestCase
 {
+    /** @dataProvider explicitFormats */
+    public function testExplicitFormatIsSentAndSelectsResponseParser(string $format, string $code, string $accept): void
+    {
+        $receipt = base64_encode(json_encode($this->receiptData()));
+        $body = $format === Format::CSV
+            ? "Result;ErrorMessage;Receipt\n11;Invalid ReceiptSignature;" . $receipt
+            : '<response><Result>11</Result><ErrorMessage>Invalid ReceiptSignature</ErrorMessage><Receipt>' . $receipt . '</Receipt></response>';
+        $container = $this->responseContainer([new Response(200, ['Content-Type' => $accept], $body)], function ($request) use ($code, $accept) {
+            $this->assertSame('POST', $request->getMethod());
+            $this->assertSame(ApiEndpoints::FISCAL_CONFIRM, (string)$request->getUri());
+            $this->assertSame($accept, $request->getHeaderLine('Accept'));
+            parse_str((string)$request->getBody(), $parameters);
+            $this->assertSame($code, $parameters['Format']);
+            if ($code === '1') {
+                $this->assertSame('1', $parameters['Header1']);
+            } else {
+                $this->assertArrayNotHasKey('Header1', $parameters);
+            }
+            $this->assertArrayHasKey('Signature', $parameters);
+            $this->assertArrayHasKey('ReceiptSignature', $parameters);
+            $this->assertArrayNotHasKey('Password', $parameters);
+        });
+        $builder = $this->fiscalBuilder($container);
+        $signature = $builder->getSignature();
+        $receiptSignature = $builder->getReceiptSignature();
+        $this->assertSame($builder, $builder->setFormat($format));
+        if ($format === Format::CSV) {
+            $this->assertSame($builder, $builder->setHeader1(1));
+        }
+        $this->assertSame($format, $builder->getResponseFormat());
+        $this->assertSame($signature, $builder->getSignature());
+        $this->assertSame($receiptSignature, $builder->getReceiptSignature());
+
+        $result = $builder->process();
+        $this->assertSame(11, $result->getResult());
+        $this->assertSame('Invalid ReceiptSignature', $result->getErrorMessage());
+        $this->assertCount(1, $result->getReceipts());
+    }
+
+    public function explicitFormats(): array
+    {
+        return [[Format::CSV, '1', 'text/csv'], [Format::XML, '3', 'application/xml']];
+    }
+
+    /** @dataProvider unsupportedFormats */
+    public function testUnsupportedFormatIsRejectedBeforeSending(string $format): void
+    {
+        $builder = $this->fiscalBuilder($this->responseContainer([]));
+        $this->expectException(NotValidParameterException::class);
+        $builder->setFormat($format);
+    }
+
+    public function unsupportedFormats(): array
+    {
+        return [[Format::BRACKETS], [Format::SOAP], [Format::JSON], ['unknown']];
+    }
+
+    public function testCsvWithMultipleResultsIsRejected(): void
+    {
+        $container = $this->responseContainer([new Response(200, [], "Result;ErrorMessage\n0;\n11;Invalid ReceiptSignature")]);
+        $builder = $this->fiscalBuilder($container)->setFormat(Format::CSV);
+        $this->expectException(InvalidResponseException::class);
+        $this->expectExceptionMessage('Expected one row in FiscalConfirm CSV response');
+        $builder->process();
+    }
+
     /** @dataProvider receiptCounts */
     public function testSuccessWithReceipts(int $count)
     {

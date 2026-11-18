@@ -7,7 +7,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Tmconsulting\Uniteller\Callback\Callback;
-use Tmconsulting\Uniteller\Cancel\CancelBuilder;
+use Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder;
 use Tmconsulting\Uniteller\Cancel\CancelWithReceiptBuilder;
 use Tmconsulting\Uniteller\Confirm\ConfirmBuilder;
 use Tmconsulting\Uniteller\Confirm\FiscalConfirmBuilder;
@@ -57,7 +57,7 @@ class DependencyContainerTest extends TestCase
             [PaymentBuilder::class, true],
             ['NotExistClass', false],
             [Callback::class, true],
-            [CancelBuilder::class, true],
+            [FiscalCancelBuilder::class, true],
             [CancelWithReceiptBuilder::class, true],
             [ConfirmBuilder::class, true],
             [FastPaymentBuilder::class, true],
@@ -98,8 +98,8 @@ class DependencyContainerTest extends TestCase
     public function testGet()
     {
         $container = new Container();
-        $cancelBuilder = $container->get(CancelBuilder::class);
-        $this->assertInstanceOf(CancelBuilder::class, $cancelBuilder);
+        $cancelBuilder = $container->get(FiscalCancelBuilder::class);
+        $this->assertInstanceOf(FiscalCancelBuilder::class, $cancelBuilder);
 
         $this->expectException(ServiceNotFoundException::class);
         $container->get('NotExistClass');

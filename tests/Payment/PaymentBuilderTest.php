@@ -12,7 +12,7 @@ use Tmconsulting\Uniteller\Parameter\Enum\MeanType;
 use Tmconsulting\Uniteller\Parameter\Enum\PaymentType;
 use Tmconsulting\Uniteller\Parameter\Enum\UnitellerParameterName;
 use Tmconsulting\Uniteller\Payment\PaymentBuilder;
-use Tmconsulting\Uniteller\Payment\Uri;
+use Tmconsulting\Uniteller\Payment\PaymentLink;
 use Tmconsulting\Uniteller\Request\ApiEndpoints;
 use Tmconsulting\Uniteller\Signature\SignatureInterface;
 use Tmconsulting\Uniteller\Tests\TestCase;
@@ -668,7 +668,7 @@ class PaymentBuilderTest extends TestCase
             ->setUrlReturnNo('https://no.url');
 
         $uri = $this->builder->process();
-        $this->assertInstanceOf(Uri::class, $uri);
-        $this->assertEquals('https://example.com/pay?Shop_IDP=shop&Order_IDP=123&Subtotal_P=100&URL_RETURN_OK=https%3A%2F%2Fok.url&URL_RETURN_NO=https%3A%2F%2Fno.url&Signature=mocked_signature', $uri->getUri());
+        $this->assertInstanceOf(PaymentLink::class, $uri);
+        $this->assertEquals('https://example.com/pay?Shop_IDP=shop&Order_IDP=123&Subtotal_P=100&URL_RETURN_OK=https%3A%2F%2Fok.url&URL_RETURN_NO=https%3A%2F%2Fno.url&Signature=mocked_signature', $uri->getUrl());
     }
 }

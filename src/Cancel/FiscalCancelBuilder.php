@@ -5,10 +5,11 @@ namespace Tmconsulting\Uniteller\Cancel;
 use Tmconsulting\Uniteller\Builder\BaseBuilder;
 use Tmconsulting\Uniteller\Dependency\ContainerAwareInterface;
 use Tmconsulting\Uniteller\Dependency\ContainerAwareTrait;
+use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
 use Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException;
-use Tmconsulting\Uniteller\Parameter\AmountParameter;
 use Tmconsulting\Uniteller\Parameter\Enum\CanonicalParameterName;
 use Tmconsulting\Uniteller\Parameter\Enum\UnitellerParameterName;
+use Tmconsulting\Uniteller\Parameter\NonNegativeAmountParameter;
 use Tmconsulting\Uniteller\Parameter\ReceiptParameter;
 use Tmconsulting\Uniteller\Parameter\ScalarParameter;
 use Tmconsulting\Uniteller\Parameter\StringParameter;
@@ -16,10 +17,12 @@ use Tmconsulting\Uniteller\Request\ApiEndpoints;
 use Tmconsulting\Uniteller\Request\Format;
 use Tmconsulting\Uniteller\Request\ParserInterface;
 use Tmconsulting\Uniteller\Request\RequestManager;
-use Tmconsulting\Uniteller\Support\LogSanitizer;
+use Tmconsulting\Uniteller\Support\ExceptionContext;
 
 /**
- * Сценарии отмены.
+ * Отмена платежа через API фискализации с ответом в формате JSON.
+ *
+ * При отмене неподтверждённой преавторизации без чека аванса Receipt не передаётся.
  *
  * @method $this setPassword(string|int $password) Пароль. Доступен Merchant-у в Личном кабинете.
  * @method string|null getPassword()
@@ -33,15 +36,15 @@ use Tmconsulting\Uniteller\Support\LogSanitizer;
  * @method string|null getOrderId()
  * @method bool hasOrderId()
  *
- * @method $this setSubtotal(string|int $subtotal) Отменяемая сумма оплаты электронными денежными средствами.
+ * @method $this setSubtotal(string|int $subtotal) Отменяемая сумма электронной оплаты; ноль допустим только с Receipt.
  * @method string|null getSubtotal()
  * @method bool hasSubtotal()
  *
- * @method $this setReceipt(\Tmconsulting\Uniteller\Receipt\Receipt $receipt) Чек
- * @method bool|null getReceipt()
+ * @method $this setReceipt(\Tmconsulting\Uniteller\Receipt\Receipt $receipt) Чек возврата.
+ * @method string|null getReceipt() Чек, закодированный методом Base64.
  * @method bool hasReceipt()
  */
-class CancelBuilder extends BaseBuilder implements ContainerAwareInterface
+class FiscalCancelBuilder extends BaseBuilder implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 
@@ -67,9 +70,10 @@ class CancelBuilder extends BaseBuilder implements ContainerAwareInterface
         );
         /**
          * Отменяемая сумма оплаты электронными денежными средствами.
+         * Ноль допустим при передаче Receipt для отмены только ДПС.
          */
         $this->parameters->add(
-            new AmountParameter(CanonicalParameterName::SUBTOTAL, UnitellerParameterName::SUBTOTAL)
+            new NonNegativeAmountParameter(CanonicalParameterName::SUBTOTAL, UnitellerParameterName::SUBTOTAL)
         );
         // Чек
         $this->parameters->add(
@@ -79,6 +83,9 @@ class CancelBuilder extends BaseBuilder implements ContainerAwareInterface
 
     /**
      * Порядок следования полей важен т.к. иначе signature может не пройти!
+     * Subtotal и Receipt включаются только при наличии соответствующего параметра.
+     * При полной отмене с чеком Subtotal не передаётся. Для отсутствующего поля в подписываемую строку
+     * не добавляются ни хеш, ни разделитель.
      *
      * @return string Сигнатура.
      *
@@ -90,19 +97,28 @@ class CancelBuilder extends BaseBuilder implements ContainerAwareInterface
         $arr = [
             UnitellerParameterName::ORDER_ID => $this->getOrderId(),
             UnitellerParameterName::UPID     => $this->getShopId(),
-            UnitellerParameterName::SUBTOTAL => $this->getSubtotal(),
-            UnitellerParameterName::RECEIPT  => $this->getReceipt(),
-            UnitellerParameterName::PASSWORD => $this->getPassword(),
         ];
+        if ($this->hasSubtotal()) {
+            $arr[UnitellerParameterName::SUBTOTAL] = $this->getSubtotal();
+        }
+        if ($this->hasReceipt()) {
+            $arr[UnitellerParameterName::RECEIPT] = $this->getReceipt();
+        }
+        $arr[UnitellerParameterName::PASSWORD] = $this->getPassword();
+
         return $this->signatureCreator->setParameters($arr)->createSha256();
     }
 
     /**
-     * Проверка присутствия обязательных полей
+     * Проверяет обязательные поля и сочетание суммы с чеком возврата.
+     *
+     * Без Receipt требуется положительный Subtotal. С Receipt сумма может
+     * отсутствовать для полной отмены или быть нулевой для отмены только ДПС.
      *
      * @return void
      *
      * @throws \Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException
+     * @throws \Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException Если Subtotal равен нулю без Receipt.
      */
     protected function validateRequired(): void
     {
@@ -115,11 +131,12 @@ class CancelBuilder extends BaseBuilder implements ContainerAwareInterface
         if (!$this->hasOrderId()) {
             throw new RequiredParameterException(UnitellerParameterName::ORDER_IDP);
         }
-        if (!$this->hasSubtotal()) {
+        // При полной отмене с чеком сумма определяется по Receipt.
+        if (!$this->hasSubtotal() && !$this->hasReceipt()) {
             throw new RequiredParameterException(UnitellerParameterName::SUBTOTAL);
         }
-        if (!$this->hasReceipt()) {
-            throw new RequiredParameterException(UnitellerParameterName::RECEIPT);
+        if (!$this->hasReceipt() && $this->getSubtotal() <= 0) {
+            throw new NotValidParameterException('Invalid Subtotal: amount must be greater than zero without Receipt.');
         }
     }
 
@@ -171,7 +188,8 @@ class CancelBuilder extends BaseBuilder implements ContainerAwareInterface
 
         if ($this->debug) {
             $this->logger->debug(
-                'Parameters in request: ' . PHP_EOL . print_r(LogSanitizer::sanitize($this->toArray()), true)
+                'uniteller.cancel.request_prepared',
+                ['uniteller' => ['parameters' => $this->toArray()]]
             );
         }
 
@@ -179,7 +197,15 @@ class CancelBuilder extends BaseBuilder implements ContainerAwareInterface
             $response = $requestManager->executeRequest($this);
             $result = $this->container->get(CancelResultParser::class)->parse($response);
         } catch (\Throwable $e) {
-            $this->logger->error($e->getMessage(), ['exception' => $e]);
+            $this->logger->error(
+                'uniteller.cancel.failed',
+                [
+                    'uniteller' => [
+                        'error' => ExceptionContext::fromThrowable($e),
+                        'message' => ExceptionContext::logMessage($e, 'Uniteller operation failed'),
+                    ]
+                ]
+            );
             throw $e;
         }
 

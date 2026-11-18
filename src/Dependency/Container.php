@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Tmconsulting\Uniteller\Builder\BuilderInterface;
 use Tmconsulting\Uniteller\Callback\Callback;
-use Tmconsulting\Uniteller\Cancel\CancelBuilder;
+use Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder;
 use Tmconsulting\Uniteller\Cancel\CancelResultParser;
 use Tmconsulting\Uniteller\Confirm\ConfirmBuilder;
 use Tmconsulting\Uniteller\Confirm\FiscalConfirmBuilder;
@@ -26,6 +26,8 @@ use Tmconsulting\Uniteller\Response\LegacyResponseParserFactory;
 use Tmconsulting\Uniteller\Results\FiscalResultsBuilder;
 use Tmconsulting\Uniteller\Results\ResultsBuilder;
 use Tmconsulting\Uniteller\Signature\Signature;
+use Tmconsulting\Uniteller\Support\LoggingAwareInterface;
+use Tmconsulting\Uniteller\Support\LoggingPolicy;
 
 /**
  * Контейнер зависимостей библиотеки Uniteller.
@@ -55,20 +57,21 @@ class Container implements ContainerInterface, DebugAwareInterface
         $this->debug = $debug;
 
         $defaults = [
-            CancelResultParser::class => CancelResultParser::class,
-            FiscalConfirmResultParser::class => FiscalConfirmResultParser::class,
+            CancelResultParser::class          => CancelResultParser::class,
+            FiscalConfirmResultParser::class   => FiscalConfirmResultParser::class,
             LegacyResponseParserFactory::class => LegacyResponseParserFactory::class,
-            Callback::class                => Callback::class,
-            CancelBuilder::class           => CancelBuilder::class,
-            ConfirmBuilder::class          => ConfirmBuilder::class,
-            LoggerInterface::class         => NullLogger::class,
-            ParserInterface::class         => ParserCsv::class,
-            ParserReceiptFromBase64::class => ParserReceiptFromBase64::class,
-            PaymentBuilder::class          => PaymentBuilder::class,
-            FiscalConfirmBuilder::class    => FiscalConfirmBuilder::class,
-            RecurrentBuilder::class        => RecurrentBuilder::class,
-            RequestManager::class          => RequestManager::class,
-            ResultsBuilder::class          => ResultsBuilder::class,
+            Callback::class                    => Callback::class,
+            FiscalCancelBuilder::class         => FiscalCancelBuilder::class,
+            ConfirmBuilder::class              => ConfirmBuilder::class,
+            LoggerInterface::class             => NullLogger::class,
+            LoggingPolicy::class               => LoggingPolicy::class,
+            ParserInterface::class             => ParserCsv::class,
+            ParserReceiptFromBase64::class     => ParserReceiptFromBase64::class,
+            PaymentBuilder::class              => PaymentBuilder::class,
+            FiscalConfirmBuilder::class        => FiscalConfirmBuilder::class,
+            RecurrentBuilder::class            => RecurrentBuilder::class,
+            RequestManager::class              => RequestManager::class,
+            ResultsBuilder::class              => ResultsBuilder::class,
             FiscalResultsBuilder::class    => FiscalResultsBuilder::class,
             Signature::class               => Signature::class,
         ];
@@ -155,6 +158,13 @@ class Container implements ContainerInterface, DebugAwareInterface
             );
         }
         $this->bindings[$id] = $definition;
+        if ($id === LoggingPolicy::class && $definition instanceof LoggingPolicy) {
+            foreach ($this->bindings as $entry) {
+                if ($entry instanceof LoggingAwareInterface) {
+                    $entry->setLoggingPolicy($definition);
+                }
+            }
+        }
     }
 
     /**
@@ -193,6 +203,9 @@ class Container implements ContainerInterface, DebugAwareInterface
         }
         $reflection = new \ReflectionClass($class);
         $entry = $reflection->newInstanceArgs($args);
+        if ($entry instanceof LoggingAwareInterface) {
+            $entry->setLoggingPolicy($this->get(LoggingPolicy::class));
+        }
         if ($entry instanceof LoggerAwareInterface) {
             $entry->setLogger($this->get(LoggerInterface::class));
         }
@@ -231,7 +244,7 @@ class Container implements ContainerInterface, DebugAwareInterface
     {
         return in_array($id, [
             Callback::class,
-            CancelBuilder::class,
+            FiscalCancelBuilder::class,
             ConfirmBuilder::class,
             PaymentBuilder::class,
             FiscalConfirmBuilder::class,

@@ -14,15 +14,15 @@ $builder = $uniteller->fiscalPreAuthPaymentWithAdvanceReceipt();
 
 $builder->setShopId($shopId)
     ->setPassword($password)
-    ->setOrderId('fiscal_preauth_order_with_receipt_2')
-    ->setSubtotal(50)
+    ->setOrderId('fiscal_preauth_order_with_receipt_7')
+    ->setSubtotal('50.00')
     ->setLifetime(360)
-    ->setUrlReturnOk('https://i3bepb.ru/?q=success')
-    ->setUrlReturnNo('https://i3bepb.ru/?q=failure')
+    ->setUrlReturnOk('https://google.com/?q=success')
+    ->setUrlReturnNo('https://google.com/?q=failure')
     ->setCallbackFields(CallbackFields::toArray())
     ->setEmail($email);
 
-$uriWithReceipt = $builder->process()->getUri();
+$uriWithReceipt = $builder->process()->getUrl();
 
 echo <<< HTML
     <p>Оплата с преавторизацией и фискализацией (с чеком аванса)</p>
@@ -32,6 +32,6 @@ echo <<< HTML
     <a href="/fiscal_confirm.php">/fiscal_confirm.php</a>
     <br>
     <p>Отмена</p>
-    <a href="/cancel.php">/cancel.php</a>
+    <a href="/fiscal_cancel.php">/fiscal_cancel.php</a>
     <br>
 HTML;

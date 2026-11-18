@@ -7,21 +7,20 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamFactoryInterface;
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use Tmconsulting\Uniteller\Support\LoggingAwareInterface;
+use Tmconsulting\Uniteller\Support\LoggingAwareTrait;
 use Tmconsulting\Uniteller\Builder\BuilderInterface;
 use Tmconsulting\Uniteller\Exception\RequestException;
 use Tmconsulting\Uniteller\Exception\ServerErrorException;
-use Tmconsulting\Uniteller\Support\LogSanitizer;
 
 /**
  * Отправляет HTTP-запросы, проверяет HTTP-статус и декодирует тело ответа.
  *
  * Разбор результата операции выполняется отдельным парсером на стороне билдера.
  */
-class RequestManager implements LoggerAwareInterface
+class RequestManager implements LoggingAwareInterface
 {
-    use LoggerAwareTrait;
+    use LoggingAwareTrait;
 
     /**
      * @var \Psr\Http\Message\RequestFactoryInterface
@@ -54,8 +53,7 @@ class RequestManager implements LoggerAwareInterface
         StreamFactoryInterface $streamFactory,
         ClientInterface $httpClient,
         ParserInterface $parser
-    )
-    {
+    ) {
         $this->requestFactory = $requestFactory;
         $this->streamFactory = $streamFactory;
         $this->httpClient = $httpClient;
@@ -96,11 +94,14 @@ class RequestManager implements LoggerAwareInterface
      */
     private function logRequest(string $requestId, RequestInterface $request, string $uri, ?array $data)
     {
-        $this->logger->info('Request to Uniteller: ' . $uri, [
-            'request_id' => $requestId,
-            'method'     => $request->getMethod(),
-            'headers'    => $request->getHeaders(),
-            'parameters' => $data ? $this->sanitizeData($data) : null,
+        $this->logger->info('uniteller.http.request_sending', [
+            'uniteller' => [
+                'url'        => $uri,
+                'request_id' => $requestId,
+                'method'     => $request->getMethod(),
+                'headers'    => ['Content-Type' => $request->getHeaderLine('Content-Type')],
+                'parameters' => $data ?: null,
+            ]
         ]);
     }
 
@@ -110,14 +111,16 @@ class RequestManager implements LoggerAwareInterface
      */
     private function logResponse(string $requestId, ResponseInterface $response)
     {
-        $body = (string) $response->getBody();
+        $body = (string)$response->getBody();
         $response->getBody()->rewind();
 
-        $this->logger->info('Response from Uniteller', [
-            'request_id' => $requestId,
-            'statusCode' => $response->getStatusCode(),
-            'headers'    => $response->getHeaders(),
-            'body'       => $body,
+        $this->logger->info('uniteller.http.response_received', [
+            'uniteller' => [
+                'request_id' => $requestId,
+                'statusCode' => $response->getStatusCode(),
+                'headers'    => ['Content-Type' => $response->getHeaderLine('Content-Type')],
+                'body'       => $body,
+            ]
         ]);
     }
 
@@ -137,18 +140,6 @@ class RequestManager implements LoggerAwareInterface
         if ($statusCode >= 400 && $statusCode < 500) {
             throw RequestException::create($request, $response);
         }
-    }
-
-    /**
-     * Маскирует чувствительные данные (например, пароль) перед логированием.
-     *
-     * @param array $data
-     *
-     * @return array
-     */
-    protected function sanitizeData(array $data): array
-    {
-        return LogSanitizer::sanitize($data);
     }
 
     /**

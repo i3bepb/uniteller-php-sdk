@@ -22,7 +22,7 @@ $builder->setShopId($shopId)
     ->setPassword($password)
     ->setFormat(Format::CSV)
     ->setHeader1(1)
-    ->setOrderId('2605180001_7');
+    ->setOrderId('fiscal_preauth_order_with_receipt_3');
 //    ->setSFields([
 //        SFields::ORDER_NUMBER,
 //        SFields::BILL_NUMBER,

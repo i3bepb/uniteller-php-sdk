@@ -57,6 +57,39 @@ class CallbackTest extends TestCase
         $_SERVER = $this->originalServer;
     }
 
+    public function testIncomingDataIsSanitizedBeforeSignatureValidation(): void
+    {
+        $receipt = base64_encode('{"futureField":"callback-receipt-payload"}');
+        $_POST = ['Order_ID' => '00123', 'Status' => 'paid', 'Signature' => 'invalid',
+            'Password' => 'incoming-secret', 'Email' => 'buyer@example.test', 'Phone' => '+79991234567',
+            'Receipt' => $receipt, 'ReceiptSignature' => 'invalid'];
+        $_GET = ['Email' => 'buyer@example.test', 'Password' => 'query-secret', 'Receipt' => $receipt];
+        $_SERVER['REQUEST_URI'] = '/callback?' . http_build_query($_GET);
+        $original = $_POST;
+        $logged = [];
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('info')->willReturnCallback(function ($message, array $context) use (&$logged) {
+            $logged = [$message, $context];
+        });
+        $this->callback->setLogger($logger);
+        try {
+            $this->callback->process();
+            $this->fail('Invalid signature must be rejected');
+        } catch (\Tmconsulting\Uniteller\Exception\UnitellerRuntimeException $exception) {
+            $this->assertSame(403, $exception->getCode());
+        }
+        $this->assertSame($original, $_POST);
+        $log = json_encode($logged);
+        foreach (['incoming-secret', 'query-secret', 'buyer', '79991234567', $receipt, 'callback-receipt-payload'] as $value) {
+            $this->assertStringNotContainsString($value, $log);
+        }
+        $this->assertSame('uniteller.callback.received', $logged[0]);
+        $this->assertSame(['uniteller'], array_keys($logged[1]));
+        $this->assertSame('00123', $logged[1]['uniteller']['post_data']['Order_ID']);
+        $this->assertSame('[REDACTED]', $logged[1]['uniteller']['post_data']['Receipt']);
+        $this->assertSame('[REDACTED]', $logged[1]['uniteller']['get_query']['Receipt']);
+    }
+
     public function testSetAndGetPassword()
     {
         $this->assertSame($this->callback, $this->callback->setPassword('another-secret'));
@@ -103,8 +136,11 @@ class CallbackTest extends TestCase
         $logged = false;
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->once())->method('info')->with(
-            'Request from Uniteller: ' . $url,
-            $this->callback(function (array $context) use (&$logged, $ip, $userAgent) {
+            'uniteller.callback.received',
+            $this->callback(function (array $context) use (&$logged, $ip, $userAgent, $url) {
+                $this->assertSame(['uniteller'], array_keys($context));
+                $context = $context['uniteller'];
+                $this->assertSame($url, $context['url']);
                 $this->assertSame($_POST, $context['post_data']);
                 $this->assertSame($_GET, $context['get_query']);
                 $this->assertSame($ip, $context['ip']);
@@ -117,7 +153,7 @@ class CallbackTest extends TestCase
                 return true;
             })
         );
-        $logger->expects($this->once())->method('error')->with('Method Not Allowed')
+        $logger->expects($this->once())->method('error')->with('uniteller.callback.rejected', ['uniteller' => ['reason' => 'Method Not Allowed', 'http_status' => 405]])
             ->willReturnCallback(function () use (&$logged) {
                 $this->assertTrue($logged, 'The incoming request must be logged before validation fails.');
             });
@@ -215,8 +251,11 @@ class CallbackTest extends TestCase
         $this->container->set(ParserReceiptFromBase64::class, $parser);
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->exactly(2))->method('error')->withConsecutive(
-            ['Receipt parsing failed', ['exception' => $exception]],
-            ['Invalid receipt']
+            ['uniteller.callback.receipt_parsing_failed', ['uniteller' => ['message' => 'Receipt parsing failed', 'error' => [
+                'class' => get_class($exception), 'code' => $exception->getCode(),
+                'file' => $exception->getFile(), 'line' => $exception->getLine(),
+            ]]]],
+            ['uniteller.callback.rejected', ['uniteller' => ['reason' => 'Invalid receipt', 'http_status' => 400]]]
         );
         $this->callback->setLogger($logger);
 
@@ -357,8 +396,11 @@ class CallbackTest extends TestCase
         $_POST = $this->preauthorizationPost();
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects($this->once())->method('debug')->with(
-            'Signature verify md5',
+            'uniteller.signature.verification_completed',
             $this->callback(function (array $context) {
+                $this->assertSame(['uniteller'], array_keys($context));
+                $context = $context['uniteller'];
+                $this->assertSame('md5', $context['algorithm']);
                 $this->assertSame([
                     'Order_ID' => '2609280002_18',
                     'Status' => 'authorized',
@@ -369,7 +411,7 @@ class CallbackTest extends TestCase
                     'CardNumber' => '220006******6821',
                     'PaymentType' => '1',
                     'AcquirerID' => '35',
-                    'Password' => '*****',
+                    'Password' => '[REDACTED]',
                 ], $context['parameters']);
                 $this->assertSame($_POST['Signature'], $context['expected_signature']);
                 $this->assertSame($_POST['Signature'], $context['received_signature']);

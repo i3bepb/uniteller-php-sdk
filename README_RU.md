@@ -49,6 +49,8 @@ PHP (7.2+) SDK для интеграции с интернет-эквайрин�
 
 ## Использование
 
+Настройка логов и маскирования данных описана в [политике логирования](docs/logging.md).
+
 Примеры использования SDK лежат в папке `./examples`, а так-же `README.md` файл, 
 в котором написан способ установки.
 
@@ -126,9 +128,9 @@ $results = $container->recurrent([
 
 ```php
 <?php
-use Tmconsulting\Uniteller\Cancel\CancelBuilder;
+use Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder;
 
-$builder = (new CancelBuilder())->setBillNumber('RRN Number, (12 digits)');
+$builder = (new FiscalCancelBuilder())->setBillNumber('RRN Number, (12 digits)');
 $results = $container->cancel($builder);
 ```
 

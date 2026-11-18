@@ -18,7 +18,7 @@ use Tmconsulting\Uniteller\Request\Format;
 use Tmconsulting\Uniteller\Request\ParserInterface;
 use Tmconsulting\Uniteller\Request\RequestManager;
 use Tmconsulting\Uniteller\Response\LegacyResponseParserFactory;
-use Tmconsulting\Uniteller\Support\LogSanitizer;
+use Tmconsulting\Uniteller\Support\ExceptionContext;
 
 /**
  * Сценарии рекуррентного платежа.
@@ -204,7 +204,7 @@ class RecurrentBuilder extends BaseBuilder implements ContainerAwareInterface
 
         if ($this->debug) {
             $this->logger->debug(
-                'Parameters in request: ' . PHP_EOL . print_r(LogSanitizer::sanitize($this->toArray()), true)
+                'uniteller.recurrent.request_prepared', ['uniteller' => ['parameters' => $this->toArray()]]
             );
         }
 
@@ -213,7 +213,13 @@ class RecurrentBuilder extends BaseBuilder implements ContainerAwareInterface
             $parser = $this->container->get(LegacyResponseParserFactory::class)->create($this->getResponseFormat());
             $result = $parser->parse($response);
         } catch (\Throwable $e) {
-            $this->logger->error($e->getMessage(), ['exception' => $e]);
+            $this->logger->error(
+                'uniteller.recurrent.failed',
+                ['uniteller' => [
+                    'error' => ExceptionContext::fromThrowable($e),
+                    'message' => ExceptionContext::logMessage($e, 'Uniteller operation failed'),
+                ]]
+            );
             throw $e;
         }
 

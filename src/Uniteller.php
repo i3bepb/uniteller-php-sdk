@@ -7,7 +7,7 @@ use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Tmconsulting\Uniteller\Callback\Callback;
-use Tmconsulting\Uniteller\Cancel\CancelBuilder;
+use Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder;
 use Tmconsulting\Uniteller\Confirm\ConfirmBuilder;
 use Tmconsulting\Uniteller\Confirm\FiscalConfirmBuilder;
 use Tmconsulting\Uniteller\Dependency\Container;
@@ -17,6 +17,7 @@ use Tmconsulting\Uniteller\Recurrent\RecurrentBuilder;
 use Tmconsulting\Uniteller\Request\ApiEndpoints;
 use Tmconsulting\Uniteller\Results\FiscalResultsBuilder;
 use Tmconsulting\Uniteller\Results\ResultsBuilder;
+use Tmconsulting\Uniteller\Support\LoggingPolicy;
 
 /**
  * Фасад для работы с Uniteller.
@@ -118,6 +119,28 @@ class Uniteller
     public function withLogger(LoggerInterface $logger): self
     {
         $this->set(LoggerInterface::class, $logger);
+
+        return $this;
+    }
+
+    /**
+     * Устанавливает политику логирования SDK.
+     *
+     * Политика управляет маскированием известных SDK полей персональных данных
+     * (телефона, email, ФИО, адреса и покупателя) перед передачей записей логгеру.
+     * По умолчанию маскирование включено. Чтобы отключить его, передайте политику,
+     * настроенную вызовом LoggingPolicy::maskPersonalData(false).
+     *
+     * Чеки скрываются целиком при включённом маскировании персональных данных иначе сохраняются как есть.
+     * Пароль и его промежуточные хеши скрываются независимо от настройки персональных данных.
+     *
+     * @param \Tmconsulting\Uniteller\Support\LoggingPolicy $policy Политика маскирования данных в логах SDK.
+     *
+     * @return self Текущий экземпляр для последовательного вызова методов настройки.
+     */
+    public function withLoggingPolicy(LoggingPolicy $policy): self
+    {
+        $this->set(LoggingPolicy::class, $policy);
 
         return $this;
     }
@@ -387,15 +410,15 @@ class Uniteller
     /**
      * Отмена платежа с чеком.
      *
-     * @return \Tmconsulting\Uniteller\Cancel\CancelBuilder
+     * @return \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder
      *
      * @throws \Psr\Container\NotFoundExceptionInterface
      * @throws \ReflectionException
      */
-    public function cancel(): CancelBuilder
+    public function fiscalCancel(): FiscalCancelBuilder
     {
-        /** @var \Tmconsulting\Uniteller\Cancel\CancelBuilder $builder */
-        $builder = $this->container->get(CancelBuilder::class);
+        /** @var \Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder $builder */
+        $builder = $this->container->get(FiscalCancelBuilder::class);
 
         return $builder;
     }

@@ -2,8 +2,8 @@
 
 namespace Tmconsulting\Uniteller\Builder;
 
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use Tmconsulting\Uniteller\Support\LoggingAwareInterface;
+use Tmconsulting\Uniteller\Support\LoggingAwareTrait;
 use Tmconsulting\Uniteller\Dependency\DebugAwareInterface;
 use Tmconsulting\Uniteller\Dependency\DebugAwareTrait;
 use Tmconsulting\Uniteller\Exception\Configuration\ConfigurationException;
@@ -16,9 +16,9 @@ use Tmconsulting\Uniteller\Signature\Signature;
 /**
  * Основа всех сценариев (кейсов) в API Uniteller.
  */
-abstract class BaseBuilder implements BuilderInterface, LoggerAwareInterface, DebugAwareInterface
+abstract class BaseBuilder implements BuilderInterface, LoggingAwareInterface, DebugAwareInterface
 {
-    use LoggerAwareTrait;
+    use LoggingAwareTrait;
     use DebugAwareTrait;
     use TrimmedStringValidation;
 

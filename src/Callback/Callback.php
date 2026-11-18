@@ -2,8 +2,10 @@
 
 namespace Tmconsulting\Uniteller\Callback;
 
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use Tmconsulting\Uniteller\Support\LoggingAwareInterface;
+use Tmconsulting\Uniteller\Support\ExceptionContext;
+use Tmconsulting\Uniteller\Support\LoggingAwareTrait;
+use Tmconsulting\Uniteller\Support\LogSanitizer;
 use Tmconsulting\Uniteller\Dependency\ContainerAwareInterface;
 use Tmconsulting\Uniteller\Dependency\ContainerAwareTrait;
 use Tmconsulting\Uniteller\Dependency\DebugAwareInterface;
@@ -26,9 +28,9 @@ use Tmconsulting\Uniteller\Signature\Signature;
  *
  * Callback (webhook) отправляется платёжной системой Uniteller при изменении статуса заказа (оплата, отмена, возврат и т.д.).
  */
-class Callback implements LoggerAwareInterface, DebugAwareInterface, ContainerAwareInterface
+class Callback implements LoggingAwareInterface, DebugAwareInterface, ContainerAwareInterface
 {
-    use LoggerAwareTrait;
+    use LoggingAwareTrait;
     use DebugAwareTrait;
     use ContainerAwareTrait;
 
@@ -101,13 +103,17 @@ class Callback implements LoggerAwareInterface, DebugAwareInterface, ContainerAw
     {
         $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
         $url = $protocol . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ($_SERVER['REQUEST_URI'] ?? '');
-        $this->logger->info('Request from Uniteller: ' . $url, [
-            'datetime'   => date('Y-m-d H:i:s'),
-            'post_data'  => $_POST,
-            'raw_post'   => file_get_contents('php://input'),
-            'get_query'  => $_GET,
-            'ip'         => $_SERVER['REMOTE_ADDR'] ?? '?.?.?.?',
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
+        $this->logger->info('uniteller.callback.received', [
+            'uniteller' => [
+                'url'        => LogSanitizer::sanitizeUri($url, $this->getLoggingPolicy()),
+                'datetime'   => date('Y-m-d H:i:s'),
+                'headers'    => ['Content-Type' => $_SERVER['CONTENT_TYPE'] ?? 'application/x-www-form-urlencoded'],
+                'post_data'  => $_POST,
+                'raw_post'   => file_get_contents('php://input'),
+                'get_query'  => $_GET,
+                'ip'         => $_SERVER['REMOTE_ADDR'] ?? '?.?.?.?',
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'Unknown',
+            ]
         ]);
     }
 
@@ -193,7 +199,15 @@ class Callback implements LoggerAwareInterface, DebugAwareInterface, ContainerAw
         try {
             $receipts = $parser->parse($post['Receipt']);
         } catch (\RuntimeException $e) {
-            $this->logger->error('Receipt parsing failed', ['exception' => $e]);
+            $this->logger->error(
+                'uniteller.callback.receipt_parsing_failed',
+                [
+                    'uniteller' => [
+                        'error'   => ExceptionContext::fromThrowable($e),
+                        'message' => ExceptionContext::logMessage($e, 'Receipt parsing failed'),
+                    ]
+                ]
+            );
             $this->exitWithMessage('Invalid receipt', 400);
         }
 
@@ -235,7 +249,12 @@ class Callback implements LoggerAwareInterface, DebugAwareInterface, ContainerAw
      */
     protected function exitWithMessage(string $message, int $code)
     {
-        $this->logger->error($message);
+        $this->logger->error('uniteller.callback.rejected', [
+            'uniteller' => [
+                'reason'      => $message,
+                'http_status' => $code,
+            ]
+        ]);
         throw new UnitellerRuntimeException($message, $code);
     }
 }

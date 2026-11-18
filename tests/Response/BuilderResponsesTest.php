@@ -3,15 +3,19 @@
 namespace Tmconsulting\Uniteller\Tests\Response;
 
 use GuzzleHttp\Psr7\Response;
-use Tmconsulting\Uniteller\Cancel\CancelBuilder;
+use Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder;
 use Tmconsulting\Uniteller\Confirm\ConfirmBuilder;
 use Tmconsulting\Uniteller\Exception\AuthenticationException;
+use Tmconsulting\Uniteller\Exception\Parameter\NotValidParameterException;
 use Tmconsulting\Uniteller\Order\Order;
 use Tmconsulting\Uniteller\Recurrent\RecurrentBuilder;
+use Tmconsulting\Uniteller\Request\ApiEndpoints;
 use Tmconsulting\Uniteller\Request\Format;
 use Tmconsulting\Uniteller\Results\ResultsBuilder;
 use Tmconsulting\Uniteller\Results\FiscalResultsBuilder;
 use Tmconsulting\Uniteller\Receipt\FiscalReceipt;
+use Tmconsulting\Uniteller\Receipt\Enum\Kind;
+use Tmconsulting\Uniteller\Receipt\Enum\TypePaymentMethod;
 use Tmconsulting\Uniteller\Tests\ResponseTestCase;
 
 class BuilderResponsesTest extends ResponseTestCase
@@ -95,15 +99,152 @@ class BuilderResponsesTest extends ResponseTestCase
 
     public function testCancelJsonStillReturnsArrayWithReceipts()
     {
-        $container = $this->responseContainer([new Response(200, [], $this->getStubContents('responseCancelWithReceipt', 'json'))]);
-        $builder = $container->get(CancelBuilder::class)
+        $expectedReceipt = null;
+        $container = $this->responseContainer(
+            [new Response(200, [], $this->getStubContents('responseCancelWithReceipt', 'json'))],
+            function ($request) use (&$expectedReceipt) {
+                parse_str((string)$request->getBody(), $parameters);
+                $this->assertSame($expectedReceipt, $parameters['Receipt']);
+                $expectedSignature = strtoupper(hash('sha256',
+                    hash('sha256', 'order123') . '&' . hash('sha256', 'shop') . '&'
+                    . hash('sha256', '20.00') . '&' . hash('sha256', $expectedReceipt) . '&'
+                    . hash('sha256', 'password')
+                ));
+                $this->assertSame($expectedSignature, $parameters['Signature']);
+            }
+        );
+        $builder = $container->get(FiscalCancelBuilder::class)
             ->setShopId('shop')->setOrderId('order123')->setPassword('password')->setSubtotal('20.00');
         // ReceiptParameter accepts the receipt domain object, not its Base64 representation.
         $receipts = (new \Tmconsulting\Uniteller\Request\ParserReceiptFromBase64())->parse(base64_encode(json_encode($this->receiptData())));
-        $result = $builder->setReceipt($receipts[0])->process();
+        $builder->setReceipt($receipts[0]);
+        $expectedReceipt = $builder->getReceipt();
+        $result = $builder->process();
         $this->assertSame('00', $result['Code']);
         $this->assertSame('canceled', $result['Status']);
         $this->assertInstanceOf(FiscalReceipt::class, $result['Receipt'][0]);
+    }
+
+    /** @dataProvider zeroSubtotals */
+    public function testCancelAdditionalPaymentWithReceiptIncludesZeroInRequestAndSignature($subtotal): void
+    {
+        $expectedReceipt = null;
+        $container = $this->responseContainer(
+            [new Response(200, [], $this->getStubContents('responseCancelWithReceipt', 'json'))],
+            function ($request) use (&$expectedReceipt, $subtotal) {
+                parse_str((string)$request->getBody(), $parameters);
+                $this->assertCount(5, $parameters);
+                $this->assertSame((string)$subtotal, $parameters['Subtotal']);
+                $this->assertSame($expectedReceipt, $parameters['Receipt']);
+                $expectedSignature = strtoupper(hash('sha256',
+                    hash('sha256', 'order123') . '&' . hash('sha256', 'shop') . '&'
+                    . hash('sha256', (string)$subtotal) . '&' . hash('sha256', $expectedReceipt) . '&'
+                    . hash('sha256', 'password')
+                ));
+                $this->assertSame($expectedSignature, $parameters['Signature']);
+            }
+        );
+        $receiptData = $this->receiptData()[0];
+        $receiptData['payments'] = [[
+            'kind' => Kind::ADDITIONAL, 'type' => TypePaymentMethod::CASH, 'amount' => $receiptData['total'],
+        ]];
+        $receipts = (new \Tmconsulting\Uniteller\Request\ParserReceiptFromBase64())->parse(base64_encode(json_encode([$receiptData])));
+        $builder = $container->get(FiscalCancelBuilder::class)
+            ->setShopId('shop')->setOrderId('order123')->setPassword('password')
+            ->setSubtotal($subtotal)->setReceipt($receipts[0]);
+        $expectedReceipt = $builder->getReceipt();
+
+        $this->assertTrue($builder->hasSubtotal());
+        $this->assertSame('00', $builder->process()['Code']);
+    }
+
+    /** @dataProvider zeroSubtotals */
+    public function testCancelZeroSubtotalWithoutReceiptIsRejectedBeforeSending($subtotal): void
+    {
+        $builder = $this->responseContainer([])->get(FiscalCancelBuilder::class)
+            ->setShopId('shop')->setOrderId('order123')->setPassword('password')->setSubtotal($subtotal);
+
+        $this->expectException(NotValidParameterException::class);
+        $this->expectExceptionMessage('Invalid Subtotal: amount must be greater than zero without Receipt.');
+        $builder->process();
+    }
+
+    public function zeroSubtotals(): array
+    {
+        return [[0], ['0'], ['0.0'], ['0.00']];
+    }
+
+    public function testCancelFullPaymentWithReceiptOmitsSubtotalFromRequestAndSignature(): void
+    {
+        $expectedReceipt = null;
+        $container = $this->responseContainer(
+            [new Response(200, [], $this->getStubContents('responseCancelWithReceipt', 'json'))],
+            function ($request) use (&$expectedReceipt) {
+                parse_str((string)$request->getBody(), $parameters);
+                $this->assertCount(4, $parameters);
+                $this->assertSame('order123', $parameters['OrderID']);
+                $this->assertSame('shop', $parameters['UPID']);
+                $this->assertSame($expectedReceipt, $parameters['Receipt']);
+                $this->assertArrayNotHasKey('Subtotal', $parameters);
+                $this->assertArrayNotHasKey('Password', $parameters);
+                $expectedSignature = strtoupper(hash('sha256',
+                    hash('sha256', 'order123') . '&' . hash('sha256', 'shop') . '&'
+                    . hash('sha256', $expectedReceipt) . '&' . hash('sha256', 'password')
+                ));
+                $this->assertSame($expectedSignature, $parameters['Signature']);
+            }
+        );
+        $receipts = (new \Tmconsulting\Uniteller\Request\ParserReceiptFromBase64())->parse(base64_encode(json_encode($this->receiptData())));
+        $builder = $container->get(FiscalCancelBuilder::class)
+            ->setShopId('shop')->setOrderId('order123')->setPassword('password')->setReceipt($receipts[0]);
+        $expectedReceipt = $builder->getReceipt();
+
+        $this->assertFalse($builder->hasSubtotal());
+        $result = $builder->process();
+        $this->assertSame('00', $result['Code']);
+        $this->assertSame('canceled', $result['Status']);
+        $this->assertInstanceOf(FiscalReceipt::class, $result['Receipt'][0]);
+    }
+
+    public function testCancelWithoutReceiptRequiresSubtotal(): void
+    {
+        $builder = $this->responseContainer([])->get(FiscalCancelBuilder::class)
+            ->setShopId('shop')->setOrderId('order123')->setPassword('password');
+
+        $this->expectException(\Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException::class);
+        $this->expectExceptionMessage('Parameter Subtotal empty or not set');
+        $builder->process();
+    }
+
+    public function testCancelPreauthorizationWithoutReceiptSendsSignedRequestAndParsesJson(): void
+    {
+        $responseData = ['Code' => '00', 'Note' => 'Operation completed', 'Status' => 'canceled', 'Balance' => '0.00'];
+        $container = $this->responseContainer(
+            [new Response(200, ['Content-Type' => 'application/json'], json_encode($responseData))],
+            function ($request) {
+                $this->assertSame('POST', $request->getMethod());
+                $this->assertSame(ApiEndpoints::FISCAL_CANCEL, (string)$request->getUri());
+                $this->assertSame('application/json', $request->getHeaderLine('Accept'));
+                parse_str((string)$request->getBody(), $parameters);
+                $this->assertCount(4, $parameters);
+                $this->assertSame('order123', $parameters['OrderID']);
+                $this->assertSame('shop', $parameters['UPID']);
+                $this->assertSame('20.00', $parameters['Subtotal']);
+                $this->assertArrayNotHasKey('Receipt', $parameters);
+                $this->assertArrayNotHasKey('Password', $parameters);
+                $expectedSignature = strtoupper(hash('sha256',
+                    hash('sha256', 'order123') . '&' . hash('sha256', 'shop') . '&'
+                    . hash('sha256', '20.00') . '&' . hash('sha256', 'password')
+                ));
+                $this->assertSame($expectedSignature, $parameters['Signature']);
+            }
+        );
+        $builder = $container->get(FiscalCancelBuilder::class)
+            ->setShopId('shop')->setOrderId('order123')->setPassword('password')->setSubtotal('20.00');
+
+        $this->assertFalse($builder->hasReceipt());
+        $this->assertSame($responseData, $builder->process());
+        $this->assertFalse($builder->hasReceipt());
     }
 
     public function testFiscalCsvResultsDecodeReceiptAfterFormatParsing()
@@ -122,7 +263,7 @@ class BuilderResponsesTest extends ResponseTestCase
         $response = new Response(200, [], '{"Code":"1","Note":"Authentication error"}');
         $container = $this->responseContainer([$response]);
         $receipts = (new \Tmconsulting\Uniteller\Request\ParserReceiptFromBase64())->parse(base64_encode(json_encode($this->receiptData())));
-        $builder = $container->get(CancelBuilder::class)
+        $builder = $container->get(FiscalCancelBuilder::class)
             ->setShopId('shop')->setOrderId('order123')->setPassword('password')->setSubtotal('20.00')->setReceipt($receipts[0]);
         $this->expectException(AuthenticationException::class);
         $builder->process();

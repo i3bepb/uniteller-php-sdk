@@ -2,8 +2,9 @@
 
 namespace Tmconsulting\Uniteller\Signature;
 
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
+use Tmconsulting\Uniteller\Support\LoggingAwareInterface;
+use Tmconsulting\Uniteller\Support\LoggingAwareTrait;
 use Tmconsulting\Uniteller\Dependency\DebugAwareInterface;
 use Tmconsulting\Uniteller\Dependency\DebugAwareTrait;
 use Tmconsulting\Uniteller\Support\LogSanitizer;
@@ -11,15 +12,41 @@ use Tmconsulting\Uniteller\Support\LogSanitizer;
 /**
  * Class Signature
  */
-class Signature implements LoggerAwareInterface, DebugAwareInterface
+class Signature implements LoggingAwareInterface, DebugAwareInterface
 {
-    use LoggerAwareTrait;
+    use LoggingAwareTrait {
+        setLogger as private setSanitizingLogger;
+    }
     use DebugAwareTrait;
 
     /**
      * @var array
      */
     protected $parameters = [];
+
+    /**
+     * Исходный логгер для полной диагностики расчёта подписи при включённом debug.
+     *
+     * @var LoggerInterface|null
+     */
+    private $debugLogger;
+
+    /**
+     * Устанавливает логгер для проверки и расчёта подписи.
+     *
+     * Для проверки подписи применяется общая политика маскирования.
+     * Для отладки расчёта сохраняется исходный логгер: параметры и хеши
+     * передаются ему без маскирования, только при включённом debug.
+     *
+     * @param LoggerInterface $logger Логгер приложения.
+     *
+     * @return void
+     */
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->setSanitizingLogger($logger);
+        $this->debugLogger = $logger;
+    }
 
     /**
      * Проверка сигнатуры.
@@ -34,20 +61,14 @@ class Signature implements LoggerAwareInterface, DebugAwareInterface
         $valid = $expected === $signature;
 
         if ($this->debug && $this->logger !== null) {
-            $parameters = $this->parameters;
-            if ($parameters !== []) {
-                // В старом формате без имён полей пароль — последнее значение.
-                end($parameters);
-                $lastKey = key($parameters);
-                if (is_int($lastKey)) {
-                    $parameters[$lastKey] = '*****';
-                }
-            }
-            $this->logger->debug('Signature verify md5', [
-                'parameters' => LogSanitizer::sanitize($parameters),
-                'expected_signature' => $expected,
-                'received_signature' => $signature,
-                'valid' => $valid,
+            $this->logger->debug('uniteller.signature.verification_completed', [
+                'uniteller' => [
+                    'algorithm'          => 'md5',
+                    'parameters'         => LogSanitizer::sanitizeSignatureParameters($this->parameters, $this->getLoggingPolicy()),
+                    'expected_signature' => $expected,
+                    'received_signature' => $signature,
+                    'valid'              => $valid,
+                ]
             ]);
         }
 
@@ -113,9 +134,10 @@ class Signature implements LoggerAwareInterface, DebugAwareInterface
     }
 
     /**
-     * Отладка создания сигнатуры: исходный пароль скрыт, хеши параметров выводятся полностью.
+     * Отладка создания сигнатуры без маскирования параметров и их хешей.
      *
-     * Внимание: в лог могут попасть чувствительные данные, поэтому режим не следует включать в production-окружении!
+     * Запись выполняется только при включённом debug и установленном логгере.
+     * Исходные значения, включая пароль и чек, передаются логгеру приложения без маскирования.
      *
      * @param array $parameters Параметры участвующие в сигнатуре.
      * @param string $hash Промежуточное значение хэша для отладки.
@@ -123,12 +145,15 @@ class Signature implements LoggerAwareInterface, DebugAwareInterface
      */
     private function debugSignatureCalculation(array $parameters, string $hash, string $hashLabel = 'md5')
     {
-        if ($this->debug) {
+        if ($this->debug && $this->debugLogger !== null) {
             $hashes = $parameters ? array_combine(array_keys($parameters), explode('&', $hash)) : [];
-            $this->logger->debug("Signature {$hashLabel}", [
-                'parameters' => LogSanitizer::sanitize($parameters),
-                'hashes' => $hashes,
-                'signature' => strtoupper(hash($hashLabel, $hash)),
+            $this->debugLogger->debug('uniteller.signature.calculated', [
+                'uniteller' => [
+                    'algorithm'  => $hashLabel,
+                    'parameters' => $parameters,
+                    'hashes'     => $hashes,
+                    'signature'  => strtoupper(hash($hashLabel, $hash)),
+                ]
             ]);
         }
     }

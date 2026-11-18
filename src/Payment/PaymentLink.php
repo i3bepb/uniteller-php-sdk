@@ -1,38 +1,30 @@
 <?php
-/**
- * Created by Roquie.
- * E-mail: roquie0@gmail.com
- * GitHub: Roquie
- */
 
 namespace Tmconsulting\Uniteller\Payment;
 
-/**
- * Class Uri
- */
-class Uri
+class PaymentLink
 {
     /**
      * @var string
      */
-    private $uri;
+    private $url;
 
     /**
-     * Uri constructor.
+     * PaymentLink constructor.
      *
      * @param string $uri
      */
     public function __construct(string $uri)
     {
-        $this->uri = $uri;
+        $this->url = $uri;
     }
 
     /**
      * @return string
      */
-    public function getUri(): string
+    public function getUrl(): string
     {
-        return $this->uri;
+        return $this->url;
     }
 
     /**
@@ -40,6 +32,6 @@ class Uri
      */
     public function go()
     {
-        header(sprintf('Location: %s', $this->uri));
+        header(sprintf('Location: %s', $this->url));
     }
 }

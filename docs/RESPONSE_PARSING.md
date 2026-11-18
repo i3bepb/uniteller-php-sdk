@@ -7,8 +7,30 @@
 Цепочки builders:
 
 - `ResultsBuilder`, `FiscalResultsBuilder`, `ConfirmBuilder`, `RecurrentBuilder`: HTTP → `RequestManager` → `ParserCsv` / `ParserXml` → `LegacyCsvResponseParser` / `LegacyXmlResponseParser` → `Order[]`. Фабрика выбирает преобразователь по формату; различия названий полей и значений по умолчанию сохранены. Ошибки legacy-ответов обрабатываются через `ExceptionFactory` с исходным HTTP-контекстом.
-- `FiscalConfirmBuilder`: HTTP → `RequestManager` → `ParserXml` → `FiscalConfirmResultParser` → `FiscalConfirmResult`. `Result` обязателен. Ненулевой, в том числе неизвестный, целочисленный код сохраняется как бизнес-результат. Присутствующий `Receipt` декодируется через `ParserReceiptFromBase64` в `FiscalReceipt[]`, в том числе при неуспешном результате.
+- `FiscalConfirmBuilder`: HTTP → `RequestManager` → `ParserXml` / `ParserCsv` → `FiscalConfirmResultParser` → `FiscalConfirmResult`. `Result` обязателен. Ненулевой, в том числе неизвестный, целочисленный код сохраняется как бизнес-результат. Присутствующий `Receipt` декодируется через `ParserReceiptFromBase64` в `FiscalReceipt[]`, в том числе при неуспешном результате.
 - `CancelBuilder`: HTTP → `RequestManager` → `ParserJson` → `CancelResultParser` → прежний массив с полями ответа и декодированными чеками. Существующая поддержка JSON не расширена на другие endpoint-ы.
+
+Для эксперимента в `FiscalConfirmBuilder` добавлен `setFormat(Format::CSV)` / `setFormat(Format::XML)`.
+В POST передаётся `Format=1` / `Format=3` по аналогии с `ConfirmBuilder`.
+По умолчанию сохраняется XML, без передачи `Format`. Выбранный формат определяет `Accept` и парсер.
+CSV ожидается с заголовками и одной строкой результата. Для запроса заголовков добавлен
+`setHeader1(1)`, как в `ResultsBuilder`: допустимы 0 и 1, без вызова параметр не отправляется.
+Например, `$builder->setFormat(Format::CSV)->setHeader1(1)` отправляет `Format=1&Header1=1`.
+Алгоритмы `Signature` и `ReceiptSignature` сохранены, `Format` и `Header1` в них не добавлены.
+Эти параметры для `/v2/api/iaconfirm` не описаны в §3.10 документации; локальные тесты используют заглушки.
+
+`CancelBuilder` использует `https://fpay.uniteller.ru/v2/cancel`, у которого ответ фиксирован в JSON
+и нет параметра `Format`. При отмене неподтверждённой преавторизации без чека аванса `Receipt`
+можно не передавать. Тогда поле отсутствует и в POST-параметрах, и в расчёте подписи:
+подписываются `OrderID`, `UPID`, `Subtotal`, `Password` в этом порядке. При наличии чека
+`Receipt` включается перед `Password`. При полной отмене с чеком `Subtotal` не передаётся
+и не участвует в подписи: подписываются `OrderID`, `UPID`, `Receipt`, `Password`.
+Без чека `Subtotal` обязателен и должен быть больше нуля. Для отмены только ДПС
+передаются `Receipt` и `Subtotal=0`; ноль участвует и в POST-параметрах, и в подписи.
+Для этого `CancelBuilder` использует `NonNegativeAmountParameter`: отрицательные суммы
+запрещены. Обычный `AmountParameter` сохраняет требование суммы строго больше нуля.
+Пароль в тело запроса не передаётся.
+Основание: [фискализация 02.1.18 rev. 5, §3.14, стр. 56–57](тп_-_платежи_с_фискализацией_-_v._02.1.18_rev._5.md#page-56).
 
 HTTP 4xx/5xx, исключения PSR HTTP client, повреждённый XML/JSON/Base64 остаются исключениями. Отсутствующий или некорректный `Result` вызывает `InvalidResponseException`. Пустой XML также считается повреждённым ответом.
 

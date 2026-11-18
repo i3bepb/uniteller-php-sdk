@@ -10,6 +10,7 @@ global $shopId, $login, $password;
 
 $uniteller = (new Uniteller(true))
     ->withLogger(new \ShowInBrowserLogger())
+    ->withLoggingPolicy(new \Tmconsulting\Uniteller\Support\LoggingPolicy(false))
     ->withHttpTransport(
         new \GuzzleHttp\Client(),
         new \GuzzleHttp\Psr7\HttpFactory(),
@@ -30,8 +31,8 @@ $builder
         SFields::SBER_ORDER_ID,
         SFields::SUM,
     ])
-    ->setStart(\DateTime::createFromFormat('Y-m-d', '2026-05-01'))
-    ->setEnd(\DateTime::createFromFormat('Y-m-d', '2026-05-06'));
+    ->setStart(\DateTime::createFromFormat('Y-m-d', '2026-11-07'))
+    ->setEnd(\DateTime::createFromFormat('Y-m-d', '2026-11-10'));
 
 $results = $builder->process();
 

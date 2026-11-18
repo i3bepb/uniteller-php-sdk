@@ -24,7 +24,6 @@ use Tmconsulting\Uniteller\Parameter\ReceiptParameter;
 use Tmconsulting\Uniteller\Parameter\ScalarParameter;
 use Tmconsulting\Uniteller\Parameter\StringParameter;
 use Tmconsulting\Uniteller\Parameter\UrlParameter;
-use Tmconsulting\Uniteller\Support\LogSanitizer;
 
 /**
  * Описывает сценарии (кейсы) инициации оплаты через платёжную форму в Uniteller.
@@ -654,28 +653,58 @@ class PaymentBuilder extends BaseBuilder
     }
 
     /**
-     * @return \Tmconsulting\Uniteller\Payment\Uri
+     * Генерация url до формы бронирования.
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentLink
      */
-    public function process(): Uri
+    public function process(): PaymentLink
     {
         $parameters = $this->toArray();
 
         if ($this->debug) {
-            $this->logger->debug(
-                'Parameters in request: ' . PHP_EOL . print_r(LogSanitizer::sanitize($parameters), true)
-            );
+            $context = [
+                'uniteller' => [
+                    'parameters' => $parameters,
+                    'method'     => 'GET',
+                ]
+            ];
             if ($this->hasReceipt()) {
-                $this->logger->debug(
-                    'Receipt: ' . PHP_EOL . json_encode(
-                        $this->getReceipt(),
-                        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
-                    )
-                );
+                $context['uniteller']['receipt'] = $this->getReceipt();
             }
+
+            $this->logger->debug('uniteller.payment_form.url_generated', $context);
         }
 
         $uri = sprintf('%s?%s', $this->getEndpoint(), http_build_query($parameters));
 
-        return new Uri($uri);
+        return new PaymentLink($uri);
+    }
+
+    /**
+     * Генерация url до формы бронирования.
+     *
+     * @return \Tmconsulting\Uniteller\Payment\PaymentLink
+     */
+    public function generateUrl(): PaymentLink
+    {
+        $parameters = $this->toArray();
+
+        if ($this->debug) {
+            $context = [
+                'uniteller' => [
+                    'parameters' => $parameters,
+                    'method'     => 'GET',
+                ]
+            ];
+            if ($this->hasReceipt()) {
+                $context['uniteller']['receipt'] = $this->getReceipt();
+            }
+
+            $this->logger->debug('uniteller.payment_form.url_generated', $context);
+        }
+
+        $url = sprintf('%s?%s', $this->getEndpoint(), http_build_query($parameters));
+
+        return new PaymentLink($url);
     }
 }

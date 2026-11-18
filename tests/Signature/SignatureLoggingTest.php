@@ -32,7 +32,10 @@ class SignatureLoggingTest extends TestCase
         $this->assertTrue($signature->verify($expected));
 
         foreach ($entries as $index => [$message, $context]) {
-            $this->assertSame('Signature verify md5', $message);
+            $this->assertSame('uniteller.signature.verification_completed', $message);
+            $this->assertSame(['uniteller'], array_keys($context));
+            $context = $context['uniteller'];
+            $this->assertSame('md5', $context['algorithm']);
             $this->assertSame($masked, $context['parameters']);
             $this->assertSame($expected, $context['expected_signature']);
             $this->assertSame($index === 0 ? $expected : 'INVALID_SIGNATURE', $context['received_signature']);
@@ -47,15 +50,11 @@ class SignatureLoggingTest extends TestCase
         return [
             'named callback parameters' => [
                 ['Order_ID' => '12345', 'Status' => 'authorized', 'Total' => '50.00', 'Password' => 'verify-secret-7Q'],
-                ['Order_ID' => '12345', 'Status' => 'authorized', 'Total' => '50.00', 'Password' => '*****'],
-            ],
-            'legacy positional parameters' => [
-                ['12345', 'authorized', '50.00', 'verify-secret-7Q'],
-                ['12345', 'authorized', '50.00', '*****'],
+                ['Order_ID' => '12345', 'Status' => 'authorized', 'Total' => '50.00', 'Password' => '[REDACTED]'],
             ],
             'named password not last' => [
                 ['Password' => 'verify-secret-7Q', 'Order_ID' => '12345'],
-                ['Password' => '*****', 'Order_ID' => '12345'],
+                ['Password' => '[REDACTED]', 'Order_ID' => '12345'],
             ],
             'empty parameters' => [[], []],
         ];
@@ -70,7 +69,7 @@ class SignatureLoggingTest extends TestCase
     }
 
     /** @dataProvider signatureParameters */
-    public function testDebugMasksOnlyRawPasswordAndPreservesHashes(string $method, string $algorithm, array $parameters)
+    public function testDebugLogsOriginalParametersAndAllHashes(string $method, string $algorithm, array $parameters)
     {
         $signature = (new Signature())->setParameters($parameters);
         $expected = $signature->$method();
@@ -87,21 +86,18 @@ class SignatureLoggingTest extends TestCase
         $signature->setDebug(true);
 
         $this->assertSame($expected, $signature->$method());
-        $this->assertSame('Signature ' . $algorithm, $message);
-        $this->assertSame(['parameters', 'hashes', 'signature'], array_keys($context));
-        $masked = $parameters;
-        if (array_key_exists('Password', $parameters)) {
-            $masked['Password'] = '*****';
-            $this->assertSame(hash($algorithm, $parameters['Password']), $context['hashes']['Password']);
-        }
-        $this->assertSame($masked, $context['parameters']);
+        $this->assertSame('uniteller.signature.calculated', $message);
+        $this->assertSame(['uniteller'], array_keys($context));
+        $context = $context['uniteller'];
+        $this->assertSame($algorithm, $context['algorithm']);
+        $this->assertSame(['algorithm', 'parameters', 'hashes', 'signature'], array_keys($context));
+        $this->assertSame($parameters, $context['parameters']);
         $this->assertSame(array_keys($parameters), array_keys($context['hashes']));
         foreach ($parameters as $name => $value) {
             $this->assertSame(hash($algorithm, $value), $context['hashes'][$name]);
         }
         $this->assertSame($expected, $context['signature']);
         $this->assertSame($expected, strtoupper(hash($algorithm, implode('&', $context['hashes']))));
-        $this->assertStringNotContainsString('log-secret-9D', json_encode($context));
 
         $signature->setDebug(false);
         $this->assertSame($expected, $signature->$method());
@@ -118,8 +114,23 @@ class SignatureLoggingTest extends TestCase
                 'ShopID' => 'shop123', 'Password' => '0', 'OrderID' => 'order123',
             ]];
             $cases[$algorithm . ' no password'] = [$method, $algorithm, ['OrderID' => 'order123']];
+            $cases[$algorithm . ' personal data and receipt'] = [$method, $algorithm, [
+                'Password' => 'log-secret-9D', 'Email' => 'customer@example.com',
+                'Receipt' => base64_encode('{"customer":"customer@example.com"}'),
+            ]];
             $cases[$algorithm . ' empty parameters'] = [$method, $algorithm, []];
         }
         return $cases;
+    }
+
+    public function testCreateWithDebugEnabledWithoutLogger(): void
+    {
+        $signature = (new Signature())->setParameters(['Password' => 'secret']);
+        $md5 = $signature->createMd5();
+        $sha256 = $signature->createSha256();
+        $signature->setDebug(true);
+
+        $this->assertSame($md5, $signature->createMd5());
+        $this->assertSame($sha256, $signature->createSha256());
     }
 }

@@ -15,11 +15,11 @@ $builder->setShopId($shopId)
     ->setOrderId('preauth_order_10')
     ->setSubtotal(10)
     ->setLifetime(360)
-    ->setUrlReturnOk('https://i3bepb.ru/?q=success')
-    ->setUrlReturnNo('https://i3bepb.ru/?q=failure')
+    ->setUrlReturnOk('https://google.com/?q=success')
+    ->setUrlReturnNo('https://google.com/?q=failure')
     ->setEmail($email);
 
-$uri = $builder->process()->getUri();
+$uri = $builder->process()->getUrl();
 
 echo <<< HTML
     <p>Оплата с преавторизацией</p>
@@ -29,6 +29,6 @@ echo <<< HTML
     <a href="/confirm.php">/confirm.php</a>
     <br>
     <p>Отмена</p>
-    <a href="/cancel.php">/cancel.php</a>
+    <a href="/fiscal_cancel.php">/fiscal_cancel.php</a>
     <br>
 HTML;

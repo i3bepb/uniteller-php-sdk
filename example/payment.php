@@ -15,8 +15,8 @@ $builder = $uniteller->payment();
  */
 $builder->setShopId($shopId)
     ->setPassword($password)
-    ->setOrderId('simple_order_25')
-    ->setSubtotal(20)
+    ->setOrderId('simple_order_32')
+    ->setSubtotal(50)
     ->setLifetime(360)
     ->setOrderLifetime(360)
     ->setCallbackFields([
@@ -31,7 +31,7 @@ $builder->setShopId($shopId)
     ->setEmail($email);
 
 
-$uri = $builder->process()->getUri();
+$uri = $builder->generateUrl()->getUrl();
 
 echo <<< HTML
     <h2>Простая оплата</h2>

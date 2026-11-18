@@ -124,9 +124,9 @@ $results = $container->recurrent([
 
 ```php
 <?php
-use Tmconsulting\Uniteller\Cancel\CancelBuilder;
+use Tmconsulting\Uniteller\Cancel\FiscalCancelBuilder;
 
-$builder = (new CancelBuilder())->setBillNumber('RRN Number, (12 digits)');
+$builder = (new FiscalCancelBuilder())->setBillNumber('RRN Number, (12 digits)');
 $results = $container->cancel($builder);
 ```
 

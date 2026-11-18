@@ -5,10 +5,13 @@ namespace Tmconsulting\Uniteller\Confirm;
 use Tmconsulting\Uniteller\Builder\BaseBuilder;
 use Tmconsulting\Uniteller\Dependency\ContainerAwareInterface;
 use Tmconsulting\Uniteller\Dependency\ContainerAwareTrait;
+use Tmconsulting\Uniteller\Exception\InvalidResponseException;
 use Tmconsulting\Uniteller\Exception\Parameter\RequiredParameterException;
 use Tmconsulting\Uniteller\Parameter\AmountParameter;
 use Tmconsulting\Uniteller\Parameter\Enum\CanonicalParameterName;
 use Tmconsulting\Uniteller\Parameter\Enum\UnitellerParameterName;
+use Tmconsulting\Uniteller\Parameter\FormatParameter;
+use Tmconsulting\Uniteller\Parameter\IntParameter;
 use Tmconsulting\Uniteller\Parameter\ReceiptParameter;
 use Tmconsulting\Uniteller\Parameter\ScalarParameter;
 use Tmconsulting\Uniteller\Parameter\StringParameter;
@@ -16,7 +19,7 @@ use Tmconsulting\Uniteller\Request\ApiEndpoints;
 use Tmconsulting\Uniteller\Request\Format;
 use Tmconsulting\Uniteller\Request\ParserInterface;
 use Tmconsulting\Uniteller\Request\RequestManager;
-use Tmconsulting\Uniteller\Support\LogSanitizer;
+use Tmconsulting\Uniteller\Support\ExceptionContext;
 
 /**
  * Подтверждение платежа с фискализацией.
@@ -176,18 +179,25 @@ class FiscalConfirmBuilder extends BaseBuilder implements ContainerAwareInterfac
 
         if ($this->debug) {
             $this->logger->debug(
-                'Parameters in request: ' . PHP_EOL . print_r(LogSanitizer::sanitize($this->toArray()), true)
-            );
-            $this->logger->debug(
-                'Receipt: ' . PHP_EOL . json_encode($this->getReceipt(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+                'uniteller.fiscal_confirm.request_prepared',
+                ['uniteller' => ['parameters' => $this->toArray()]]
             );
         }
 
         try {
             $response = $requestManager->executeRequest($this);
-            $result = $this->container->get(FiscalConfirmResultParser::class)->parse($response->getData());
+            $data = $response->getData();
+            $result = $this->container->get(FiscalConfirmResultParser::class)->parse($data);
         } catch (\Throwable $e) {
-            $this->logger->error($e->getMessage(), ['exception' => $e]);
+            $this->logger->error(
+                'uniteller.fiscal_confirm.failed',
+                [
+                    'uniteller' => [
+                        'error'   => ExceptionContext::fromThrowable($e),
+                        'message' => ExceptionContext::logMessage($e, 'Uniteller operation failed'),
+                    ]
+                ]
+            );
             throw $e;
         }
 

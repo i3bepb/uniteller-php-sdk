@@ -19,7 +19,7 @@ $builderRecurrentStart->setShopId($shopId)
     ->setUrlReturnNo('https://google.ru/?q=failure')
     ->setEmail($email);
 
-$uriRecurrentStart = $builderRecurrentStart->process()->getUri();
+$uriRecurrentStart = $builderRecurrentStart->process()->getUrl();
 
 echo <<< HTML
     <h2>Стартовый рекуррентый платеж</h2>

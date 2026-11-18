@@ -52,16 +52,16 @@ $receipt = new Receipt(
 
 $builderWithReceipt->setShopId($shopId)
     ->setPassword($password)
-    ->setOrderId('receipt_order_15')
+    ->setOrderId('receipt_order_16')
     ->setSubtotal(2)
     ->setLifetime(360)
-    ->setUrlReturnOk('https://i3bepb.ru/?q=success')
-    ->setUrlReturnNo('https://i3bepb.ru/?q=failure')
+    ->setUrlReturnOk('https://google.com/?q=success')
+    ->setUrlReturnNo('https://google.com/?q=failure')
     ->setReceipt($receipt)
     ->setCallbackFields(CallbackFields::toArray())
     ->setEmail($email);
 
-$uriWithReceipt = $builderWithReceipt->process()->getUri();
+$uriWithReceipt = $builderWithReceipt->process()->getUrl();
 
 echo <<< HTML
     <h2>Оплата с фискализацией</h2>

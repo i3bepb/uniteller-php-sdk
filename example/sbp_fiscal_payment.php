@@ -53,12 +53,12 @@ $builder->setShopId($shopId)
     ->setOrderId('fast_payment_system_order_test_8')
     ->setSubtotal(2)
     ->setLifetime(300)
-    ->setUrlReturnOk('https://i3bepb.ru/?q=success')
-    ->setUrlReturnNo('https://i3bepb.ru/?q=failure')
+    ->setUrlReturnOk('https://google.com/?q=success')
+    ->setUrlReturnNo('https://google.com/?q=failure')
     ->setReceipt($receipt)
     ->setEmail($email);
 
-$uriFast = $builder->process()->getUri();
+$uriFast = $builder->process()->getUrl();
 
 echo <<< HTML
     <h2>Оплата СБП</h2>

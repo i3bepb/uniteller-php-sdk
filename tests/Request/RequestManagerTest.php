@@ -8,6 +8,7 @@ use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Tmconsulting\Uniteller\Builder\BuilderInterface;
@@ -39,34 +40,52 @@ class RequestManagerTest extends TestCase
         $data = ['OrderID' => '1', 'Password' => $password, 'Comment' => 'order & payment'];
         $query = 'OrderID=1&Password=' . $password . '&Comment=order+%26+payment';
         $builder = $this->builder($endpoint, $data, $format);
+        $extraHeaders = [
+            'Authorization' => 'Bearer request-token',
+            'Cookie' => 'session=request-cookie',
+            'X-Unlisted-Header' => 'request-private-value',
+        ];
+        $requestFactory = $this->createMock(RequestFactoryInterface::class);
+        $requestFactory->expects($this->once())->method('createRequest')->with('POST', $endpoint)
+            ->willReturn(new Request('POST', $endpoint, $extraHeaders));
+        $this->manager = new RequestManager($requestFactory, new HttpFactory(), $this->client, $this->parser);
         $logger = $this->createMock(LoggerInterface::class);
         $this->manager->setLogger($logger);
         $requestId = null;
         $stages = [];
         $logger->expects($this->exactly(2))->method('info')->willReturnCallback(
-            function ($message, array $context) use (&$requestId, &$stages, $endpoint, $accept) {
+            function ($message, array $context) use (&$requestId, &$stages, $endpoint) {
+                $this->assertSame(['uniteller'], array_keys($context));
+                $context = $context['uniteller'];
                 if ($requestId === null) {
                     $stages[] = 'request log';
-                    $this->assertSame('Request to Uniteller: ' . $endpoint, $message);
+                    $this->assertSame('uniteller.http.request_sending', $message);
+                    $this->assertSame($endpoint, $context['url']);
                     $requestId = $context['request_id'];
                     $this->assertSame('POST', $context['method']);
-                    $this->assertSame([$accept], $context['headers']['Accept']);
-                    $this->assertSame('*****', $context['parameters']['Password']);
+                    $this->assertSame(['Content-Type' => 'application/x-www-form-urlencoded'], $context['headers']);
+                    $this->assertSame('[REDACTED]', $context['parameters']['Password']);
                     $this->assertSame('1', $context['parameters']['OrderID']);
                     $this->assertSame('order & payment', $context['parameters']['Comment']);
+                    $this->assertArrayNotHasKey('body', $context);
                 } else {
                     $stages[] = 'response log';
-                    $this->assertSame('Response from Uniteller', $message);
+                    $this->assertSame('uniteller.http.response_received', $message);
                     $this->assertSame($requestId, $context['request_id']);
                     $this->assertSame(200, $context['statusCode']);
-                    $this->assertSame('body', $context['body']);
+                    $this->assertSame(['Content-Type' => 'text/plain'], $context['headers']);
+                    $this->assertSame('[unparsed body: 4 bytes]', $context['body']);
                 }
             }
         );
-        $response = new Response(200, [], 'body');
+        $response = new Response(200, [
+            'Content-Type' => 'text/plain',
+            'Set-Cookie' => 'session=response-cookie',
+            'X-Unlisted-Header' => 'response-private-value',
+        ], 'body');
         $sentRequest = null;
         $this->client->expects($this->once())->method('sendRequest')->willReturnCallback(
-            function ($request) use ($accept, $response, $endpoint, $query, &$sentRequest, &$stages) {
+            function ($request) use ($accept, $response, $endpoint, $query, $extraHeaders, &$sentRequest, &$stages) {
                 $stages[] = 'send';
                 $sentRequest = $request;
                 $this->assertSame('POST', $request->getMethod());
@@ -74,6 +93,9 @@ class RequestManagerTest extends TestCase
                 $this->assertSame('', $request->getUri()->getQuery());
                 $this->assertSame($accept, $request->getHeaderLine('Accept'));
                 $this->assertSame('application/x-www-form-urlencoded', $request->getHeaderLine('Content-Type'));
+                foreach ($extraHeaders as $name => $value) {
+                    $this->assertSame($value, $request->getHeaderLine($name));
+                }
                 $this->assertSame($query, (string)$request->getBody());
                 return $response;
             }
@@ -89,6 +111,8 @@ class RequestManagerTest extends TestCase
         $this->assertInstanceOf(DecodedResponse::class, $decoded);
         $this->assertSame(['Result' => '11'], $decoded->getData());
         $this->assertSame($response, $decoded->getResponse());
+        $this->assertSame('session=response-cookie', $decoded->getResponse()->getHeaderLine('Set-Cookie'));
+        $this->assertSame('response-private-value', $decoded->getResponse()->getHeaderLine('X-Unlisted-Header'));
         $this->assertSame($sentRequest, $decoded->getRequest());
     }
 
@@ -133,6 +157,16 @@ class RequestManagerTest extends TestCase
 
     public function testClientErrorPropagates()
     {
+        $logger = $this->createMock(LoggerInterface::class);
+        $logger->expects($this->once())->method('info')->with(
+            'uniteller.http.request_sending',
+            $this->callback(function (array $context) {
+                $this->assertSame(['uniteller'], array_keys($context));
+                $this->assertSame('POST', $context['uniteller']['method']);
+                return true;
+            })
+        );
+        $this->manager->setLogger($logger);
         $exception = new ConnectException('Connection failed', new Request('POST', 'https://uniteller.test'));
         $this->client->method('sendRequest')->willThrowException($exception);
         $this->parser->expects($this->never())->method('parse');
